@@ -19,8 +19,10 @@ def read(path):
                     s = line.strip().split('\t')
                     print(s)
                     binnedData = np.zeros((len(s) - 9, 39))
-                    for sample in s[10:]:
-                        countData = np.append(countData, [sample])
+                    for sample in s[9:]:
+                        if(sample[0] == '.'):
+                            sample = sample[2:]
+                        countData.append([sample])
                     continue
 
                 s = line.strip().split('\t')
@@ -71,11 +73,11 @@ def read(path):
                 
 
                 #Update count and binned data
-                for sample in np.arange(0, len(s) - 10):
-                    GTField = s[10 + sample].split(':')
+                for sample in np.arange(0, len(s) - 9):
+                    GTField = s[9 + sample].split(':')
                     if (GTField[0] != "0/0"):
-                        print(countData[sample])
-                        countData[sample] = np.append(countData[sample], variantSize)
+                        print(countData)
+                        countData[sample].append(variantSize)
 
 
 
