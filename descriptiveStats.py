@@ -44,7 +44,7 @@ def read(path):
                 elif (IDField == 'DD'):
                     variantSize = -2
                 #Check for mixed insertions and deletetions
-                elif all(x in IDField for x in ['I', 'D']):
+                elif all(x in IDField for x in ['I', 'D']) or all(x in IDField for x in ['I', 'X']) or all(x in IDField for x in ['X', 'D']):
                     print("Mixed:", IDField)
                     variantSize = 1000000
                 #     if 'I' in IDField:
@@ -54,23 +54,23 @@ def read(path):
                 #Single insertions or deletions of various sizes.
                 elif any(x in IDField for x in ['I', 'D']):
                     stringPos = 0
-                    if(IDField == 'IIX'):
-                        variantSize = 2
-                    elif (IDField == 'IX'):
-                        variantSize = 1
-                    elif(IDField == 'DDX'):
-                        variantSize = -2
-                    elif(IDField == 'DX'):
-                        variantSize = -1
-                    else:
-                        for char in IDField:
-                            if (char == "I"):
-                                variantSize = int(IDField[0:stringPos])
-                                break
-                            elif (char == "D") and not IDField.find("BND"):
-                                variantSize = -int(IDField[0:stringPos])
-                                break
-                            stringPos += 1
+                    # if(IDField == 'IIX'):
+                    #     variantSize = 2
+                    # elif (IDField == 'IX'):
+                    #     variantSize = 1
+                    # elif(IDField == 'DDX'):
+                    #     variantSize = -2
+                    # elif(IDField == 'DX'):
+                    #     variantSize = -1
+                    #else:
+                    for char in IDField:
+                        if (char == "I"):
+                            variantSize = int(IDField[0:stringPos])
+                            break
+                        elif (char == "D") and not IDField.find("BND"):
+                            variantSize = -int(IDField[0:stringPos])
+                            break
+                        stringPos += 1
                 #Difficult to parse changes go here.
                 else:
                     print("Difficult:", IDField)
