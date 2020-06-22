@@ -25,19 +25,19 @@ def findBin(x):
             return 27
         elif (x == 10):
             return 28
-        elif (x < 10) and (x >= 20):
+        elif (x > 10) and (x <= 20):
             return 29
-        elif (x < 20) and (x >= 50):
+        elif (x > 20) and (x <= 50):
             return 30
-        elif (x < 50) and (x >= 100):
+        elif (x > 50) and (x <= 100):
             return 31
-        elif (x < 100) and (x >= 200):
+        elif (x > 100) and (x <= 200):
             return 32
-        elif (x < 200) and (x >= 500):
+        elif (x > 200) and (x <= 500):
             return 33
-        elif (x < 500) and (x >= 1000):
+        elif (x > 500) and (x <= 1000):
             return 34
-        elif (x < 1000) and (x >= 2000):
+        elif (x > 1000) and (x <= 2000):
             return 35
         elif (x > 2000 and x < 1000000):
             return 36

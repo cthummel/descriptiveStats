@@ -17,7 +17,7 @@ def read(path):
                     #Generate the matricies for each sample 
                     s = line.strip().split('\t')
                     #print(s)
-                    binnedData = np.zeros(39))
+                    binnedData = np.zeros(39)
                     for sample in s[9:]:
                         if(sample[0] == '.'):
                             sample = sample[2:]
