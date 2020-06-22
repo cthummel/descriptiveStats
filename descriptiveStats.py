@@ -17,15 +17,18 @@ def read(path):
                 elif (line[:1] == "#" ):
                     #Generate the matricies for each sample 
                     s = line.strip().split('\t')
-                    binnedData = np.zeros(len(s) - 9, 39)
-                    countData = s[10:].reshape((len(s) - 9), 1)
+                    print(s)
+                    binnedData = np.zeros((len(s) - 9, 39))
+                    for sample in s[10:]:
+                        countData = np.append(countData, [sample])
                     continue
 
                 s = line.strip().split('\t')
 
                 #Parse the ID field to detect SNV, Inserts, and Deletes
                 variantSize = 0
-                IDField = s[3].split('-')[0]
+                IDField = s[2].split('-')[0]
+                print(IDField)
 
                 #Check small values
                 if (IDField == 'X'):
@@ -56,7 +59,7 @@ def read(path):
                         elif (char == "D"):
                             variantSize = -int(IDField[0:stringPos])
                             break
-
+                        stringPos += 1
                 #Difficult to parse changes go here.
                 else:
                     print("Difficult:", IDField)
@@ -71,7 +74,8 @@ def read(path):
                 for sample in np.arange(0, len(s) - 10):
                     GTField = s[10 + sample].split(':')
                     if (GTField[0] != "0/0"):
-                        countData[sample, :] = np.append(countData[sample, :], variantSize)
+                        print(countData[sample])
+                        countData[sample] = np.append(countData[sample], variantSize)
 
 
 
