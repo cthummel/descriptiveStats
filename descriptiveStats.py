@@ -145,9 +145,7 @@ def main(argv):
     for key, val in countsDict.items():
         wCount.writerow([key, val])
 
-    wBinned = csv.writer(open(outputPrefix + "binned.csv", "w"))
-    for val in binnedValues:
-        wBinned.writerow(val)
+    np.savetxt(outputPrefix + "binned.csv", binnedValues, delimiter=",")
 
     
 
