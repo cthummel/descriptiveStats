@@ -17,7 +17,7 @@ def read(path):
                 elif (line[:1] == "#" ):
                     #Generate the matricies for each sample 
                     s = line.strip().split('\t')
-                    print(s)
+                    #print(s)
                     binnedData = np.zeros((len(s) - 9, 39))
                     for sample in s[9:]:
                         if(sample[0] == '.'):
@@ -30,7 +30,7 @@ def read(path):
                 #Parse the ID field to detect SNV, Inserts, and Deletes
                 variantSize = 0
                 IDField = s[2].split('-')[0]
-                print(IDField)
+                #print(IDField)
 
                 #Check small values
                 if (IDField == 'X'):
@@ -54,14 +54,23 @@ def read(path):
                 #Single insertions or deletions of various sizes.
                 elif any(x in IDField for x in ['I', 'D']):
                     stringPos = 0
-                    for char in IDField:
-                        if (char == "I"):
-                            variantSize = int(IDField[0:stringPos])
-                            break
-                        elif (char == "D"):
-                            variantSize = -int(IDField[0:stringPos])
-                            break
-                        stringPos += 1
+                    if(IDField == 'IIX'):
+                        variantSize = 2
+                    elif (IDField == 'IX'):
+                        variantSize = 1
+                    elif(IDField == 'DDX'):
+                        variantSize = -2
+                    elif(IDField == 'DX'):
+                        variantSize = -1
+                    else:
+                        for char in IDField:
+                            if (char == "I"):
+                                variantSize = int(IDField[0:stringPos])
+                                break
+                            elif (char == "D") and not IDField.find("BND"):
+                                variantSize = -int(IDField[0:stringPos])
+                                break
+                            stringPos += 1
                 #Difficult to parse changes go here.
                 else:
                     print("Difficult:", IDField)
@@ -75,8 +84,9 @@ def read(path):
                 #Update count and binned data
                 for sample in np.arange(0, len(s) - 9):
                     GTField = s[9 + sample].split(':')
+                    #print(GTField)
                     if (GTField[0] != "0/0"):
-                        print(countData)
+                        #print(countData)
                         countData[sample].append(variantSize)
 
 
