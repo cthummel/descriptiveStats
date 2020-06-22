@@ -113,6 +113,7 @@ def main(argv):
     
     countsDict = {}
     binnedDict = {}
+    binnedValues = np.zeros(39)
     
     #Iterate through all ".FINAL.vcf.gz" files and generate basic counts
     for root, dirs, files in os.walk(path):
@@ -131,7 +132,7 @@ def main(argv):
 
                 #Merge the binned counts with dictionary
                 for i in np.arange(0, 39):
-                    binnedDict[i] += binnedData[i]
+                    binnedValues[i] += binnedData[i]
                 # for row in binnedData:
                 #     if row[0] in binnedDict:
                 #         for value in row[1:]:
