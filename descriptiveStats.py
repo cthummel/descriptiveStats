@@ -17,7 +17,7 @@ def read(path):
                     #Generate the matricies for each sample 
                     s = line.strip().split('\t')
                     #print(s)
-                    binnedData = np.zeros((len(s) - 9, 39))
+                    binnedData = np.zeros(39))
                     for sample in s[9:]:
                         if(sample[0] == '.'):
                             sample = sample[2:]
@@ -87,7 +87,7 @@ def read(path):
                     if (GTField[0] != "0/0"):
                         #print(countData)
                         countData[sample].append(variantSize)
-                        binnedData[sample, binFinder.findBin(variantSize)] += 1
+                        binnedData[binFinder.findBin(variantSize)] += 1
 
 
 
