@@ -146,8 +146,8 @@ def main(argv):
         wCount.writerow([key, val])
 
     wBinned = csv.writer(open(outputPrefix + "binned.csv", "w"))
-    for key, val in binnedDict.items():
-        wBinned.writerow([key, val])
+    for val in binnedValues:
+        wBinned.writerow(val)
 
     
 
