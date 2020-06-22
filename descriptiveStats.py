@@ -103,23 +103,23 @@ def main(argv):
         for filename in files:
             if(filename[-13:] == ".FINAL.vcf.gz"):
                 print(filename)
-                with open(os.path.join(root, filename), 'r') as f:
-                    rawData, binnedData = read(f)
+                #with open(os.path.join(root, filename), 'r') as f:
+                rawData, binnedData = read(root + filename)
 
-                    #Merge raw counts with dictionary
-                    for row in rawData:
-                        if row[0] in countsDict:
-                            countsDict[row[0]] = np.append(countsDict[row[0]], row[1:])
-                        else:
-                            countsDict[row[0]] = row[1:]
+                #Merge raw counts with dictionary
+                for row in rawData:
+                    if row[0] in countsDict:
+                        countsDict[row[0]] = np.append(countsDict[row[0]], row[1:])
+                    else:
+                        countsDict[row[0]] = row[1:]
 
-                    #Merge the binned counts with dictionary
-                    for row in binnedData:
-                        if row[0] in binnedDict:
-                            for value in row[1:]:
-                                binnedDict[row[0]] += value
-                        else:
-                            binnedDict[row[0]] = row[1:]
+                #Merge the binned counts with dictionary
+                for row in binnedData:
+                    if row[0] in binnedDict:
+                        for value in row[1:]:
+                            binnedDict[row[0]] += value
+                    else:
+                        binnedDict[row[0]] = row[1:]
 
 
     wCount = csv.writer(open(outputPrefix + "counts.csv", "w"))
