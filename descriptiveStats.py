@@ -1,6 +1,5 @@
 import numpy as np
-import math, sys, getopt, gzip, os, csv
-
+import math, sys, getopt, gzip, os, csv, binFinder
 
 
 
@@ -44,7 +43,7 @@ def read(path):
                 elif (IDField == 'DD'):
                     variantSize = -2
                 #Check for mixed insertions and deletetions
-                elif all(x in IDField for x in ['I', 'D']) or all(x in IDField for x in ['I', 'X']) or all(x in IDField for x in ['X', 'D']) or or all(x in IDField for x in ['Y', 'D']) or or all(x in IDField for x in ['Y', 'I']):
+                elif all(x in IDField for x in ['I', 'D']) or all(x in IDField for x in ['I', 'X']) or all(x in IDField for x in ['X', 'D']) or all(x in IDField for x in ['Y', 'D']) or all(x in IDField for x in ['Y', 'I']):
                     print("Mixed:", IDField)
                     variantSize = 1000000
                 #     if 'I' in IDField:
@@ -88,6 +87,7 @@ def read(path):
                     if (GTField[0] != "0/0"):
                         #print(countData)
                         countData[sample].append(variantSize)
+                        binnedData[sample, binFinder.findBin(variantSize)] += 1
 
 
 
