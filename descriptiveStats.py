@@ -130,12 +130,14 @@ def main(argv):
                         countsDict[row[0]] = row[1:]
 
                 #Merge the binned counts with dictionary
-                for row in binnedData:
-                    if row[0] in binnedDict:
-                        for value in row[1:]:
-                            binnedDict[row[0]] += value
-                    else:
-                        binnedDict[row[0]] = row[1:]
+                for i in np.arange(0, 39):
+                    binnedDict[i] += binnedData[i]
+                # for row in binnedData:
+                #     if row[0] in binnedDict:
+                #         for value in row[1:]:
+                #             binnedDict[row[0]] += value
+                #     else:
+                #         binnedDict[row[0]] = row[1:]
 
 
     wCount = csv.writer(open(outputPrefix + "counts.csv", "w"))
