@@ -51,19 +51,38 @@ def read(path):
                     stringPos = 0
                     lastNumberPos = 0
                     mixed.append(IDField)
-                    # for char in IDField:
-                    #     if (char == "I") or (char == 'Y'):
-                    #         if (IDField[0:stringPos] == ''):
-                    #             variantSize = variantSize.append(1)
-                    #         else:
-                    #             variantSize = variantSize.append(int(IDField[0:stringPos]))
-                    #     elif (char == "D") and not IDField.find("BND"):
-                    #         variantSize = variantSize.append(-int(IDField[0:stringPos]))
-                    #     stringPos += 1
+
+                    if (IDField == "DX"):
+                        variantSize.append([-1, 0])
+                    elif (IDField == 'IX') or (IDField == 'YX'):
+                        variantSize.append([1, 0])
+                    else:
+                        for char in IDField:
+                            if (stringPos + 1 <= len(IDField)):
+                                if (IDField[stringPos] == 'I') and (IDField[stringPos + 1] == 'I'):
+                                    variantSize.append(2)
+                                    stringPos += 1
+                                    lastNumberPos += 2
+
+                        
+                            if (char == 'I') or (char == 'Y'):
+                                if (IDField[lastNumberPos:stringPos] == ''):
+                                    variantSize.append(1)
+                                else:
+                                    variantSize.append(int(IDField[lastNumberPos:stringPos]))
+                                lastNumberPos = stringPos + 1
+                            elif (char == "D") and not IDField.find("BND"):
+                                if (IDField[lastNumberPos:stringPos] == ''):
+                                    variantSize.append(-1)
+                                else:
+                                    variantSize.append(-int(IDField[lastNumberPos:stringPos]))
+                                lastNumberPos = stringPos + 1
+
+                            stringPos += 1
                 
 
                 #Single insertions or deletions of various sizes.
-                elif any(x in IDField for x in ['I', 'D', 'Y']):
+                elif any(x in IDField for x in ['I', 'D', 'Y', 'X']):
                     stringPos = 0
                     for char in IDField:
                         if (char == "I") or (char == 'Y'):
@@ -78,7 +97,7 @@ def read(path):
                         stringPos += 1
                 #Difficult to parse changes go here.
                 else:
-                    print("Difficult:", IDField)
+                    #print("Difficult:", IDField)
                     variantSize.append(2000000)
                     difficult.append(IDField)
 
