@@ -6,6 +6,8 @@ import math, sys, getopt, gzip, os, csv, binFinder, re
 def read(path):
     countData = []
     binnedData = []
+    difficult = []
+    mixed = []
     if path[-3:] == ".gz":
         with gzip.open(path, mode='rt') as f:
             for line in f:
@@ -29,8 +31,6 @@ def read(path):
 
                 #Parse the ID field to detect SNV, Inserts, and Deletes
                 variantSize = []
-                difficult = []
-                mixed = []
                 IDField = s[2].split('-')[0]
                 #print(IDField)
 
