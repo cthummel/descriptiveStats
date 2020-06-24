@@ -36,21 +36,21 @@ def read(path):
 
                 #Check small values
                 if (IDField == 'X') or (IDField == 'XX'):
-                    variantSize = variantSize.append(0)
+                    variantSize.append(0)
                 elif (IDField == 'I'):
-                    variantSize = variantSize.append(1)
+                    variantSize.append(1)
                 elif (IDField == 'II'):
-                    variantSize = variantSize.append(2)
+                    variantSize.append(2)
                 elif (IDField == 'D'):
-                    variantSize = variantSize.append(-1)
+                    variantSize.append(-1)
                 elif (IDField == 'DD'):
-                    variantSize = variantSize.append(-2)
+                    variantSize.append(-2)
 
                 #Check for mixed insertions and deletetions
                 elif all(x in IDField for x in ['I', 'D']) or all(x in IDField for x in ['I', 'X']) or all(x in IDField for x in ['X', 'D']) or all(x in IDField for x in ['Y', 'D']) or all(x in IDField for x in ['Y', 'I']):
                     stringPos = 0
                     lastNumberPos = 0
-                    mixed = mixed.append(IDField)
+                    mixed.append(IDField)
                     # for char in IDField:
                     #     if (char == "I") or (char == 'Y'):
                     #         if (IDField[0:stringPos] == ''):
@@ -67,17 +67,17 @@ def read(path):
                     stringPos = 0
                     for char in IDField:
                         if (char == "I") or (char == 'Y'):
-                            variantSize = variantSize.append(int(IDField[0:stringPos]))
+                            variantSize.append(int(IDField[0:stringPos]))
                             break
                         elif (char == "D") and not IDField.find("BND"):
-                            variantSize = variantSize.append(-int(IDField[0:stringPos]))
+                            variantSize.append(-int(IDField[0:stringPos]))
                             break
                         stringPos += 1
                 #Difficult to parse changes go here.
                 else:
                     print("Difficult:", IDField)
-                    variantSize = variantSize.append(2000000)
-                    difficult = difficult.append(IDField)
+                    variantSize.append(2000000)
+                    difficult.append(IDField)
 
 
 
@@ -148,8 +148,8 @@ def main(argv):
                 #     else:
                 #         binnedDict[row[0]] = row[1:]
 
-                difficultToParse = difficultToParse.append(difficult)
-                mixedParse = mixedParse.append(mixed)
+                difficultToParse.append(difficult)
+                mixedParse.append(mixed)
 
 
     wCount = csv.writer(open(outputPrefix + "counts.csv", "w"))
