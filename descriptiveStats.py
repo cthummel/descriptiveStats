@@ -52,7 +52,7 @@ def read(path):
                     lastNumberPos = 0
                     mixed.append(IDField)
                     tokens = re.findall("(\d*)([A-Z]+)", IDField)
-                    print(IDField, tokens)
+                    #print(IDField, tokens)
 
                     if (IDField == "DX"):
                         variantSize.append(-1)
@@ -68,52 +68,35 @@ def read(path):
                         variantSize.append(0)
                     else:
                         tokens = re.finditer("(\d*)([A-Z]+)", IDField)
-                        print(IDField)
                         for token in tokens:
-                            digit = token.group(1)
+                            digit = int(token.group(1))
                             letters = token.group(2)
-                            print(digit, letters)
                             if (digit == ''):
-                                if any(x in letters for x in ['II', 'YY']):
-                                    variantSize.append(2)
+                                print(IDField, digit, letters)
 
                             else:
-                                if any(x in letters for x in ['I', 'Y']):
-                                    variantSize.append(int(digit))
-                                if any(x in letters for x in ['X']):
+                                if (letters[0] == 'I') or (letters[0] == 'Y'):
+                                    variantSize.append(digit)
+                                elif (letters[0] == 'X') :
                                     variantSize.append(0)
-                                if any(x in letters for x in ['D']):
-                                    variantSize.append(-int(digit))
+                                elif (letters[0] == 'D'):
+                                    variantSize.append(-digit)
 
-                        # for char in IDField:
-                            # if (char.isdigit() == False):
-                            #     if (IDField[lastNumberPos:stringPos] == ''):
+                                if (len(letters) == 2):
+                                    if (letters[1] == 'I') or (letters[1] == 'Y'):
+                                        variantSize.append(1)
+                                    elif (letters[1] == 'X') :
+                                        variantSize.append(0)
+                                    elif (letters[1] == 'D'):
+                                        variantSize.append(-1)
 
-                            #     tempSize = int(IDField[lastNumberPos:stringPos])
-                            #     if (char == 'D'):
-                            #         tempSize = tempSize * -1
-                            #     lastNumberPos = stringPos + 1
-
-                            # if (stringPos + 1 <= len(IDField)):
-                            #     if (IDField[stringPos] == 'I') and (IDField[stringPos + 1] == 'I'):
-                            #         variantSize.append(2)
-                            #         stringPos += 1
-                            #         lastNumberPos += 2
-                        
-                            # if (char == 'I') or (char == 'Y'):
-                            #     if (IDField[lastNumberPos:stringPos] == ''):
-                            #         variantSize.append(1)
-                            #     else:
-                            #         variantSize.append(int(IDField[lastNumberPos:stringPos]))
-                            #     lastNumberPos = stringPos + 1
-                            # elif (char == "D") and not IDField.find("BND"):
-                            #     if (IDField[lastNumberPos:stringPos] == ''):
-                            #         variantSize.append(-1)
-                            #     else:
-                            #         variantSize.append(-int(IDField[lastNumberPos:stringPos]))
-                            #     lastNumberPos = stringPos + 1
-
-                            # stringPos += 1
+                                elif (len(letters) == 3):
+                                    if (letters[1:] == "II") or (letters[2:] == "YY"):
+                                        variantSize.append(2)
+                                    elif (letters[1:] == "XX"):
+                                        variantSize.append(0)
+                                    elif (letters[1:] == "DD"):
+                                        variantSize.append(-2)
                 
 
                 #Single insertions or deletions of various sizes.
