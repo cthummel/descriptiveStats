@@ -48,12 +48,8 @@ def read(path):
 
                 #Check for mixed insertions and deletetions
                 elif all(x in IDField for x in ['I', 'D']) or all(x in IDField for x in ['I', 'X']) or all(x in IDField for x in ['X', 'D']) or all(x in IDField for x in ['Y', 'D']) or all(x in IDField for x in ['Y', 'I']):
-                    stringPos = 0
-                    lastNumberPos = 0
                     mixed.append(IDField)
-                    tokens = re.findall("(\d*)([A-Z]+)", IDField)
                     #print(IDField, tokens)
-
                     if (IDField == "DX"):
                         variantSize.append(-1)
                         variantSize.append(0)
@@ -66,13 +62,31 @@ def read(path):
                     elif (IDField == 'IIX') or (IDField == 'YYX'):
                         variantSize.append(2)
                         variantSize.append(0)
+                    elif any(x in IDField for x in ['+', '_']):
+                        variantSize.append(2000000)
+                        difficult.append(IDField)
                     else:
                         tokens = re.finditer("(\d*)([A-Z]+)", IDField)
                         for token in tokens:
                             digit = token.group(1)
                             letters = token.group(2)
                             if (digit == ''):
-                                print(IDField, digit, letters)
+                                #print(IDField, digit, letters)
+                                if (len(letters) == 1):
+                                    if (letters == 'I') or (letters == 'Y'):
+                                        variantSize.append(1)
+                                    elif (letters == 'X') :
+                                        variantSize.append(0)
+                                    elif (letters == 'D'):
+                                        variantSize.append(-1)
+
+                                elif (len(letters) == 2):
+                                    if (letters == "II") or (letters[2:] == "YY"):
+                                        variantSize.append(2)
+                                    elif (letters == "XX"):
+                                        variantSize.append(0)
+                                    elif (letters == "DD"):
+                                        variantSize.append(-2)
 
                             else:
                                 if (letters[0] == 'I') or (letters[0] == 'Y'):
