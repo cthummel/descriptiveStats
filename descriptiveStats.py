@@ -1,5 +1,5 @@
 import numpy as np
-import math, sys, getopt, gzip, os, csv, binFinder
+import math, sys, getopt, gzip, os, csv, binFinder, re
 
 
 
@@ -51,34 +51,54 @@ def read(path):
                     stringPos = 0
                     lastNumberPos = 0
                     mixed.append(IDField)
+                    tokens = re.findall("(\d*)([A-Z]+)", IDField)
+                    print(IDField, tokens)
 
                     if (IDField == "DX"):
-                        variantSize.append([-1, 0])
+                        variantSize.append(-1)
+                        variantSize.append(0)
+                    elif (IDField == "DDX"):
+                        variantSize.append(-2)
+                        variantSize.append(0)
                     elif (IDField == 'IX') or (IDField == 'YX'):
-                        variantSize.append([1, 0])
+                        variantSize.append(1)
+                        variantSize.append(0)
+                    elif (IDField == 'IIX') or (IDField == 'YYX'):
+                        variantSize.append(2)
+                        variantSize.append(0)
                     else:
-                        for char in IDField:
-                            if (stringPos + 1 <= len(IDField)):
-                                if (IDField[stringPos] == 'I') and (IDField[stringPos + 1] == 'I'):
-                                    variantSize.append(2)
-                                    stringPos += 1
-                                    lastNumberPos += 2
+                        tokens = re.findall("(\d*)([A-Z]+)", IDField)
+                        print(IDField, tokens)
 
+                        # for char in IDField:
+                            # if (char.isdigit() == False):
+                            #     if (IDField[lastNumberPos:stringPos] == ''):
+
+                            #     tempSize = int(IDField[lastNumberPos:stringPos])
+                            #     if (char == 'D'):
+                            #         tempSize = tempSize * -1
+                            #     lastNumberPos = stringPos + 1
+
+                            # if (stringPos + 1 <= len(IDField)):
+                            #     if (IDField[stringPos] == 'I') and (IDField[stringPos + 1] == 'I'):
+                            #         variantSize.append(2)
+                            #         stringPos += 1
+                            #         lastNumberPos += 2
                         
-                            if (char == 'I') or (char == 'Y'):
-                                if (IDField[lastNumberPos:stringPos] == ''):
-                                    variantSize.append(1)
-                                else:
-                                    variantSize.append(int(IDField[lastNumberPos:stringPos]))
-                                lastNumberPos = stringPos + 1
-                            elif (char == "D") and not IDField.find("BND"):
-                                if (IDField[lastNumberPos:stringPos] == ''):
-                                    variantSize.append(-1)
-                                else:
-                                    variantSize.append(-int(IDField[lastNumberPos:stringPos]))
-                                lastNumberPos = stringPos + 1
+                            # if (char == 'I') or (char == 'Y'):
+                            #     if (IDField[lastNumberPos:stringPos] == ''):
+                            #         variantSize.append(1)
+                            #     else:
+                            #         variantSize.append(int(IDField[lastNumberPos:stringPos]))
+                            #     lastNumberPos = stringPos + 1
+                            # elif (char == "D") and not IDField.find("BND"):
+                            #     if (IDField[lastNumberPos:stringPos] == ''):
+                            #         variantSize.append(-1)
+                            #     else:
+                            #         variantSize.append(-int(IDField[lastNumberPos:stringPos]))
+                            #     lastNumberPos = stringPos + 1
 
-                            stringPos += 1
+                            # stringPos += 1
                 
 
                 #Single insertions or deletions of various sizes.
@@ -96,6 +116,9 @@ def read(path):
                             break
                         stringPos += 1
                 #Difficult to parse changes go here.
+                elif any(x in IDField for x in ["BND"]):
+                    variantSize.append(2000000)
+                    difficult.append(IDField)
                 else:
                     #print("Difficult:", IDField)
                     variantSize.append(2000000)
@@ -146,10 +169,11 @@ def main(argv):
     mixedParse = []
     
     #Iterate through all ".FINAL.vcf.gz" files and generate basic counts
+    print("Reading all vcf files in path:", path)
     for root, dirs, files in os.walk(path):
         for filename in files:
             if(filename[-13:] == ".FINAL.vcf.gz"):
-                print(filename)
+                #print(filename)
                 #with open(os.path.join(root, filename), 'r') as f:
                 rawData, binnedData, difficult, mixed = read(root + filename)
 
