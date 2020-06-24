@@ -67,8 +67,23 @@ def read(path):
                         variantSize.append(2)
                         variantSize.append(0)
                     else:
-                        tokens = re.findall("(\d*)([A-Z]+)", IDField)
-                        print(IDField, tokens)
+                        tokens = re.finditer("(\d*)([A-Z]+)", IDField)
+                        print(IDField)
+                        for token in tokens:
+                            digit = token.group(1)
+                            letters = token.group(2)
+                            print(digit, letters)
+                            if (digit == ''):
+                                if any(x in letters for x in ['II', 'YY']):
+                                    variantSize.append(2)
+
+                            else:
+                                if any(x in letters for x in ['I', 'Y']):
+                                    variantSize.append(int(digit))
+                                if any(x in letters for x in ['X']):
+                                    variantSize.append(0)
+                                if any(x in letters for x in ['D']):
+                                    variantSize.append(-int(digit))
 
                         # for char in IDField:
                             # if (char.isdigit() == False):
