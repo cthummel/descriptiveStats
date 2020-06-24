@@ -69,18 +69,18 @@ def read(path):
                     else:
                         tokens = re.finditer("(\d*)([A-Z]+)", IDField)
                         for token in tokens:
-                            digit = int(token.group(1))
+                            digit = token.group(1)
                             letters = token.group(2)
                             if (digit == ''):
                                 print(IDField, digit, letters)
 
                             else:
                                 if (letters[0] == 'I') or (letters[0] == 'Y'):
-                                    variantSize.append(digit)
+                                    variantSize.append(int(digit))
                                 elif (letters[0] == 'X') :
                                     variantSize.append(0)
                                 elif (letters[0] == 'D'):
-                                    variantSize.append(-digit)
+                                    variantSize.append(-int(digit))
 
                                 if (len(letters) == 2):
                                     if (letters[1] == 'I') or (letters[1] == 'Y'):
