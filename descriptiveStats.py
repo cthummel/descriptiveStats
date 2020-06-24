@@ -72,6 +72,9 @@ def read(path):
                         elif (char == "D") and not IDField.find("BND"):
                             variantSize.append(-int(IDField[0:stringPos]))
                             break
+                        elif (char == 'X'):
+                            variantSize.append(0)
+                            break
                         stringPos += 1
                 #Difficult to parse changes go here.
                 else:
@@ -86,7 +89,7 @@ def read(path):
                 
 
                 #Update count and binned data
-                for sample in np.arange(0, sampleCount):
+                for sample in np.arange(0, len(s) - 9):
                     GTField = s[9 + sample].split(':')
                     #print(GTField)
                     if (GTField[0] != "0/0"):
@@ -147,18 +150,20 @@ def main(argv):
                 #             binnedDict[row[0]] += value
                 #     else:
                 #         binnedDict[row[0]] = row[1:]
+                if (len(difficult) != 0):
+                    difficultToParse.append(difficult)
+                if (len(mixed) != 0):
+                    mixedParse.append(mixed)
 
-                difficultToParse.append(difficult)
-                mixedParse.append(mixed)
-
+    #bins = np.array([-5000, -2000, -1000, -500, -200, -100, -50, -20, -10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 50, 100, 200, 500, 1000, 2000])
 
     wCount = csv.writer(open(outputPrefix + "counts.csv", "w"))
     for key, val in countsDict.items():
         wCount.writerow([key, val])
 
     np.savetxt(outputPrefix + "binned.csv", binnedValues, delimiter=",", fmt="%10.0f")
-    np.savetxt(outputPrefix + "mixed.csv", np.asarray(mixedParse), delimiter=",")
-    np.savetxt(outputPrefix + "difficult.csv", np.asarray(difficultToParse), delimiter=",")
+    np.savetxt(outputPrefix + "mixed.csv", np.asarray(mixedParse), delimiter=",", fmt="%s")
+    np.savetxt(outputPrefix + "difficult.csv", np.asarray(difficultToParse), delimiter=",", fmt="%s")
 
     
 
