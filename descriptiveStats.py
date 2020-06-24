@@ -16,6 +16,7 @@ def read(path):
                 elif (line[:1] == "#" ):
                     #Generate the matricies for each sample 
                     s = line.strip().split('\t')
+                    sampleCount = len(s) - 9
                     #print(s)
                     binnedData = np.zeros(39)
                     for sample in s[9:]:
@@ -27,53 +28,57 @@ def read(path):
                 s = line.strip().split('\t')
 
                 #Parse the ID field to detect SNV, Inserts, and Deletes
-                variantSize = 0
+                variantSize = []
+                difficult = []
+                mixed = []
                 IDField = s[2].split('-')[0]
                 #print(IDField)
 
                 #Check small values
-                if (IDField == 'X'):
-                    variantSize = 0
+                if (IDField == 'X') or (IDField == 'XX'):
+                    variantSize = variantSize.append(0)
                 elif (IDField == 'I'):
-                    variantSize = 1
+                    variantSize = variantSize.append(1)
                 elif (IDField == 'II'):
-                    variantSize = 2
+                    variantSize = variantSize.append(2)
                 elif (IDField == 'D'):
-                    variantSize = -1
+                    variantSize = variantSize.append(-1)
                 elif (IDField == 'DD'):
-                    variantSize = -2
+                    variantSize = variantSize.append(-2)
+
                 #Check for mixed insertions and deletetions
                 elif all(x in IDField for x in ['I', 'D']) or all(x in IDField for x in ['I', 'X']) or all(x in IDField for x in ['X', 'D']) or all(x in IDField for x in ['Y', 'D']) or all(x in IDField for x in ['Y', 'I']):
-                    print("Mixed:", IDField)
-                    variantSize = 1000000
-                #     if 'I' in IDField:
-
-                #     else:
+                    stringPos = 0
+                    lastNumberPos = 0
+                    mixed = mixed.append(IDField)
+                    # for char in IDField:
+                    #     if (char == "I") or (char == 'Y'):
+                    #         if (IDField[0:stringPos] == ''):
+                    #             variantSize = variantSize.append(1)
+                    #         else:
+                    #             variantSize = variantSize.append(int(IDField[0:stringPos]))
+                    #     elif (char == "D") and not IDField.find("BND"):
+                    #         variantSize = variantSize.append(-int(IDField[0:stringPos]))
+                    #     stringPos += 1
+                
 
                 #Single insertions or deletions of various sizes.
-                elif any(x in IDField for x in ['I', 'D']):
+                elif any(x in IDField for x in ['I', 'D', 'Y']):
                     stringPos = 0
-                    # if(IDField == 'IIX'):
-                    #     variantSize = 2
-                    # elif (IDField == 'IX'):
-                    #     variantSize = 1
-                    # elif(IDField == 'DDX'):
-                    #     variantSize = -2
-                    # elif(IDField == 'DX'):
-                    #     variantSize = -1
-                    #else:
                     for char in IDField:
-                        if (char == "I"):
-                            variantSize = int(IDField[0:stringPos])
+                        if (char == "I") or (char == 'Y'):
+                            variantSize = variantSize.append(int(IDField[0:stringPos]))
                             break
                         elif (char == "D") and not IDField.find("BND"):
-                            variantSize = -int(IDField[0:stringPos])
+                            variantSize = variantSize.append(-int(IDField[0:stringPos]))
                             break
                         stringPos += 1
                 #Difficult to parse changes go here.
                 else:
                     print("Difficult:", IDField)
-                    variantSize = 2000000
+                    variantSize = variantSize.append(2000000)
+                    difficult = difficult.append(IDField)
+
 
 
                 
@@ -81,25 +86,26 @@ def read(path):
                 
 
                 #Update count and binned data
-                for sample in np.arange(0, len(s) - 9):
+                for sample in np.arange(0, sampleCount):
                     GTField = s[9 + sample].split(':')
                     #print(GTField)
                     if (GTField[0] != "0/0"):
                         #print(countData)
                         countData[sample].append(variantSize)
-                        binnedData[binFinder.findBin(variantSize)] += 1
+                        for variant in variantSize:
+                            binnedData[binFinder.findBin(variant)] += 1
 
 
 
 
                 
 
-    return countData, binnedData
+    return countData, binnedData, difficult, mixed
                 
 
 
 def main(argv):
-    opts, args = getopt.getopt(argv, "hop:", ['--path'])
+    opts, args = getopt.getopt(argv, "ho:p:", ['--path'])
     outputPrefix = ""
 
     for opt, arg in opts:
@@ -114,6 +120,8 @@ def main(argv):
     countsDict = {}
     binnedDict = {}
     binnedValues = np.zeros(39)
+    difficultToParse = []
+    mixedParse = []
     
     #Iterate through all ".FINAL.vcf.gz" files and generate basic counts
     for root, dirs, files in os.walk(path):
@@ -121,7 +129,7 @@ def main(argv):
             if(filename[-13:] == ".FINAL.vcf.gz"):
                 print(filename)
                 #with open(os.path.join(root, filename), 'r') as f:
-                rawData, binnedData = read(root + filename)
+                rawData, binnedData, difficult, mixed = read(root + filename)
 
                 #Merge raw counts with dictionary
                 for row in rawData:
@@ -140,12 +148,17 @@ def main(argv):
                 #     else:
                 #         binnedDict[row[0]] = row[1:]
 
+                difficultToParse = difficultToParse.append(difficult)
+                mixedParse = mixedParse.append(mixed)
+
 
     wCount = csv.writer(open(outputPrefix + "counts.csv", "w"))
     for key, val in countsDict.items():
         wCount.writerow([key, val])
 
-    np.savetxt(outputPrefix + "binned.csv", binnedValues, delimiter=",")
+    np.savetxt(outputPrefix + "binned.csv", binnedValues, delimiter=",", fmt="%10.0f")
+    np.savetxt(outputPrefix + "mixed.csv", np.asarray(mixedParse), delimiter=",")
+    np.savetxt(outputPrefix + "difficult.csv", np.asarray(difficultToParse), delimiter=",")
 
     
 
