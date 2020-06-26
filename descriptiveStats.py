@@ -72,6 +72,11 @@ def main(argv):
             siblingCountData.remove(x)
             siblingRemovedCount += 1
 
+    #print(probandCountData)
+    #print(siblingCountData)
+    print(probandRemovedCount)
+    print(siblingRemovedCount)
+
     pMean = np.mean(probandCountData)
     pMedian = np.median(probandCountData)
     pMode = stats.mode(probandCountData)
@@ -88,18 +93,18 @@ def main(argv):
     print("Proband Median:", pMedian)
     print("Proband Mode:", pMode)
     print("Proband Variance:", pVariance)
-    print("Proband SD:", pSd)
+    print("Proband SD:", pSd, "\n")
 
     print("Sibling Mean:", sMean)
     print("Sibling Median:", sMedian)
     print("Sibling Mode:", sMode)
     print("Sibling Variance:", sVariance)
-    print("Sibling SD:", sSd)
+    print("Sibling SD:", sSd, "\n")
 
     testStat, pvalue = stats.ks_2samp(probandHistogramData, siblingHistogramData)
     print("----KS Test using Histograms----")
     print("Test Statistic:", testStat)
-    print("P-value", pvalue)
+    print("P-value", pvalue, "\n")
 
     testStat, pvalue = stats.ks_2samp(probandCountData, siblingCountData)
     print("----KS Test using Counts----")
