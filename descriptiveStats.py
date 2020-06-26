@@ -1,5 +1,6 @@
 import numpy as np
-import scipy, sys, getopt, math
+from scipy import stats
+import sys, getopt, math
 
 
 def readHistogram(filename):
@@ -32,7 +33,7 @@ def readCount(filename):
 
 
 def main(argv):
-    opts, args = getopt.getopt(argv, "ho:", ['--proHist', '--proCount', '--sibHist', '--sibCount', '--output'])
+    opts, args = getopt.getopt(argv, "ho:", ['proHist=', 'proCount=', 'sibHist=', 'sibCount=', 'output'])
     outputPrefix = ""
 
     for opt, arg in opts:
@@ -73,13 +74,13 @@ def main(argv):
 
     pMean = np.mean(probandCountData)
     pMedian = np.median(probandCountData)
-    pMode = scipy.stats.mode(probandCountData)
+    pMode = stats.mode(probandCountData)
     pVariance = np.var(probandCountData)
     pSd = np.sqrt(pVariance)
 
     sMean = np.mean(siblingCountData)
     sMedian = np.median(siblingCountData)
-    sMode = scipy.stats.mode(siblingCountData)
+    sMode = stats.mode(siblingCountData)
     sVariance = np.var(siblingCountData)
     sSd = np.sqrt(sVariance)
 
@@ -95,12 +96,12 @@ def main(argv):
     print("Sibling Variance:", sVariance)
     print("Sibling SD:", sSd)
 
-    testStat, pvalue = scipy.stats.ks_2samp(probandHistogramData, siblingHistogramData)
+    testStat, pvalue = stats.ks_2samp(probandHistogramData, siblingHistogramData)
     print("----KS Test using Histograms----")
     print("Test Statistic:", testStat)
     print("P-value", pvalue)
 
-    testStat, pvalue = scipy.stats.ks_2samp(probandCountData, siblingCountData)
+    testStat, pvalue = stats.ks_2samp(probandCountData, siblingCountData)
     print("----KS Test using Counts----")
     print("Test Statistic:", testStat)
     print("P-value", pvalue)
