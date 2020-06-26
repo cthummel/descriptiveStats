@@ -112,6 +112,10 @@ def read(path):
                                     elif (letters[1:] == "DD"):
                                         variantSize.append(-2)
                 
+                #Difficult to parse changes go here.
+                elif any(x in IDField for x in ["BND", '+', '_']):
+                    variantSize.append(2000000)
+                    difficult.append(IDField)
 
                 #Single insertions or deletions of various sizes.
                 elif any(x in IDField for x in ['I', 'D', 'Y', 'X']):
@@ -120,18 +124,14 @@ def read(path):
                         if (char == "I") or (char == 'Y'):
                             variantSize.append(int(IDField[0:stringPos]))
                             break
-                        elif (char == "D") and not IDField.find("BND"):
+                        elif (char == "D"):
                             variantSize.append(-int(IDField[0:stringPos]))
                             break
                         elif (char == 'X'):
                             variantSize.append(0)
                             break
-                        stringPos += 1
-                        
-                #Difficult to parse changes go here.
-                elif any(x in IDField for x in ["BND"]):
-                    variantSize.append(2000000)
-                    difficult.append(IDField)
+                        stringPos += 1      
+                
                 else:
                     #print("Difficult:", IDField)
                     variantSize.append(2000000)
