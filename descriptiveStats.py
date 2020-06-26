@@ -14,10 +14,12 @@ def readCount(filename):
     results = []
     with open(filename, mode='rt') as f:
         for line in f:
-            for x in line.strip().split(',')[1:]:
-                #Not sure why some entries are ''. Should check this later.
-                if(x != ''):
-                    results.append(int(x))
+            vector = line.strip().split(',')
+            if (len(vector) > 1):
+                for x in vector[1:]:
+                    #Not sure why some entries are ''. Should check this later.
+                    if(x != ''):
+                        results.append(int(x))
     return results
 
 
