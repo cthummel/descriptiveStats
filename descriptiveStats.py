@@ -32,22 +32,80 @@ def readCount(filename):
 
 
 def main(argv):
-    opts, args = getopt.getopt(argv, "h:c:o:", ['--path'])
+    opts, args = getopt.getopt(argv, "ho:", ['--proHist', '--proCount', '--sibHist', '--sibCount', '--output'])
     outputPrefix = ""
 
     for opt, arg in opts:
-        if opt == '-h':
-            histogramFilename = arg
-        elif opt in ('-c', '--counts'):
-            countsFilename = arg
+        if opt == '--proHist':
+            probandHistogramFilename = arg
+        elif opt == '--sibHist':
+            siblingHistogramFilename = arg
+        elif opt == '--proCount':
+            probandCountFilename = arg
+        elif opt == '--sibCount':
+            siblingCountFilename = arg
+        elif opt in ('-h'):
+            print("Use", ['--proHist', '--proCount', '--sibHist', '--sibCount'], "to input filenames")
+            print("-o for output file.")
+            sys.exit(0)
         elif opt in ('-o', '--output'):
             outputPrefix = arg
 
-    histogramData, specialData = readHistogram(histogramFilename)
-    countsData = readCount(countsFilename)
+    probandHistogramData, probandSpecialData = readHistogram(probandHistogramFilename)
+    siblingHistogramData, siblingSpecialData = readHistogram(siblingHistogramFilename)
+    
+    probandCountData = readCount(probandCountFilename)
+    siblingCountData = readCount(siblingCountFilename)
 
-    print(histogramData)
-    print(countsData)
+    #print(histogramData)
+    #print(countsData)
+    probandRemovedCount = 0
+    for x in probandCountData:
+        if x == 2000000 or x == 1000000:
+            probandCountData.remove(x)
+            probandRemovedCount += 1
+
+    siblingRemovedCount = 0
+    for x in siblingCountData:
+        if x == 2000000 or x == 1000000:
+            siblingCountData.remove(x)
+            siblingRemovedCount += 1
+
+    pMean = np.mean(probandCountData)
+    pMedian = np.median(probandCountData)
+    pMode = scipy.stats.mode(probandCountData)
+    pVariance = np.var(probandCountData)
+    pSd = np.sqrt(pVariance)
+
+    sMean = np.mean(siblingCountData)
+    sMedian = np.median(siblingCountData)
+    sMode = scipy.stats.mode(siblingCountData)
+    sVariance = np.var(siblingCountData)
+    sSd = np.sqrt(sVariance)
+
+    print("Proband Mean:", pMean)
+    print("Proband Median:", pMedian)
+    print("Proband Mode:", pMode)
+    print("Proband Variance:", pVariance)
+    print("Proband SD:", pSd)
+
+    print("Sibling Mean:", sMean)
+    print("Sibling Median:", sMedian)
+    print("Sibling Mode:", sMode)
+    print("Sibling Variance:", sVariance)
+    print("Sibling SD:", sSd)
+
+    testStat, pvalue = scipy.stats.ks_2samp(probandHistogramData, siblingHistogramData)
+    print("----KS Test using Histograms----")
+    print("Test Statistic:", testStat)
+    print("P-value", pvalue)
+
+    testStat, pvalue = scipy.stats.ks_2samp(probandCountData, siblingCountData)
+    print("----KS Test using Counts----")
+    print("Test Statistic:", testStat)
+    print("P-value", pvalue)
+    
+
 
 
 
