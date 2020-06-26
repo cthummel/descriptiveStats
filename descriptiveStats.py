@@ -60,22 +60,26 @@ def main(argv):
 
     #print(histogramData)
     #print(countsData)
-    probandRemovedCount = 0
-    for x in probandCountData:
-        if x == 2000000 or x == 1000000:
-            probandCountData.remove(x)
-            probandRemovedCount += 1
 
-    siblingRemovedCount = 0
-    for x in siblingCountData:
-        if x == 2000000 or x == 1000000:
-            siblingCountData.remove(x)
-            siblingRemovedCount += 1
+    probandCountData = [x for x in probandCountData if x not in (2000000, 1000000)]
+    siblingCountData = [x for x in siblingCountData if x not in (2000000, 1000000)]
+
+    probandRemovedCount = 0
+    # for x in probandCountData:
+    #     if (x == 2000000) or (x == 1000000):
+    #         probandCountData.remove(x)
+    #         probandRemovedCount += 1
+
+    # siblingRemovedCount = 0
+    # for x in siblingCountData:
+    #     if (x == 2000000) or (x == 1000000):
+    #         siblingCountData.remove(x)
+    #         siblingRemovedCount += 1
 
     #print(probandCountData)
     #print(siblingCountData)
-    print(probandRemovedCount)
-    print(siblingRemovedCount)
+    #print(probandRemovedCount)
+    #print(siblingRemovedCount)
 
     pMean = np.mean(probandCountData)
     pMedian = np.median(probandCountData)
