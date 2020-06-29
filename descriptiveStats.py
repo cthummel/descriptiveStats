@@ -1,6 +1,6 @@
 import numpy as np
 from scipy import stats
-import sys, getopt, math
+import sys, getopt, math, binFinder
 
 
 def readHistogram(filename):
@@ -115,6 +115,10 @@ def main(argv):
     print("Test Statistic:", testStat)
     print("P-value", pvalue)
     
+    #Binwise binomial test
+    for bin in np.arange(0, binFinder.binCount()):
+        binomPvalue = stats.binom_test(probandHistogramData[bin], sum(probandHistogramData) * 1.0, siblingHistogramData[bin] * 1.0 / sum(siblingHistogramData))
+        print(binFinder.binSize(bin) + ":", binomPvalue)
 
 
 
