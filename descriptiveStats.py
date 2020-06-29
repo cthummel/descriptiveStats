@@ -116,9 +116,18 @@ def main(argv):
     print("P-value", pvalue)
     
     #Binwise binomial test
+    print("Binwise Binomial Test")
     for bin in np.arange(0, binFinder.binCount()):
-        binomPvalue = stats.binom_test(probandHistogramData[bin], sum(probandHistogramData) * 1.0, siblingHistogramData[bin] * 1.0 / sum(siblingHistogramData))
-        print(binFinder.binSize(bin) + ":", binomPvalue)
+        probandBinCount = probandHistogramData[bin]
+        probandN = sum(probandHistogramData)
+
+        siblingBinCount = siblingHistogramData[bin]
+        siblingN = sum(siblingHistogramData)
+        siblingProportion = siblingBinCount * 1.0 / siblingN
+
+        print(probandBinCount, probandN, siblingBinCount, siblingN, siblingProportion)
+        binomPvalue = stats.binom_test(probandBinCount, probandN, siblingProportion)
+        print(binFinder.binSize(bin) + ":", binomPvalue, "\n")
 
 
 
