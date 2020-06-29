@@ -118,15 +118,15 @@ def main(argv):
     #Binwise binomial test
     print("Binwise Binomial Test")
     for bin in np.arange(0, binFinder.binCount()):
-        probandBinCount = probandHistogramData[bin] * 1.0
+        probandBinCount = probandHistogramData[bin]
         probandN = sum(probandHistogramData)
 
         siblingBinCount = siblingHistogramData[bin]
         siblingN = sum(siblingHistogramData)
         siblingProportion = siblingBinCount * 1.0 / siblingN
 
-        print(bin, probandBinCount, probandN, siblingBinCount, siblingN, siblingProportion, probandBinCount / probandN)
-        binomPvalue = stats.binom_test(probandBinCount, probandN, siblingProportion)
+        print(bin, probandBinCount, probandN, siblingBinCount, siblingN, siblingProportion, probandBinCount * 1.0/ probandN)
+        binomPvalue = stats.binom_test(probandBinCount, n=probandN, p=siblingProportion)
         print(binFinder.binSize(bin) + ":", '%.4f' % binomPvalue, "\n")
 
 
