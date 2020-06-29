@@ -113,21 +113,21 @@ def main(argv):
     testStat, pvalue = stats.ks_2samp(probandCountData, siblingCountData)
     print("----KS Test using Counts----")
     print("Test Statistic:", testStat)
-    print("P-value", pvalue)
+    print("P-value", pvalue, "\n")
     
     #Binwise binomial test
     print("Binwise Binomial Test")
     for bin in np.arange(0, binFinder.binCount()):
-        probandBinCount = probandHistogramData[bin]
+        probandBinCount = probandHistogramData[bin] * 1.0
         probandN = sum(probandHistogramData)
 
         siblingBinCount = siblingHistogramData[bin]
         siblingN = sum(siblingHistogramData)
         siblingProportion = siblingBinCount * 1.0 / siblingN
 
-        print(probandBinCount, probandN, siblingBinCount, siblingN, siblingProportion)
+        print(bin, probandBinCount, probandN, siblingBinCount, siblingN, siblingProportion, probandBinCount / probandN)
         binomPvalue = stats.binom_test(probandBinCount, probandN, siblingProportion)
-        print(binFinder.binSize(bin) + ":", binomPvalue, "\n")
+        print(binFinder.binSize(bin) + ":", '%.4f' % binomPvalue, "\n")
 
 
 
