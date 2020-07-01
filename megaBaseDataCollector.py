@@ -29,7 +29,7 @@ def megabaseCountMerge(file, overlap, outputPrefix):
             currentMegaBaseEnd = 0 + megabaseSize
             currentChrom = s[0]
 
-        while (s[1] > currentMegaBaseEnd):
+        while (int(s[1]) > currentMegaBaseEnd):
             newMegaBaseStart = currentMegaBaseEnd - \
                 (overlap * megabaseSize)
             chromInfoDict[s[0]].append(megabaseInfo(
@@ -38,7 +38,7 @@ def megabaseCountMerge(file, overlap, outputPrefix):
             currentMegaBaseEnd = newMegaBaseStart + megabaseSize
             currentMegaBaseIndex += 1
 
-        if (s[1] <= currentMegaBaseEnd and s[1] > currentMegaBaseEnd - (megabaseSize * overlap)):
+        if (int(s[1]) <= currentMegaBaseEnd and int(s[1]) > currentMegaBaseEnd - (megabaseSize * overlap)):
             if currentMegaBaseIndex == len(chromInfoDict[s[0]]) - 1:
                 newMegaBaseStart = currentMegaBaseEnd - \
                     (overlap * megabaseSize)
@@ -111,6 +111,7 @@ def megabaseCount(file, overlap, outputPrefix):
 def main(argv):
     opts, args = getopt.getopt(argv, "hp:", ['merge=', 'output=', 'overlap='])
     outputPrefix = ""
+    path = ""
 
     for opt, arg in opts:
         if opt == '--merge':
