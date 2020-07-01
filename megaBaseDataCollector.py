@@ -23,6 +23,7 @@ def megabaseCountMerge(file, overlap, outputPrefix):
         #New chromosome means we add a new key to the dictionary and append a new megabase counter.
         ##s[0] is the chromosome, s[1] is the position
         if (s[0] != currentChrom):
+            print("Scanning variants in:", s[0])
             chromInfoDict[s[0]] = [
                 megabaseInfo(0, 0 + megabaseSize, 0)]
             currentMegaBaseIndex = 0
