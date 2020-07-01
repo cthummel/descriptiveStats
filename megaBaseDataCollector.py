@@ -54,6 +54,7 @@ def megabaseCountMerge(file, overlap, outputPrefix):
             chromInfoDict[s[0]][currentMegaBaseIndex].count += 1
 
     wCounts = csv.writer(open(outputPrefix + "megaBaseCounts.csv", "w"))
+    wCounts.writerow(["Chrom", "Start", "End", "Count"])
     for key in chromInfoDict.keys():
         for val in chromInfoDict[key]:
             wCounts.writerow([key, val.start, val.end, val.count])
