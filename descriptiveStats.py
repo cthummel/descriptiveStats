@@ -33,7 +33,7 @@ def readCount(filename):
 
 
 def main(argv):
-    opts, args = getopt.getopt(argv, "ho:", ['proHist=', 'proCount=', 'sibHist=', 'sibCount=', 'output'])
+    opts, args = getopt.getopt(argv, "ho:", ['proHist=', 'proCount=', 'sibHist=', 'sibCount=', 'output='])
     outputPrefix = ""
 
     for opt, arg in opts:

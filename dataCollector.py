@@ -1,6 +1,12 @@
 import numpy as np
 import math, sys, getopt, gzip, os, csv, binFinder, re
 
+class megabaseInfo:
+    def __init__(self, start, end, count):
+        self.start = start
+        self.end = end
+        self.count = count
+
 
 
 def read(path):
@@ -113,7 +119,7 @@ def read(path):
                                         variantSize.append(-2)
                 
                 #Difficult to parse changes go here.
-                elif any(x in IDField for x in ["BND", '+', '_']):
+                elif any(x in IDField for x in ["BND", '+', '_', "DUP"]):
                     variantSize.append(2000000)
                     difficult.append(IDField)
 
@@ -125,6 +131,7 @@ def read(path):
                             variantSize.append(int(IDField[0:stringPos]))
                             break
                         elif (char == "D"):
+                            print(IDField)
                             variantSize.append(-int(IDField[0:stringPos]))
                             break
                         elif (char == 'X'):
@@ -155,9 +162,68 @@ def read(path):
     return countData, binnedData, difficult, mixed
                 
 
+def mergeVcf(path):
+    fileNames = []
+    for root, dirs, files in os.walk(path):
+        for filename in files:
+            if(filename[-13:] == ".FINAL.vcf.gz"):
+                fileNames.append(root + filename)
+    
+
+def megabaseCount(file, overlap, outputPrefix):
+    megabaseSize = 1000000
+    chromInfoDict = {}
+    currentChrom = ""
+    currentMegaBaseIndex = 0
+    if(file[-3:] == ".gz"):
+        with gzip.open(file, mode='rt') as f:
+            for line in f:
+                if len(line.strip()) == 0:
+                    continue
+                elif (line[:2] == "##"):
+                    continue
+                elif (line[:1] == "#" ):
+                    continue
+                s = line.strip().split('\t')
+                #New chromosome means we add a new key to the dictionary and append a new megabase counter.
+                ##s[0] is the chromosome, s[1] is the position
+                if (s[0] != currentChrom):
+                    chromInfoDict[s[0]] = [megabaseInfo(0, 0 + megabaseSize, 0)]
+                    currentMegaBaseIndex = 0
+                    currentMegaBaseEnd = 0 + megabaseSize
+                    currentChrom = s[0]
+
+                while (s[1] > currentMegaBaseEnd):
+                    newMegaBaseStart = currentMegaBaseEnd - (overlap * megabaseSize)
+                    chromInfoDict[s[0]].append(megabaseInfo(newMegaBaseStart, newMegaBaseStart + megabaseSize, 0))
+
+                    currentMegaBaseEnd = newMegaBaseStart + megabaseSize
+                    currentMegaBaseIndex += 1
+                    
+                if (s[1] <= currentMegaBaseEnd and s[1] > currentMegaBaseEnd - (megabaseSize * overlap)):
+                    if currentMegaBaseIndex == len(chromInfoDict[s[0]]) -1:
+                        newMegaBaseStart = currentMegaBaseEnd - (overlap * megabaseSize)
+                        chromInfoDict[s[0]].append(megabaseInfo(newMegaBaseStart, newMegaBaseStart + megabaseSize, 1))
+                        chromInfoDict[s[0]][currentMegaBaseIndex].count += 1
+                    else:
+                        chromInfoDict[s[0]][currentMegaBaseIndex].count += 1
+                        chromInfoDict[s[0]][currentMegaBaseIndex + 1].count += 1
+                else:
+                    chromInfoDict[s[0]][currentMegaBaseIndex].count += 1
+
+    wCounts = csv.writer(open(outputPrefix + "megaBaseCounts.csv", "w"))
+    for key in chromInfoDict.keys():
+        for val in chromInfoDict[key]:
+            wCounts.writerow([key,val])
+
+    return chromInfoDict
+
+
+
+
 
 def main(argv):
-    opts, args = getopt.getopt(argv, "ho:p:", ['--path'])
+    opts, args = getopt.getopt(argv, "ho:p:m:", ['--path'])
     outputPrefix = ""
 
     for opt, arg in opts:
@@ -203,7 +269,7 @@ def main(argv):
 
     wCount = csv.writer(open(outputPrefix + "counts.csv", "w"))
     for key, val in countsDict.items():
-        wCount.writerow([key, val])
+        wCount.writerow([key,val])
 
     np.savetxt(outputPrefix + "binned.csv", binnedValues, delimiter=",", fmt="%10.0f")
     np.savetxt(outputPrefix + "mixed.csv", np.asarray(mixedParse), delimiter=",", fmt="%s")
