@@ -46,8 +46,14 @@ do
 done
 
 FILES=()
+module load tabix
 for filename in $PATH*.FINAL.vcf.gz; do
-    FILES+=("$filename")
+    if [ -f "$filename.tbi" ]; then
+        FILES+=("$filename")
+    else 
+        tabix -p vcf "$filename"
+        FILES+=("$filename")
+    fi
 done
 
 module load bcftools
