@@ -42,7 +42,6 @@ def megabaseCountMerge(file, overlap, binsize, outputPrefix):
                         while (int(s[1]) > currentMegaBaseEnd):
                             #If the megabase isnt initialized yet
                             if (currentMegaBaseIndex + 1 == len(chromInfoDict[s[0]]) ):
-                                print("new megabase")
                                 newMegaBaseStart = currentMegaBaseEnd - (overlap * megabaseSize)
                                 chromInfoDict[s[0]].append(megabaseInfo(newMegaBaseStart, newMegaBaseStart + megabaseSize, 0))
                                 currentMegaBaseEnd = newMegaBaseStart + megabaseSize
@@ -50,7 +49,6 @@ def megabaseCountMerge(file, overlap, binsize, outputPrefix):
                             else:
                                 currentMegaBaseIndex += 1
                                 currentMegaBaseEnd = chromInfoDict[s[0]][currentMegaBaseIndex].end
-                                print("looking for megabase", currentMegaBaseEnd -megabaseSize, currentMegaBaseEnd, currentMegaBaseIndex)
                                 
 
                         #If we find a variant that falls in the overlap for two megabases.
@@ -65,7 +63,7 @@ def megabaseCountMerge(file, overlap, binsize, outputPrefix):
                         else:
                             chromInfoDict[s[0]][currentMegaBaseIndex].count += 1
                             
-                        print(s[0], int(s[1]), chromInfoDict[s[0]][currentMegaBaseIndex-1].end - megabaseSize, chromInfoDict[s[0]][currentMegaBaseIndex-1].end, chromInfoDict[s[0]][currentMegaBaseIndex].count)
+                        print(s[0], int(s[1]), chromInfoDict[s[0]][currentMegaBaseIndex].end - megabaseSize, chromInfoDict[s[0]][currentMegaBaseIndex].end, chromInfoDict[s[0]][currentMegaBaseIndex].count)
 
     wCounts = csv.writer(open(outputPrefix + "megaBaseCounts.csv", "w"))
     wCounts.writerow(["Chrom", "Start", "End", "Count"])
