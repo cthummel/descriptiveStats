@@ -33,6 +33,7 @@ def megabaseCountMerge(file, overlap, binsize, outputPrefix):
                                 chromInfoDict[s[0]] = [megabaseInfo(0, 0 + megabaseSize, 0)]    
                                 currentMegaBaseEnd = 0 + megabaseSize
                             
+                            print("oldchrom:", currentChrom, "Newchrom:", s[0])
                             currentMegaBaseIndex = 0
                             currentChrom = s[0]
                             
@@ -62,10 +63,10 @@ def megabaseCountMerge(file, overlap, binsize, outputPrefix):
                                 chromInfoDict[s[0]][currentMegaBaseIndex].count += 1
                                 print("count after:", chromInfoDict[s[0]][currentMegaBaseIndex].count)
                                 chromInfoDict[s[0]][currentMegaBaseIndex + 1].count += 1
-                            print(s[0], int(s[1]), currentMegaBaseEnd - megabaseSize, currentMegaBaseEnd, chromInfoDict[s[0]][currentMegaBaseIndex].count)
                         else:
                             chromInfoDict[s[0]][currentMegaBaseIndex].count += 1
-                            print(s[0], int(s[1]), currentMegaBaseEnd - megabaseSize, currentMegaBaseEnd, chromInfoDict[s[0]][currentMegaBaseIndex].count)
+                            
+                        print(s[0], int(s[1]), chromInfoDict[s[0]][currentMegaBaseIndex-1].end - megabaseSize, chromInfoDict[s[0]][currentMegaBaseIndex-1].end, chromInfoDict[s[0]][currentMegaBaseIndex].count)
 
     wCounts = csv.writer(open(outputPrefix + "megaBaseCounts.csv", "w"))
     wCounts.writerow(["Chrom", "Start", "End", "Count"])
