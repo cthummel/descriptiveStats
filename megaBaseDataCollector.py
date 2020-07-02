@@ -7,7 +7,7 @@ class megabaseInfo:
         self.count = count
 
 
-def megabaseCountMerge(file, overlap, outputPrefix):
+def megabaseCountMerge(file, overlap, binsize, outputPrefix):
     megabaseSize = 1000000
     chromInfoDict = {}
     for root, dirs, files in os.walk(file):
@@ -58,8 +58,10 @@ def megabaseCountMerge(file, overlap, outputPrefix):
                             else:
                                 chromInfoDict[s[0]][currentMegaBaseIndex].count += 1
                                 chromInfoDict[s[0]][currentMegaBaseIndex + 1].count += 1
+                            print(int(s[1]), currentMegaBaseEnd - megabaseSize, currentMegaBaseEnd, chromInfoDict[s[0]][currentMegaBaseIndex].count)
                         else:
                             chromInfoDict[s[0]][currentMegaBaseIndex].count += 1
+                            print(int(s[1]), currentMegaBaseEnd - megabaseSize, currentMegaBaseEnd, chromInfoDict[s[0]][currentMegaBaseIndex].count)
 
     wCounts = csv.writer(open(outputPrefix + "megaBaseCounts.csv", "w"))
     wCounts.writerow(["Chrom", "Start", "End", "Count"])
@@ -69,7 +71,7 @@ def megabaseCountMerge(file, overlap, outputPrefix):
 
     return chromInfoDict
 
-def megabaseCount(file, overlap, outputPrefix):
+def megabaseCount(file, overlap, binsize, outputPrefix):
     megabaseSize = 1000000
     chromInfoDict = {}
     currentChrom = ""
@@ -128,10 +130,11 @@ def megabaseCount(file, overlap, outputPrefix):
 
 
 def main(argv):
-    opts, args = getopt.getopt(argv, "h p:", ['merge=', 'output=', 'overlap='])
+    opts, args = getopt.getopt(argv, "h p:", ['merge=', 'output=', 'overlap=', 'binsize='])
     outputPrefix = ""
     path = '-'
     merge = False
+    binsize = 1000000
 
     for opt, arg in opts:
         if opt == '--merge':
@@ -142,14 +145,16 @@ def main(argv):
             outputPrefix = arg
         elif opt == '--overlap':
             overlap = float(arg)
+        elif opt == '--binsize':
+            binsize = arg
         elif opt in ('-h'):
             print("Use", ['--merge', '--output', '--overlap'], "to adjust parameters")
             sys.exit(0)
 
     if (merge):
-        megabaseCountMerge(path, overlap, outputPrefix)
+        megabaseCountMerge(path, overlap, binsize, outputPrefix)
     else:
-        megabaseCount(path, overlap, outputPrefix)
+        megabaseCount(path, overlap, binsize, outputPrefix)
     
 
 if __name__ == '__main__':
