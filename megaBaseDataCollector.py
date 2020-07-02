@@ -33,7 +33,9 @@ def megabaseCountMerge(file, overlap, outputPrefix):
                                 chromInfoDict[s[0]] = [megabaseInfo(0, 0 + megabaseSize, 0)]
                                 currentMegaBaseIndex = 0
                                 currentMegaBaseEnd = 0 + megabaseSize
-                                currentChrom = s[0]
+                            
+                            currentChrom = s[0]
+                            
 
                         while (int(s[1]) > currentMegaBaseEnd):
                             #If the megabase isnt initialized yet
