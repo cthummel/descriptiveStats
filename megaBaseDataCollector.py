@@ -58,10 +58,10 @@ def megabaseCountMerge(file, overlap, binsize, outputPrefix):
                             else:
                                 chromInfoDict[s[0]][currentMegaBaseIndex].count += 1
                                 chromInfoDict[s[0]][currentMegaBaseIndex + 1].count += 1
-                            print(int(s[1]), currentMegaBaseEnd - megabaseSize, currentMegaBaseEnd, chromInfoDict[s[0]][currentMegaBaseIndex].count)
+                            print(s[0], int(s[1]), currentMegaBaseEnd - megabaseSize, currentMegaBaseEnd, chromInfoDict[s[0]][currentMegaBaseIndex-1].count)
                         else:
                             chromInfoDict[s[0]][currentMegaBaseIndex].count += 1
-                            print(int(s[1]), currentMegaBaseEnd - megabaseSize, currentMegaBaseEnd, chromInfoDict[s[0]][currentMegaBaseIndex].count)
+                            print(s[0], int(s[1]), currentMegaBaseEnd - megabaseSize, currentMegaBaseEnd, chromInfoDict[s[0]][currentMegaBaseIndex-1].count)
 
     wCounts = csv.writer(open(outputPrefix + "megaBaseCounts.csv", "w"))
     wCounts.writerow(["Chrom", "Start", "End", "Count"])
