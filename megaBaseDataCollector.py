@@ -35,6 +35,7 @@ def megabaseCountMerge(file, overlap, binsize, outputPrefix):
                             
                             print("oldchrom:", currentChrom, "Newchrom:", s[0])
                             currentMegaBaseIndex = 0
+                            currentMegaBaseEnd = chromInfoDict[s[0]][0].end
                             currentChrom = s[0]
                             
 
@@ -59,9 +60,7 @@ def megabaseCountMerge(file, overlap, binsize, outputPrefix):
                                 chromInfoDict[s[0]].append(megabaseInfo(newMegaBaseStart, newMegaBaseStart + megabaseSize, 1))
                                 chromInfoDict[s[0]][currentMegaBaseIndex].count += 1
                             else:
-                                print("count before:", chromInfoDict[s[0]][currentMegaBaseIndex].count)
                                 chromInfoDict[s[0]][currentMegaBaseIndex].count += 1
-                                print("count after:", chromInfoDict[s[0]][currentMegaBaseIndex].count)
                                 chromInfoDict[s[0]][currentMegaBaseIndex + 1].count += 1
                         else:
                             chromInfoDict[s[0]][currentMegaBaseIndex].count += 1
