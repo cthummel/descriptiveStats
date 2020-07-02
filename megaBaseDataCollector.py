@@ -13,7 +13,7 @@ def megabaseCountMerge(file, overlap, outputPrefix):
     for root, dirs, files in os.walk(file):
         for filename in files:
             if(filename[-13:] == ".FINAL.vcf.gz"):
-                with gzip.open(filename, mode='rt') as f:
+                with gzip.open(root + filename, mode='rt') as f:
                     print("Scanning variants from file:", filename)
                     currentChrom = ""
                     currentMegaBaseIndex = 0
