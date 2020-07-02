@@ -30,10 +30,10 @@ def megabaseCountMerge(file, overlap, outputPrefix):
                         if (s[0] != currentChrom):
                             print("Scanning variants in:", s[0])
                             if (s[0] not in chromInfoDict):
-                                chromInfoDict[s[0]] = [megabaseInfo(0, 0 + megabaseSize, 0)]
-                                currentMegaBaseIndex = 0
+                                chromInfoDict[s[0]] = [megabaseInfo(0, 0 + megabaseSize, 0)]    
                                 currentMegaBaseEnd = 0 + megabaseSize
                             
+                            currentMegaBaseIndex = 0
                             currentChrom = s[0]
                             
 
