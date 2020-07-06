@@ -163,7 +163,7 @@ def main(argv):
             siblingChromDict[row[0]].append(row[3])
 
     for chrom in uniqueChromList:
-        if (chrom in probandChromDict[chrom]) and (chrom in siblingChromDict[chrom]):
+        if (chrom in probandChromDict.keys()) and (chrom in siblingChromDict.keys()):
             testStat, pvalue = stats.ks_2samp(probandChromDict[chrom], siblingChromDict[chrom])
             print("---- KS Test using Megabase Bins in Chromosome (" + chrom + ")----")
             print("Test Statistic:", testStat)
