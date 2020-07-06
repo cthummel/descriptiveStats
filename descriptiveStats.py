@@ -1,6 +1,6 @@
 import numpy as np
 from scipy import stats
-import sys, getopt, math, binFinder
+import sys, getopt, math, binFinder, csv
 
 def readMegaBase(filename):
     results = []
@@ -146,6 +146,7 @@ def main(argv):
 
     probandChromDict = {}
     siblingChromDict = {}
+    KStestResults = []
     uniqueChromList = set()
 
     for row in probandMegaBaseData:
@@ -163,11 +164,21 @@ def main(argv):
             siblingChromDict[row[0]].append(row[3])
 
     for chrom in uniqueChromList:
+        # if (len(chrom) > 5):
+        #     continue
         if (chrom in probandChromDict.keys()) and (chrom in siblingChromDict.keys()):
             testStat, pvalue = stats.ks_2samp(probandChromDict[chrom], siblingChromDict[chrom])
             print("---- KS Test using Megabase Bins in Chromosome (" + chrom + ")----")
             print("Test Statistic:", testStat)
             print("P-value", pvalue, "\n")
+            KStestResults.append([chrom, testStat, pvalue])
+    
+    print(KStestResults)
+
+    wCounts = csv.writer(open(outputPrefix + "megaBaseKS.csv", "w"))
+    wCounts.writerow(["Chrom", "TestStat", "Pvalue"])
+    for row in KStestResults:
+        wCounts.writerow(row)
         
 
 
