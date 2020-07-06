@@ -127,7 +127,7 @@ def main(argv):
     
     #Binwise binomial test
     print("Binwise Binomial Test")
-    for bin in np.arange(0, binFinder.binCount()):
+    for bin in np.arange(0, binFinder.binCount() - 1):
         probandBinCount = probandHistogramData[bin]
         probandN = sum(probandHistogramData)
 
@@ -163,7 +163,7 @@ def main(argv):
             siblingChromDict[row[0]].append(row[3])
 
     for chrom in uniqueChromList:
-        if (chrom in probandChromDict[chrom]) and (chrom in probandChromDict[chrom]):
+        if (chrom in probandChromDict[chrom]) and (chrom in siblingChromDict[chrom]):
             testStat, pvalue = stats.ks_2samp(probandChromDict[chrom], siblingChromDict[chrom])
             print("---- KS Test using Megabase Bins in Chromosome (" + chrom + ")----")
             print("Test Statistic:", testStat)
