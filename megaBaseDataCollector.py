@@ -26,44 +26,47 @@ def megabaseCountMerge(file, overlap, binsize, outputPrefix):
                         elif (line[:1] == "#"):
                             continue
                         s = line.strip().split('\t')
-                        chrom = s[0].split('_')[0]
+                        #chrom = s[0].split('_')[0]
                         #New chromosome means we add a new key to the dictionary and append a new megabase counter.
                         ##s[0] is the chromosome, s[1] is the position
-                        if (chrom != currentChrom):
+                        if len(s[0]) > 5):
+                            continue
+                        if (s[0] != currentChrom):
                             #print("Scanning variants in:", chrom)
-                            if (chrom not in chromInfoDict):
-                                chromInfoDict[chrom] = [megabaseInfo(0, 0 + megabaseSize, 0)]    
+                            
+                            if (s[0] not in chromInfoDict):
+                                chromInfoDict[s[0]] = [megabaseInfo(0, 0 + megabaseSize, 0)]    
                                 currentMegaBaseEnd = 0 + megabaseSize
                             
                             #print("oldchrom:", currentChrom, "Newchrom:", chrom)
                             currentMegaBaseIndex = 0
-                            currentMegaBaseEnd = chromInfoDict[chrom][0].end
-                            currentChrom = chrom
+                            currentMegaBaseEnd = chromInfoDict[s[0]][0].end
+                            currentChrom = s[0]
                             
 
                         while (int(s[1]) > currentMegaBaseEnd):
                             #If the megabase isnt initialized yet
-                            if (currentMegaBaseIndex + 1 == len(chromInfoDict[chrom]) ):
+                            if (currentMegaBaseIndex + 1 == len(chromInfoDict[s[0]]) ):
                                 newMegaBaseStart = currentMegaBaseEnd - (overlap * megabaseSize)
-                                chromInfoDict[chrom].append(megabaseInfo(newMegaBaseStart, newMegaBaseStart + megabaseSize, 0))
+                                chromInfoDict[s[0]].append(megabaseInfo(newMegaBaseStart, newMegaBaseStart + megabaseSize, 0))
                                 currentMegaBaseEnd = newMegaBaseStart + megabaseSize
                                 currentMegaBaseIndex += 1
                             else:
                                 currentMegaBaseIndex += 1
-                                currentMegaBaseEnd = chromInfoDict[chrom][currentMegaBaseIndex].end
+                                currentMegaBaseEnd = chromInfoDict[s[0]][currentMegaBaseIndex].end
                                 
 
                         #If we find a variant that falls in the overlap for two megabases.
                         if (int(s[1]) <= currentMegaBaseEnd and int(s[1]) > currentMegaBaseEnd - (megabaseSize * overlap)):
-                            if (currentMegaBaseIndex == len(chromInfoDict[chrom]) - 1):
+                            if (currentMegaBaseIndex == len(chromInfoDict[s[0]]) - 1):
                                 newMegaBaseStart = currentMegaBaseEnd - (overlap * megabaseSize)
-                                chromInfoDict[chrom].append(megabaseInfo(newMegaBaseStart, newMegaBaseStart + megabaseSize, 1))
-                                chromInfoDict[chrom][currentMegaBaseIndex].count += 1
+                                chromInfoDict[s[0]].append(megabaseInfo(newMegaBaseStart, newMegaBaseStart + megabaseSize, 1))
+                                chromInfoDict[s[0]][currentMegaBaseIndex].count += 1
                             else:
-                                chromInfoDict[chrom][currentMegaBaseIndex].count += 1
-                                chromInfoDict[chrom][currentMegaBaseIndex + 1].count += 1
+                                chromInfoDict[s[0]][currentMegaBaseIndex].count += 1
+                                chromInfoDict[s[0]][currentMegaBaseIndex + 1].count += 1
                         else:
-                            chromInfoDict[chrom][currentMegaBaseIndex].count += 1
+                            chromInfoDict[s[0]][currentMegaBaseIndex].count += 1
                             
                         #print(chrom, int(s[1]), chromInfoDict[chrom][currentMegaBaseIndex].end - megabaseSize, chromInfoDict[chrom][currentMegaBaseIndex].end, chromInfoDict[chrom][currentMegaBaseIndex].count)
 
@@ -94,37 +97,37 @@ def megabaseCount(file, overlap, binsize, outputPrefix):
         if (chrom != currentChrom):
             print("Scanning variants in:", chrom)
             if (chrom not in chromInfoDict):
-                chromInfoDict[chrom] = [megabaseInfo(0, 0 + megabaseSize, 0)]    
+                chromInfoDict[s[0]] = [megabaseInfo(0, 0 + megabaseSize, 0)]    
                 currentMegaBaseEnd = 0 + megabaseSize
             
-            currentMegaBaseEnd = chromInfoDict[chrom][0].end
+            currentMegaBaseEnd = chromInfoDict[s[0]][0].end
             currentMegaBaseIndex = 0
             currentChrom = chrom
             
 
         while (int(s[1]) > currentMegaBaseEnd):
             #If the megabase isnt initialized yet
-            if (currentMegaBaseIndex + 1 == len(chromInfoDict[chrom]) ):
+            if (currentMegaBaseIndex + 1 == len(chromInfoDict[s[0]]) ):
                 newMegaBaseStart = currentMegaBaseEnd - (overlap * megabaseSize)
-                chromInfoDict[chrom].append(megabaseInfo(newMegaBaseStart, newMegaBaseStart + megabaseSize, 0))
+                chromInfoDict[s[0]].append(megabaseInfo(newMegaBaseStart, newMegaBaseStart + megabaseSize, 0))
                 currentMegaBaseEnd = newMegaBaseStart + megabaseSize
                 currentMegaBaseIndex += 1
             else:
                 currentMegaBaseIndex += 1
-                currentMegaBaseEnd = chromInfoDict[chrom][currentMegaBaseIndex].end
+                currentMegaBaseEnd = chromInfoDict[s[0]][currentMegaBaseIndex].end
                 
 
         #If we find a variant that falls in the overlap for two megabases.
         if (int(s[1]) <= currentMegaBaseEnd and int(s[1]) > currentMegaBaseEnd - (megabaseSize * overlap)):
-            if (currentMegaBaseIndex == len(chromInfoDict[chrom]) - 1):
+            if (currentMegaBaseIndex == len(chromInfoDict[s[0]]) - 1):
                 newMegaBaseStart = currentMegaBaseEnd - (overlap * megabaseSize)
-                chromInfoDict[chrom].append(megabaseInfo(newMegaBaseStart, newMegaBaseStart + megabaseSize, 1))
-                chromInfoDict[chrom][currentMegaBaseIndex].count += 1
+                chromInfoDict[s[0]].append(megabaseInfo(newMegaBaseStart, newMegaBaseStart + megabaseSize, 1))
+                chromInfoDict[s[0]][currentMegaBaseIndex].count += 1
             else:
-                chromInfoDict[chrom][currentMegaBaseIndex].count += 1
-                chromInfoDict[chrom][currentMegaBaseIndex + 1].count += 1
+                chromInfoDict[s[0]][currentMegaBaseIndex].count += 1
+                chromInfoDict[s[0]][currentMegaBaseIndex + 1].count += 1
         else:
-            chromInfoDict[chrom][currentMegaBaseIndex].count += 1
+            chromInfoDict[s[0]][currentMegaBaseIndex].count += 1
 
     wCounts = csv.writer(open(outputPrefix + "megaBaseCounts.csv", "w"))
     wCounts.writerow(["Chrom", "Start", "End", "Count"])
