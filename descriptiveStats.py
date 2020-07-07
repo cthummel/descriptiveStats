@@ -1,6 +1,6 @@
 import numpy as np
 from scipy import stats
-import sys, getopt, math, binFinder, csv
+import sys, getopt, math, binFinder, csv, statsmodels
 
 def readMegaBase(filename):
     results = []
@@ -28,6 +28,19 @@ def readCount(filename):
                     if(x != ''):
                         results.append(int(x))
     return results
+
+
+def sidakProcedure(alpha, m):
+    return 1 - np.power(1 - alpha, 1.0 / m)
+
+def holmBonferroni(pvalues, alpha, m):
+    k = len(pvalues)
+    sortedData = np.sort(pvalues)
+    for x in np.arange(0, k - 1):
+        if (alpha / (m + 1 - x)) < sortedData[x]:
+            return np.max(x - 1, 0)
+    
+    return k
 
 
 
@@ -111,7 +124,7 @@ def main(argv):
     print("Proband Max:", pMax)
     print("Proband Mean:", pMean)
     print("Proband Median:", pMedian)
-    print("Proband Mode:", pMode)
+    print("Proband Mode:", pMode.mode)
     print("Proband Variance:", pVariance)
     print("Proband SD:", pSd, "\n")
 
@@ -119,7 +132,7 @@ def main(argv):
     print("Sibling Max:", sMax)
     print("Sibling Mean:", sMean)
     print("Sibling Median:", sMedian)
-    print("Sibling Mode:", sMode[0])
+    print("Sibling Mode:", sMode.mode)
     print("Sibling Variance:", sVariance)
     print("Sibling SD:", sSd, "\n")
 
@@ -155,6 +168,7 @@ def main(argv):
     probandChromDict = {}
     siblingChromDict = {}
     KStestResults = []
+    pvalues = []
     uniqueChromList = set()
 
     for row in probandMegaBaseData:
@@ -179,14 +193,20 @@ def main(argv):
             print("---- KS Test using Megabase Bins in Chromosome (" + chrom + ")----")
             print("Test Statistic:", testStat)
             print("P-value", pvalue, "\n")
+            pvalues.append(pvalue)
             KStestResults.append([chrom, testStat, pvalue])
     
-    print(KStestResults)
+    resultsBon = statsmodels.stats.multitest.multipletests(pvalues, alpha=0.05, method='bonferroni', is_sorted=False, returnsorted=False)
+    resultSidak = statsmodels.stats.multitest.multipletests(pvalues, alpha=0.05, method='sidak', is_sorted=False, returnsorted=False)
+    resultsHolm = statsmodels.stats.multitest.multipletests(pvalues, alpha=0.05, method='holm', is_sorted=False, returnsorted=False)  
+    reject, adjPvalue = statsmodels.stats.multitest.fdrcorrection(pvalues, alpha=0.05, method='indep', is_sorted=False)
+
+    print(resultsBon, resultsHolm, resultSidak)
 
     wCounts = csv.writer(open(outputPrefix + "megaBaseKS.csv", "w"))
-    wCounts.writerow(["Chrom", "TestStat", "Pvalue"])
-    for row in KStestResults:
-        wCounts.writerow(row)
+    wCounts.writerow(["Chrom", "TestStat", "Pvalue", "Bon"])
+    for row in np.arange(0, len(KStestResults) - 1):
+        wCounts.writerow([KStestResults[row][0], KStestResults[row][1], KStestResults[row][2], adjPvalue[row]])
         
 
 
