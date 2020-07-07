@@ -152,6 +152,7 @@ def read(path):
                         #print(countData)
                         countData[sample].append(variantSize)
                         for variant in variantSize:
+                            print(variant, binFinder.findBin(variant))
                             binnedData[binFinder.findBin(variant)] += 1
 
 
