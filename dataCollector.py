@@ -152,7 +152,8 @@ def read(path):
                         #print(countData)
                         countData[sample].append(variantSize)
                         for variant in variantSize:
-                            print(variant, binFinder.findBin(variant))
+                            if variant == -91967987:
+                                print(path)
                             binnedData[binFinder.findBin(variant)] += 1
 
 
@@ -162,13 +163,6 @@ def read(path):
 
     return countData, binnedData, difficult, mixed
                 
-
-def mergeVcf(path):
-    fileNames = []
-    for root, dirs, files in os.walk(path):
-        for filename in files:
-            if(filename[-13:] == ".FINAL.vcf.gz"):
-                fileNames.append(root + filename)
     
 
 def megabaseCount(file, overlap, outputPrefix):

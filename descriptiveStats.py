@@ -71,8 +71,8 @@ def main(argv):
     #print(histogramData)
     #print(countsData)
 
-    probandCountData = [x for x in probandCountData if x not in (2000000, 1000000)]
-    siblingCountData = [x for x in siblingCountData if x not in (2000000, 1000000)]
+    probandCountData = [x for x in probandCountData if x not in [2000000, 1000000]]
+    siblingCountData = [x for x in siblingCountData if x not in [2000000, 1000000]]
 
     #probandRemovedCount = 0
     # for x in probandCountData:
@@ -91,27 +91,35 @@ def main(argv):
     #print(probandRemovedCount)
     #print(siblingRemovedCount)
 
+    pMax = np.max(probandCountData)
+    pMin = np.min(probandCountData)
     pMean = np.mean(probandCountData)
     pMedian = np.median(probandCountData)
     pMode = stats.mode(probandCountData)
     pVariance = np.var(probandCountData)
     pSd = np.sqrt(pVariance)
 
+    sMax = np.max(siblingCountData)
+    sMin = np.min(siblingCountData)
     sMean = np.mean(siblingCountData)
     sMedian = np.median(siblingCountData)
     sMode = stats.mode(siblingCountData)
     sVariance = np.var(siblingCountData)
     sSd = np.sqrt(sVariance)
 
+    print("Proband Min:", pMin)
+    print("Proband Max:", pMax)
     print("Proband Mean:", pMean)
     print("Proband Median:", pMedian)
     print("Proband Mode:", pMode)
     print("Proband Variance:", pVariance)
     print("Proband SD:", pSd, "\n")
 
+    print("Sibling Min:", sMin)
+    print("Sibling Max:", sMax)
     print("Sibling Mean:", sMean)
     print("Sibling Median:", sMedian)
-    print("Sibling Mode:", sMode)
+    print("Sibling Mode:", sMode[0])
     print("Sibling Variance:", sVariance)
     print("Sibling SD:", sSd, "\n")
 
