@@ -1,6 +1,6 @@
 import numpy as np
 from scipy import stats
-import sys, getopt, math, binFinder, csv, statsmodels
+import sys, getopt, math, binFinder, csv, statsmodels.stats.multitest
 
 def readMegaBase(filename):
     results = []
@@ -204,9 +204,9 @@ def main(argv):
     print(resultsBon, resultsHolm, resultSidak)
 
     wCounts = csv.writer(open(outputPrefix + "megaBaseKS.csv", "w"))
-    wCounts.writerow(["Chrom", "TestStat", "Pvalue", "Bon"])
+    wCounts.writerow(["Chrom", "TestStat", "Pvalue", "BonCorrect", "BonPass", "SidakCorrect", "SidakPass", "HolmsCorrect", "HolmsPass", "FDRPass", "FDRCorrect"])
     for row in np.arange(0, len(KStestResults) - 1):
-        wCounts.writerow([KStestResults[row][0], KStestResults[row][1], KStestResults[row][2], adjPvalue[row]])
+        wCounts.writerow([KStestResults[row][0], KStestResults[row][1], KStestResults[row][2], resultsBon[0][row], resultsBon[1][row], resultsSidak[0][row], resultsSidak[1][row],resultsHolm[0][row], resultsHolm[1][row], reject[row], adjPvalue[row]])
         
 
 
