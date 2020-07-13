@@ -1,10 +1,12 @@
 import sys, getopt, gzip, csv, fileinput, os
 
 class megabaseInfo:
-    def __init__(self, start, end, count):
+    def __init__(self, start, end, count, insertion, deletion):
         self.start = start
         self.end = end
         self.count = count
+        self.insertion = insertion
+        self.deletion = deletion
 
 
 
@@ -26,19 +28,38 @@ def megabaseCountMerge(file, overlap, binsize, outputPrefix):
                         elif (line[:1] == "#"):
                             continue
                         s = line.strip().split('\t')
-                        #chrom = s[0].split('_')[0]
+                        IDField = s[2].split('-')[0]
+
+                        insert = 0
+                        Del = 0
+                        variantCount = 0
+
+                        #Parse if the variant is an insertion, deletion or both
+                        if any(x in IDField for x in ["BND", '+', '_', "DUP"]):
+                            continue
+                        else:
+                            if ("I" in IDField):
+                                insert += 1
+                            if ("Y" in IDField):
+                                insert += 1
+                            if ("D" in IDField):
+                                Del += 1
+                            if ("X" in IDField):
+                                variantCount += 1
+
+                        variantCount += insert + Del
+
+                        #Place the variant in the right megabase bin
                         #New chromosome means we add a new key to the dictionary and append a new megabase counter.
                         ##s[0] is the chromosome, s[1] is the position
-                        if len(s[0]) > 5):
+                        if (len(s[0]) > 5):
                             continue
                         if (s[0] != currentChrom):
-                            #print("Scanning variants in:", chrom)
                             
                             if (s[0] not in chromInfoDict):
-                                chromInfoDict[s[0]] = [megabaseInfo(0, 0 + megabaseSize, 0)]    
+                                chromInfoDict[s[0]] = [megabaseInfo(0, 0 + megabaseSize, 0, 0, 0)]    
                                 currentMegaBaseEnd = 0 + megabaseSize
                             
-                            #print("oldchrom:", currentChrom, "Newchrom:", chrom)
                             currentMegaBaseIndex = 0
                             currentMegaBaseEnd = chromInfoDict[s[0]][0].end
                             currentChrom = s[0]
@@ -46,9 +67,9 @@ def megabaseCountMerge(file, overlap, binsize, outputPrefix):
 
                         while (int(s[1]) > currentMegaBaseEnd):
                             #If the megabase isnt initialized yet
-                            if (currentMegaBaseIndex + 1 == len(chromInfoDict[s[0]]) ):
+                            if (currentMegaBaseIndex + 1 == len(chromInfoDict[s[0]])):
                                 newMegaBaseStart = currentMegaBaseEnd - (overlap * megabaseSize)
-                                chromInfoDict[s[0]].append(megabaseInfo(newMegaBaseStart, newMegaBaseStart + megabaseSize, 0))
+                                chromInfoDict[s[0]].append(megabaseInfo(newMegaBaseStart, newMegaBaseStart + megabaseSize, 0, 0, 0))
                                 currentMegaBaseEnd = newMegaBaseStart + megabaseSize
                                 currentMegaBaseIndex += 1
                             else:
@@ -60,21 +81,29 @@ def megabaseCountMerge(file, overlap, binsize, outputPrefix):
                         if (int(s[1]) <= currentMegaBaseEnd and int(s[1]) > currentMegaBaseEnd - (megabaseSize * overlap)):
                             if (currentMegaBaseIndex == len(chromInfoDict[s[0]]) - 1):
                                 newMegaBaseStart = currentMegaBaseEnd - (overlap * megabaseSize)
-                                chromInfoDict[s[0]].append(megabaseInfo(newMegaBaseStart, newMegaBaseStart + megabaseSize, 1))
-                                chromInfoDict[s[0]][currentMegaBaseIndex].count += 1
+                                chromInfoDict[s[0]].append(megabaseInfo(newMegaBaseStart, newMegaBaseStart + megabaseSize, variantCount, insert, Del))
+                                chromInfoDict[s[0]][currentMegaBaseIndex].count += variantCount
+                                chromInfoDict[s[0]][currentMegaBaseIndex].insertion += insert
+                                chromInfoDict[s[0]][currentMegaBaseIndex].deletion += Del
                             else:
-                                chromInfoDict[s[0]][currentMegaBaseIndex].count += 1
-                                chromInfoDict[s[0]][currentMegaBaseIndex + 1].count += 1
+                                chromInfoDict[s[0]][currentMegaBaseIndex].count += variantCount
+                                chromInfoDict[s[0]][currentMegaBaseIndex].insertion += insert
+                                chromInfoDict[s[0]][currentMegaBaseIndex].deletion += Del
+                                chromInfoDict[s[0]][currentMegaBaseIndex + 1].count += variantCount
+                                chromInfoDict[s[0]][currentMegaBaseIndex + 1].insertion += insert
+                                chromInfoDict[s[0]][currentMegaBaseIndex + 1].deletion += Del
                         else:
-                            chromInfoDict[s[0]][currentMegaBaseIndex].count += 1
+                            chromInfoDict[s[0]][currentMegaBaseIndex].count += variantCount
+                            chromInfoDict[s[0]][currentMegaBaseIndex].insertion += insert
+                            chromInfoDict[s[0]][currentMegaBaseIndex].deletion += Del
                             
                         #print(chrom, int(s[1]), chromInfoDict[chrom][currentMegaBaseIndex].end - megabaseSize, chromInfoDict[chrom][currentMegaBaseIndex].end, chromInfoDict[chrom][currentMegaBaseIndex].count)
 
     wCounts = csv.writer(open(outputPrefix + "megaBaseCounts.csv", "w"))
-    wCounts.writerow(["Chrom", "Start", "End", "Count"])
+    wCounts.writerow(["Chrom", "Start", "End", "Count", "Insertions", "Deletions"])
     for key in chromInfoDict.keys():
         for val in chromInfoDict[key]:
-            wCounts.writerow([key, val.start, val.end, val.count])
+            wCounts.writerow([key, val.start, val.end, val.count, val.insertion, val.deletion])
 
     return chromInfoDict
 
@@ -94,10 +123,32 @@ def megabaseCount(file, overlap, binsize, outputPrefix):
         #New chromosome means we add a new key to the dictionary and append a new megabase counter.
         ##s[0] is the chromosome, s[1] is the position
         chrom = s[0].split('_')[0]
+        IDField = s[2].split('-')[0]
+
+        insert = 0
+        Del = 0
+        variantCount = 0
+
+        #Parse if the variant is an insertion, deletion or both
+        if any(x in IDField for x in ["BND", '+', '_', "DUP"]):
+            continue
+        else:
+            if ("I" in IDField):
+                insert += 1
+            if ("Y" in IDField):
+                insert += 1
+            if ("D" in IDField):
+                Del += 1
+            if ("X" in IDField):
+                variantCount += 1
+
+        variantCount += insert + Del
+
+        #Place the variant in the right megabase bin
         if (chrom != currentChrom):
             print("Scanning variants in:", chrom)
             if (chrom not in chromInfoDict):
-                chromInfoDict[s[0]] = [megabaseInfo(0, 0 + megabaseSize, 0)]    
+                chromInfoDict[s[0]] = [megabaseInfo(0, 0 + megabaseSize, 0, 0, 0)]    
                 currentMegaBaseEnd = 0 + megabaseSize
             
             currentMegaBaseEnd = chromInfoDict[s[0]][0].end
@@ -109,7 +160,7 @@ def megabaseCount(file, overlap, binsize, outputPrefix):
             #If the megabase isnt initialized yet
             if (currentMegaBaseIndex + 1 == len(chromInfoDict[s[0]]) ):
                 newMegaBaseStart = currentMegaBaseEnd - (overlap * megabaseSize)
-                chromInfoDict[s[0]].append(megabaseInfo(newMegaBaseStart, newMegaBaseStart + megabaseSize, 0))
+                chromInfoDict[s[0]].append(megabaseInfo(newMegaBaseStart, newMegaBaseStart + megabaseSize, 0, 0, 0))
                 currentMegaBaseEnd = newMegaBaseStart + megabaseSize
                 currentMegaBaseIndex += 1
             else:
@@ -121,19 +172,27 @@ def megabaseCount(file, overlap, binsize, outputPrefix):
         if (int(s[1]) <= currentMegaBaseEnd and int(s[1]) > currentMegaBaseEnd - (megabaseSize * overlap)):
             if (currentMegaBaseIndex == len(chromInfoDict[s[0]]) - 1):
                 newMegaBaseStart = currentMegaBaseEnd - (overlap * megabaseSize)
-                chromInfoDict[s[0]].append(megabaseInfo(newMegaBaseStart, newMegaBaseStart + megabaseSize, 1))
-                chromInfoDict[s[0]][currentMegaBaseIndex].count += 1
+                chromInfoDict[s[0]].append(megabaseInfo(newMegaBaseStart, newMegaBaseStart + megabaseSize, variantCount, insert, Del))
+                chromInfoDict[s[0]][currentMegaBaseIndex].count += variantCount
+                chromInfoDict[s[0]][currentMegaBaseIndex].insertion += insert
+                chromInfoDict[s[0]][currentMegaBaseIndex].deletion += Del
             else:
-                chromInfoDict[s[0]][currentMegaBaseIndex].count += 1
-                chromInfoDict[s[0]][currentMegaBaseIndex + 1].count += 1
+                chromInfoDict[s[0]][currentMegaBaseIndex].count += variantCount
+                chromInfoDict[s[0]][currentMegaBaseIndex].insertion += insert
+                chromInfoDict[s[0]][currentMegaBaseIndex].deletion += Del
+                chromInfoDict[s[0]][currentMegaBaseIndex + 1].count += variantCount
+                chromInfoDict[s[0]][currentMegaBaseIndex + 1].insertion += insert
+                chromInfoDict[s[0]][currentMegaBaseIndex + 1].deletion += Del
         else:
-            chromInfoDict[s[0]][currentMegaBaseIndex].count += 1
+            chromInfoDict[s[0]][currentMegaBaseIndex].count += variantCount
+            chromInfoDict[s[0]][currentMegaBaseIndex].insertion += insert
+            chromInfoDict[s[0]][currentMegaBaseIndex].deletion += Del
 
     wCounts = csv.writer(open(outputPrefix + "megaBaseCounts.csv", "w"))
-    wCounts.writerow(["Chrom", "Start", "End", "Count"])
+    wCounts.writerow(["Chrom", "Start", "End", "Count", "Insertions", "Deletions"])
     for key in chromInfoDict.keys():
         for val in chromInfoDict[key]:
-            wCounts.writerow([key, val.start, val.end, val.count])
+            wCounts.writerow([key, val.start, val.end, val.count, val.insertion, val.deletion])
 
     return chromInfoDict
 
