@@ -34,11 +34,17 @@ def pairSiblings(famFile, sampleFile):
     with open(famFile, mode='rt') as f:
         header = f.readline()
         for line in f:
+            if familyIndex == len(families):
+                break
             s = line.strip().split()
             ind = s[1].split(".")[1]
             if int(s[0]) != int(families[familyIndex].familyID):
                 while int(s[0]) > int(families[familyIndex].familyID):
                     familyIndex += 1
+                    if familyIndex == len(families):
+                        break
+                if familyIndex == len(families):
+                        break
                 if (int(s[0]) < int(families[familyIndex].familyID)):
                     continue
             else:
