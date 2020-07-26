@@ -38,7 +38,6 @@ def pairSiblings(famFile, sampleFile):
             ind = s[1].split(".")[1]
             if int(s[0]) != int(families[familyIndex].familyID):
                 while int(s[0]) > int(families[familyIndex].familyID):
-                    #start new family set.
                     familyIndex += 1
                 if (int(s[0]) < int(families[familyIndex].familyID)):
                     continue
@@ -49,7 +48,7 @@ def pairSiblings(famFile, sampleFile):
                     families[familyIndex].siblingGender = s[3]
                 
                 if families[familyIndex].siblingGender != "?" and families[familyIndex].probandGender != "?":
-                    familyIndex += 1
+                    print("found both")
 
     return families
 
