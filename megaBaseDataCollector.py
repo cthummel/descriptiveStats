@@ -23,6 +23,7 @@ def pairSiblings(famFile, sampleFile):
     families = []
 
     with open(sampleFile, mode='rt') as f:
+        header = f.readline()
         for line in f:
             s = line.strip().split("\t")
             families.append(familyInfo(s[0], s[3], s[4], "?", "?", s[19]))
@@ -31,20 +32,24 @@ def pairSiblings(famFile, sampleFile):
     currentFamilyId = 0
 
     with open(famFile, mode='rt') as f:
+        header = f.readline()
         for line in f:
             s = line.strip().split()
             ind = s[1].split(".")[1]
-
-            if currentFamilyId != families[familyIndex].familyID:
-                #start new family set.
-                currentFamilyId = s[0]
-            elif ind == "p1":
-                families[familyIndex].probandGender = s[3]
-            elif ind == "s1":
-                families[familyIndex].siblingGender = s[3]
-            
-            if families[familyIndex].siblingGender != "?" and families[familyIndex].probandGender != "?":
-                familyIndex += 1
+            if int(s[0]) != int(families[familyIndex].familyID):
+                while int(s[0]) > int(families[familyIndex].familyID):
+                    #start new family set.
+                    familyIndex += 1
+                if (int(s[0]) < int(families[familyIndex].familyID)):
+                    continue
+            else:
+                if ind == "p1":
+                    families[familyIndex].probandGender = s[3]
+                elif ind == "s1":
+                    families[familyIndex].siblingGender = s[3]
+                
+                if families[familyIndex].siblingGender != "?" and families[familyIndex].probandGender != "?":
+                    familyIndex += 1
 
     return families
 
