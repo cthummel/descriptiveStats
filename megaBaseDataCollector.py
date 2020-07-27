@@ -49,12 +49,12 @@ def pairSiblings(famFile, sampleFile):
                     continue
             else:
                 if ind == "p1":
-                    families[familyIndex].probandGender = s[3]
+                    families[familyIndex].probandGender = s[2]
                 elif ind == "s1":
-                    families[familyIndex].siblingGender = s[3]
+                    families[familyIndex].siblingGender = s[2]
                 
                 if families[familyIndex].siblingGender != "?" and families[familyIndex].probandGender != "?":
-                    print("found both")
+                    print(families[familyIndex].siblingGender, families[familyIndex].probandGender)
 
     return families
 
@@ -87,8 +87,8 @@ def megabaseCountMergeFamily(file, overlap, binsize, outputPrefix, familyData):
 
     for root, dirs, files in os.walk(file):
         temproot = root.strip().split("/")
-        print("root", temproot)
-        if temproot[len(temproot) - 1] == "s1":
+        #print("root", temproot)
+        if temproot[len(temproot) - 2] == "s1":
             probandDataSet = False
         for filename in files:
             if(filename[-13:] == ".FINAL.vcf.gz"):
@@ -117,6 +117,7 @@ def megabaseCountMergeFamily(file, overlap, binsize, outputPrefix, familyData):
                                             currentDataSet = 2
                                         elif (x.probandGender == "female") and (x.siblingGender == "female"):
                                             currentDataSet = 3
+                                        print(currentDataSet, x.probandGender, x.siblingGender)
                                         break            
                             else:
                                 for x in familyData:
@@ -217,11 +218,12 @@ def megabaseCountMergeFamily(file, overlap, binsize, outputPrefix, familyData):
     outputIndex = 0
     typePrefix = ["MM", "MF", "FM", "FF"]
     for x in result:
-        wCounts = csv.writer(open(outputPrefix + "." + typePrefix[outputIndex] + ".megaBaseCounts.csv", "w"))
+        wCounts = csv.writer(open(outputPrefix + typePrefix[outputIndex] + ".megaBaseCounts.csv", "w"))
         wCounts.writerow(["Chrom", "Start", "End", "Count", "Insertions", "Deletions", "SNV"])
         for key in x.keys():
             for val in x[key]:
                 wCounts.writerow([key, val.start, val.end, val.count, val.insertion, val.deletion, val.snv])
+        outputIndex += 1
 
     return result
 
@@ -439,7 +441,7 @@ def main(argv):
         elif opt == '--overlap':
             overlap = float(arg)
         elif opt == '--binsize':
-            binsize = arg
+            binsize = int(arg)
         elif opt == '--famFile':
             famFile = arg
         elif opt == '--sampleFile':
@@ -449,6 +451,11 @@ def main(argv):
             sys.exit(0)
 
     familyData = pairSiblings(famFile, sampleFile)
+
+    famAge = csv.writer(open(outputPrefix + "famAge.csv", "w"))
+    famAge.writerow(["famID", "probandGender", "siblingGender", "fatherAge"])
+    for val in familyData:
+        famAge.writerow([val.familyID, val.probandGender, val.siblingGender, val.fatherAge])
 
     if (merge):
         if famFile == "":
