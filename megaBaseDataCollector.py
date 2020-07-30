@@ -1,22 +1,28 @@
-import sys, getopt, gzip, csv, fileinput, os
+import sys, getopt, gzip, csv, fileinput, os, statistics
 
 class megabaseInfo:
-    def __init__(self, start, end, count, insertion, deletion, snv):
+    def __init__(self, start, end, count, insertion, deletion, snv, fatherAge, motherAge):
         self.start = start
         self.end = end
         self.count = count
         self.insertion = insertion
         self.deletion = deletion
         self.snv = snv
+        self.fatherAge = fatherAge
+        self.motherAge = motherAge
+
 
 class familyInfo:
-    def __init__(self, familyID, probandID, siblingID, probandGender, siblingGender, fatherAge):
+    def __init__(self, familyID, probandID, siblingID, probandGender, siblingGender, siblingMotherAge, siblingFatherAge, probandMotherAge, probandFatherAge):
         self.familyID = familyID
         self.probandID = probandID
         self.siblingID = siblingID
         self.probandGender = probandGender
         self.siblingGender = siblingGender
-        self.fatherAge = fatherAge
+        self.siblingFatherAge = siblingFatherAge
+        self.siblingMotherAge = siblingMotherAge
+        self.probandFatherAge = probandFatherAge
+        self.probandMotherAge = probandMotherAge
         
 
 def pairSiblings(famFile, sampleFile):
@@ -26,7 +32,7 @@ def pairSiblings(famFile, sampleFile):
         header = f.readline()
         for line in f:
             s = line.strip().split("\t")
-            families.append(familyInfo(s[0], s[3], s[4], "?", "?", s[19]))
+            families.append(familyInfo(s[0], s[3], s[4], "?", "?", s[16], s[17], s[18], s[19]))
 
     familyIndex = 0
     currentFamilyId = 0
@@ -59,19 +65,23 @@ def pairSiblings(famFile, sampleFile):
     return families
 
 
-def appendChromInfoDict(data, megaBaseStart, megaBaseSize, chrom, variantCount, insert, Del, snv):
-    data[chrom].append(megabaseInfo(megaBaseStart, megaBaseStart + megaBaseSize, variantCount, insert, Del, snv))
+def appendChromInfoDict(data, megaBaseStart, megaBaseSize, chrom, variantCount, insert, Del, snv, fatherAge, motherAge):
+    data[chrom].append(megabaseInfo(megaBaseStart, megaBaseStart + megaBaseSize, variantCount, insert, Del, snv, [fatherAge], [motherAge]))
 
-def updateChromInfoDict(data, index, chrom, variantCount, insert, Del, snv, updateNext):
+def updateChromInfoDict(data, index, chrom, variantCount, insert, Del, snv, fatherAge, motherAge, updateNext):
     data[chrom][index].count += variantCount
     data[chrom][index].insertion += insert
     data[chrom][index].deletion += Del
     data[chrom][index].snv += snv
+    data[chrom][index].fatherAge.append(fatherAge)
+    data[chrom][index].motherAge.append(motherAge)
     if updateNext:
         data[chrom][index + 1].count += variantCount
         data[chrom][index + 1].insertion += insert
         data[chrom][index + 1].deletion += Del
         data[chrom][index + 1].snv += snv
+        data[chrom][index + 1].fatherAge.append(fatherAge)
+        data[chrom][index + 1].motherAge.append(motherAge)
 
             
 def megabaseCountMergeFamily(file, overlap, binsize, outputPrefix, familyData):
@@ -97,6 +107,8 @@ def megabaseCountMergeFamily(file, overlap, binsize, outputPrefix, familyData):
                     currentChrom = ""
                     currentMegaBaseIndex = 0
                     currentDataSet = 0
+                    currentFatherAge = 0
+                    currentMotherAge = 0
                     for line in f:
                         if len(line.strip()) == 0:
                             continue
@@ -105,10 +117,12 @@ def megabaseCountMergeFamily(file, overlap, binsize, outputPrefix, familyData):
                         elif (line[:1] == "#"):
                             #parse which sample the current file has.
                             sample = line.strip().split('\t')[9][2:]
-                            print("Sample:", sample)
+                            #print("Sample:", sample)
                             if probandDataSet:
                                 for x in familyData:
                                     if x.probandID == sample:
+                                        currentFatherAge = x.probandFatherAge
+                                        currentMotherAge = x.probandMotherAge
                                         if (x.probandGender == "male") and (x.siblingGender == "male"):
                                             currentDataSet = 0
                                         elif (x.probandGender == "male") and (x.siblingGender == "female"):
@@ -117,11 +131,13 @@ def megabaseCountMergeFamily(file, overlap, binsize, outputPrefix, familyData):
                                             currentDataSet = 2
                                         elif (x.probandGender == "female") and (x.siblingGender == "female"):
                                             currentDataSet = 3
-                                        print(currentDataSet, x.probandGender, x.siblingGender)
+                                        #print(currentDataSet, x.probandGender, x.siblingGender)
                                         break            
                             else:
                                 for x in familyData:
                                     if x.siblingID == sample:
+                                        currentFatherAge = x.siblingFatherAge
+                                        currentMotherAge = x.siblingMotherAge
                                         if (x.probandGender == "male") and (x.siblingGender == "male"):
                                             currentDataSet = 0
                                         elif (x.probandGender == "male") and (x.siblingGender == "female"):
@@ -165,7 +181,7 @@ def megabaseCountMergeFamily(file, overlap, binsize, outputPrefix, familyData):
                             #     chromInfoDict[s[0]] = [megabaseInfo(0, 0 + megabaseSize, 0, 0, 0, 0)]    
                             #     currentMegaBaseEnd = 0 + megabaseSize
                             if (s[0] not in result[currentDataSet]):
-                                result[currentDataSet][s[0]] = [megabaseInfo(0, 0 + megabaseSize, 0, 0, 0, 0)]    
+                                result[currentDataSet][s[0]] = [megabaseInfo(0, 0 + megabaseSize, 0, 0, 0, 0, [], [])]    
                                 currentMegaBaseEnd = 0 + megabaseSize
                             
                             currentMegaBaseIndex = 0
@@ -177,7 +193,7 @@ def megabaseCountMergeFamily(file, overlap, binsize, outputPrefix, familyData):
                             if (currentMegaBaseIndex + 1 == len(result[currentDataSet][s[0]])):
                                 newMegaBaseStart = currentMegaBaseEnd - (overlap * megabaseSize)
                                 #chromInfoDict[s[0]].append(megabaseInfo(newMegaBaseStart, newMegaBaseStart + megabaseSize, 0, 0, 0, 0))
-                                appendChromInfoDict(result[currentDataSet], newMegaBaseStart, megabaseSize, s[0], 0, 0, 0, 0)
+                                appendChromInfoDict(result[currentDataSet], newMegaBaseStart, megabaseSize, s[0], 0, 0, 0, 0, [], [])
                                 currentMegaBaseEnd = newMegaBaseStart + megabaseSize
                                 currentMegaBaseIndex += 1
                             else:
@@ -189,15 +205,15 @@ def megabaseCountMergeFamily(file, overlap, binsize, outputPrefix, familyData):
                         if (int(s[1]) <= currentMegaBaseEnd and int(s[1]) > currentMegaBaseEnd - (megabaseSize * overlap)):
                             if (currentMegaBaseIndex == len(result[currentDataSet][s[0]]) - 1):
                                 newMegaBaseStart = currentMegaBaseEnd - (overlap * megabaseSize)
-                                appendChromInfoDict(result[currentDataSet], newMegaBaseStart, megabaseSize, s[0], variantCount, insert, Del, snv)
+                                appendChromInfoDict(result[currentDataSet], newMegaBaseStart, megabaseSize, s[0], variantCount, insert, Del, snv, currentFatherAge, currentMotherAge)
                                 #chromInfoDict[s[0]].append(megabaseInfo(newMegaBaseStart, newMegaBaseStart + megabaseSize, variantCount, insert, Del, snv))
-                                updateChromInfoDict(result[currentDataSet], currentMegaBaseIndex, s[0], variantCount, insert, Del, snv, False)
+                                updateChromInfoDict(result[currentDataSet], currentMegaBaseIndex, s[0], variantCount, insert, Del, snv, currentFatherAge, currentMotherAge, False)
                                 # chromInfoDict[s[0]][currentMegaBaseIndex].count += variantCount
                                 # chromInfoDict[s[0]][currentMegaBaseIndex].insertion += insert
                                 # chromInfoDict[s[0]][currentMegaBaseIndex].deletion += Del
                                 # chromInfoDict[s[0]][currentMegaBaseIndex].snv += snv
                             else:
-                                updateChromInfoDict(result[currentDataSet], currentMegaBaseIndex, s[0], variantCount, insert, Del, snv, True)
+                                updateChromInfoDict(result[currentDataSet], currentMegaBaseIndex, s[0], variantCount, insert, Del, snv, currentFatherAge, currentMotherAge, True)
                                 # chromInfoDict[s[0]][currentMegaBaseIndex].count += variantCount
                                 # chromInfoDict[s[0]][currentMegaBaseIndex].insertion += insert
                                 # chromInfoDict[s[0]][currentMegaBaseIndex].deletion += Del
@@ -207,7 +223,7 @@ def megabaseCountMergeFamily(file, overlap, binsize, outputPrefix, familyData):
                                 # chromInfoDict[s[0]][currentMegaBaseIndex + 1].deletion += Del
                                 # chromInfoDict[s[0]][currentMegaBaseIndex + 1].snv += snv
                         else:
-                            updateChromInfoDict(result[currentDataSet], currentMegaBaseIndex, s[0], variantCount, insert, Del, snv, False)
+                            updateChromInfoDict(result[currentDataSet], currentMegaBaseIndex, s[0], variantCount, insert, Del, snv, currentFatherAge, currentMotherAge, False)
                             # chromInfoDict[s[0]][currentMegaBaseIndex].count += variantCount
                             # chromInfoDict[s[0]][currentMegaBaseIndex].insertion += insert
                             # chromInfoDict[s[0]][currentMegaBaseIndex].deletion += Del
@@ -222,7 +238,7 @@ def megabaseCountMergeFamily(file, overlap, binsize, outputPrefix, familyData):
         wCounts.writerow(["Chrom", "Start", "End", "Count", "Insertions", "Deletions", "SNV"])
         for key in x.keys():
             for val in x[key]:
-                wCounts.writerow([key, val.start, val.end, val.count, val.insertion, val.deletion, val.snv])
+                wCounts.writerow([key, val.start, val.end, val.count, val.insertion, val.deletion, val.snv, statistics.mean(val.fatherAge), statistics.mean(val.motherAge)])
         outputIndex += 1
 
     return result
@@ -276,7 +292,7 @@ def megabaseCountMerge(file, overlap, binsize, outputPrefix):
                             continue
                         if (s[0] != currentChrom):
                             if (s[0] not in chromInfoDict):
-                                chromInfoDict[s[0]] = [megabaseInfo(0, 0 + megabaseSize, 0, 0, 0, 0)]    
+                                chromInfoDict[s[0]] = [megabaseInfo(0, 0 + megabaseSize, 0, 0, 0, 0, 0, 0)]    
                                 currentMegaBaseEnd = 0 + megabaseSize
                             
                             currentMegaBaseIndex = 0
@@ -287,7 +303,7 @@ def megabaseCountMerge(file, overlap, binsize, outputPrefix):
                             #If the megabase isnt initialized yet
                             if (currentMegaBaseIndex + 1 == len(chromInfoDict[s[0]])):
                                 newMegaBaseStart = currentMegaBaseEnd - (overlap * megabaseSize)
-                                chromInfoDict[s[0]].append(megabaseInfo(newMegaBaseStart, newMegaBaseStart + megabaseSize, 0, 0, 0, 0))
+                                chromInfoDict[s[0]].append(megabaseInfo(newMegaBaseStart, newMegaBaseStart + megabaseSize, 0, 0, 0, 0, 0, 0))
                                 currentMegaBaseEnd = newMegaBaseStart + megabaseSize
                                 currentMegaBaseIndex += 1
                             else:
@@ -299,7 +315,7 @@ def megabaseCountMerge(file, overlap, binsize, outputPrefix):
                         if (int(s[1]) <= currentMegaBaseEnd and int(s[1]) > currentMegaBaseEnd - (megabaseSize * overlap)):
                             if (currentMegaBaseIndex == len(chromInfoDict[s[0]]) - 1):
                                 newMegaBaseStart = currentMegaBaseEnd - (overlap * megabaseSize)
-                                chromInfoDict[s[0]].append(megabaseInfo(newMegaBaseStart, newMegaBaseStart + megabaseSize, variantCount, insert, Del, snv))
+                                chromInfoDict[s[0]].append(megabaseInfo(newMegaBaseStart, newMegaBaseStart + megabaseSize, variantCount, insert, Del, snv, 0, 0))
                                 chromInfoDict[s[0]][currentMegaBaseIndex].count += variantCount
                                 chromInfoDict[s[0]][currentMegaBaseIndex].insertion += insert
                                 chromInfoDict[s[0]][currentMegaBaseIndex].deletion += Del
@@ -370,7 +386,7 @@ def megabaseCount(file, overlap, binsize, outputPrefix):
         if (chrom != currentChrom):
             print("Scanning variants in:", chrom)
             if (chrom not in chromInfoDict):
-                chromInfoDict[s[0]] = [megabaseInfo(0, 0 + megabaseSize, 0, 0, 0, 0)]    
+                chromInfoDict[s[0]] = [megabaseInfo(0, 0 + megabaseSize, 0, 0, 0, 0, 0, 0)]    
                 currentMegaBaseEnd = 0 + megabaseSize
             
             currentMegaBaseEnd = chromInfoDict[s[0]][0].end
@@ -382,7 +398,7 @@ def megabaseCount(file, overlap, binsize, outputPrefix):
             #If the megabase isnt initialized yet
             if (currentMegaBaseIndex + 1 == len(chromInfoDict[s[0]]) ):
                 newMegaBaseStart = currentMegaBaseEnd - (overlap * megabaseSize)
-                chromInfoDict[s[0]].append(megabaseInfo(newMegaBaseStart, newMegaBaseStart + megabaseSize, 0, 0, 0 ,0))
+                chromInfoDict[s[0]].append(megabaseInfo(newMegaBaseStart, newMegaBaseStart + megabaseSize, 0, 0, 0 ,0, 0, 0))
                 currentMegaBaseEnd = newMegaBaseStart + megabaseSize
                 currentMegaBaseIndex += 1
             else:
@@ -394,7 +410,7 @@ def megabaseCount(file, overlap, binsize, outputPrefix):
         if (int(s[1]) <= currentMegaBaseEnd and int(s[1]) > currentMegaBaseEnd - (megabaseSize * overlap)):
             if (currentMegaBaseIndex == len(chromInfoDict[s[0]]) - 1):
                 newMegaBaseStart = currentMegaBaseEnd - (overlap * megabaseSize)
-                chromInfoDict[s[0]].append(megabaseInfo(newMegaBaseStart, newMegaBaseStart + megabaseSize, variantCount, insert, Del, snv))
+                chromInfoDict[s[0]].append(megabaseInfo(newMegaBaseStart, newMegaBaseStart + megabaseSize, variantCount, insert, Del, snv, 0, 0))
                 chromInfoDict[s[0]][currentMegaBaseIndex].count += variantCount
                 chromInfoDict[s[0]][currentMegaBaseIndex].insertion += insert
                 chromInfoDict[s[0]][currentMegaBaseIndex].deletion += Del
