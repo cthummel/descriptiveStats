@@ -37,7 +37,7 @@ def ageMean(data):
     if count == 0:
         return "NA"
     else:
-        return result / count
+        return result * 1.0 / count
 
 def pairSiblings(famFile, sampleFile):
     families = []
@@ -264,7 +264,7 @@ def megabaseCountMergeFamily(file, overlap, binsize, outputPrefix, familyData):
     typePrefix = ["MM", "MF", "FM", "FF"]
     for x in result:
         wCounts = csv.writer(open(outputPrefix + typePrefix[outputIndex] + ".megaBaseCounts.csv", "w"))
-        wCounts.writerow(["Chrom", "Start", "End", "Count", "Insertions", "Deletions", "SNV"])
+        wCounts.writerow(["Chrom", "Start", "End", "Count", "Insertions", "Deletions", "SNV", "MeanFatherAge", "MeanMotherAge"])
         for key in x.keys():
             for val in x[key]:
                 #print(val.fatherAge)
