@@ -59,8 +59,8 @@ def pairSiblings(famFile, sampleFile):
                 elif ind == "s1":
                     families[familyIndex].siblingGender = s[2]
                 
-                if families[familyIndex].siblingGender != "?" and families[familyIndex].probandGender != "?":
-                    print(families[familyIndex].siblingGender, families[familyIndex].probandGender)
+                # if families[familyIndex].siblingGender != "?" and families[familyIndex].probandGender != "?":
+                #     print(families[familyIndex].siblingGender, families[familyIndex].probandGender)
 
     return families
 
@@ -471,7 +471,7 @@ def main(argv):
     famAge = csv.writer(open(outputPrefix + "famAge.csv", "w"))
     famAge.writerow(["famID", "probandGender", "siblingGender", "fatherAge"])
     for val in familyData:
-        famAge.writerow([val.familyID, val.probandGender, val.siblingGender, val.fatherAge])
+        famAge.writerow([val.familyID, val.probandGender, val.siblingGender, val.siblingMotherAge, val.siblingFatherAge, val.probandMotherAge, val.probandFatherAge])
 
     if (merge):
         if famFile == "":
