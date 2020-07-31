@@ -24,6 +24,20 @@ class familyInfo:
         self.probandFatherAge = probandFatherAge
         self.probandMotherAge = probandMotherAge
         
+def ageMean(data):
+    result = 0
+    count = 0
+    for x in data:
+        if x == "NA":
+            continue
+        else:
+            result += x
+            count += 1
+
+    if count == 0:
+        return "NA"
+    else:
+        return result / count
 
 def pairSiblings(famFile, sampleFile):
     families = []
@@ -72,19 +86,35 @@ def appendChromInfoDict(data, megaBaseStart, megaBaseSize, chrom, variantCount, 
         data[chrom].append(megabaseInfo(megaBaseStart, megaBaseStart + megaBaseSize, variantCount, insert, Del, snv, [int(fatherAge)], [int(motherAge)]))
 
 def updateChromInfoDict(data, index, chrom, variantCount, insert, Del, snv, fatherAge, motherAge, updateNext):
+    if fatherAge == "":
+        fatherAge = "NA"
+    if motherAge == "":
+        motherAge = "NA"
     data[chrom][index].count += variantCount
     data[chrom][index].insertion += insert
     data[chrom][index].deletion += Del
     data[chrom][index].snv += snv
-    data[chrom][index].fatherAge.append(int(fatherAge))
-    data[chrom][index].motherAge.append(int(motherAge))
+    if fatherAge != "":
+        data[chrom][index].fatherAge.append(int(fatherAge))
+    else:
+        data[chrom][index].fatherAge.append("NA")
+    if motherAge != "":
+        data[chrom][index].motherAge.append(int(motherAge))
+    else:
+        data[chrom][index].motherAge.append("NA")
     if updateNext:
         data[chrom][index + 1].count += variantCount
         data[chrom][index + 1].insertion += insert
         data[chrom][index + 1].deletion += Del
         data[chrom][index + 1].snv += snv
-        data[chrom][index + 1].fatherAge.append(int(fatherAge))
-        data[chrom][index + 1].motherAge.append(int(motherAge))
+        if fatherAge != "":
+            data[chrom][index + 1].fatherAge.append(int(fatherAge))
+        else:
+            data[chrom][index + 1].fatherAge.append("NA")
+        if motherAge != "":
+            data[chrom][index + 1].motherAge.append(int(motherAge))
+        else:
+            data[chrom][index + 1].motherAge.append("NA")
 
             
 def megabaseCountMergeFamily(file, overlap, binsize, outputPrefix, familyData):
@@ -245,7 +275,7 @@ def megabaseCountMergeFamily(file, overlap, binsize, outputPrefix, familyData):
                 if val.fatherAge == [] or val.motherAge == []:
                     wCounts.writerow([key, val.start, val.end, val.count, val.insertion, val.deletion, val.snv, "NA", "NA"])
                 else:
-                    wCounts.writerow([key, val.start, val.end, val.count, val.insertion, val.deletion, val.snv, statistics.mean(val.fatherAge), statistics.mean(val.motherAge)])
+                    wCounts.writerow([key, val.start, val.end, val.count, val.insertion, val.deletion, val.snv, ageMean(val.fatherAge), ageMean(val.motherAge)])
         outputIndex += 1
 
     return result
