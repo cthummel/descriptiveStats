@@ -66,7 +66,10 @@ def pairSiblings(famFile, sampleFile):
 
 
 def appendChromInfoDict(data, megaBaseStart, megaBaseSize, chrom, variantCount, insert, Del, snv, fatherAge, motherAge):
-    data[chrom].append(megabaseInfo(megaBaseStart, megaBaseStart + megaBaseSize, variantCount, insert, Del, snv, [fatherAge], [motherAge]))
+    if (fatherAge == [] or motherAge == []):
+        data[chrom].append(megabaseInfo(megaBaseStart, megaBaseStart + megaBaseSize, variantCount, insert, Del, snv, [], []))
+    else:
+        data[chrom].append(megabaseInfo(megaBaseStart, megaBaseStart + megaBaseSize, variantCount, insert, Del, snv, [int(fatherAge)], [int(motherAge)]))
 
 def updateChromInfoDict(data, index, chrom, variantCount, insert, Del, snv, fatherAge, motherAge, updateNext):
     data[chrom][index].count += variantCount
