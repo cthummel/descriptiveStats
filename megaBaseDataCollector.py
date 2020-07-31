@@ -73,15 +73,15 @@ def updateChromInfoDict(data, index, chrom, variantCount, insert, Del, snv, fath
     data[chrom][index].insertion += insert
     data[chrom][index].deletion += Del
     data[chrom][index].snv += snv
-    data[chrom][index].fatherAge.append(fatherAge)
-    data[chrom][index].motherAge.append(motherAge)
+    data[chrom][index].fatherAge.append(int(fatherAge))
+    data[chrom][index].motherAge.append(int(motherAge))
     if updateNext:
         data[chrom][index + 1].count += variantCount
         data[chrom][index + 1].insertion += insert
         data[chrom][index + 1].deletion += Del
         data[chrom][index + 1].snv += snv
-        data[chrom][index + 1].fatherAge.append(fatherAge)
-        data[chrom][index + 1].motherAge.append(motherAge)
+        data[chrom][index + 1].fatherAge.append(int(fatherAge))
+        data[chrom][index + 1].motherAge.append(int(motherAge))
 
             
 def megabaseCountMergeFamily(file, overlap, binsize, outputPrefix, familyData):
