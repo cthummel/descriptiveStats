@@ -86,10 +86,6 @@ def appendChromInfoDict(data, megaBaseStart, megaBaseSize, chrom, variantCount, 
         data[chrom].append(megabaseInfo(megaBaseStart, megaBaseStart + megaBaseSize, variantCount, insert, Del, snv, [int(fatherAge)], [int(motherAge)]))
 
 def updateChromInfoDict(data, index, chrom, variantCount, insert, Del, snv, fatherAge, motherAge, updateNext):
-    if fatherAge == "":
-        fatherAge = "NA"
-    if motherAge == "":
-        motherAge = "NA"
     data[chrom][index].count += variantCount
     data[chrom][index].insertion += insert
     data[chrom][index].deletion += Del
