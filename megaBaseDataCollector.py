@@ -241,6 +241,7 @@ def megabaseCountMergeFamily(file, overlap, binsize, outputPrefix, familyData):
         wCounts.writerow(["Chrom", "Start", "End", "Count", "Insertions", "Deletions", "SNV"])
         for key in x.keys():
             for val in x[key]:
+                print(val.fatherAge)
                 wCounts.writerow([key, val.start, val.end, val.count, val.insertion, val.deletion, val.snv, statistics.mean(val.fatherAge), statistics.mean(val.motherAge)])
         outputIndex += 1
 
