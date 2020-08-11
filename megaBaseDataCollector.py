@@ -1,9 +1,24 @@
 import sys, getopt, gzip, csv, fileinput, os, statistics
+import numpy as np
 
 class megabaseInfo:
     def __init__(self, start, end, count, insertion, deletion, snv, fatherAge, motherAge):
         self.start = start
         self.end = end
+        self.count = count
+        self.insertion = insertion
+        self.deletion = deletion
+        self.snv = snv
+        self.fatherAge = fatherAge
+        self.motherAge = motherAge
+
+class geneInfo:
+    def __init__(self, name, transcriptStart, transcriptEnd, exonStart, exonEnd, count, insertion, deletion, snv, fatherAge, motherAge):
+        self.name = name
+        self.transcriptStart = transcriptStart
+        self.transcriptEnd = transcriptEnd
+        self.exonStart = exonStart
+        self.exonEnd = exonEnd
         self.count = count
         self.insertion = insertion
         self.deletion = deletion
@@ -112,7 +127,154 @@ def updateChromInfoDict(data, index, chrom, variantCount, insert, Del, snv, fath
         else:
             data[chrom][index + 1].motherAge.append("NA")
 
-            
+
+def geneCountMergeFamily(file, outputPrefix, familyData):
+    probandDataSet = True
+    chromInfoDict = {}
+    chromInfoDictMM = {}
+    chromInfoDictMF = {}
+    chromInfoDictFM = {}
+    chromInfoDictFF = {}
+    #[MM, MF, FM, FF]
+    result = [{}, {}, {}, {}]
+
+    #generate bins
+    with open("orderedRefFlat.txt", mode='rt') as f:
+        for line in f:
+            s = line.strip().split("\t")
+
+            #s=[GeneName, name, chrom, strand, txStart, txEnd, cdsStart, cdsEnd, exonCount, exonStart, exonEnd] 
+            for i in np.arange():
+                if (s[0] not in result[i].keys()):
+                    result[i][s[2]] = [geneInfo(s[0], int(s[4]), int(s[5]), s[9], s[10], 0, 0, 0, 0, [], [])]
+                else:
+                    result[i][s[2]].append(geneInfo(s[0], int(s[4]), int(s[5]), s[9], s[10], 0, 0, 0, 0, [], []))
+
+
+    for root, dirs, files in os.walk(file):
+        temproot = root.strip().split("/")
+        #print("root", temproot)
+        if temproot[len(temproot) - 2] == "s1":
+            probandDataSet = False
+        for filename in files:
+            if(filename[-13:] == ".FINAL.vcf.gz"):
+                with gzip.open(root + filename, mode='rt') as f:
+                    print("Scanning variants from file:", filename)
+                    currentChrom = ""
+                    currentMegaBaseIndex = 0
+                    currentDataSet = 0
+                    currentFatherAge = 0
+                    currentMotherAge = 0
+                    for line in f:
+                        if len(line.strip()) == 0:
+                            continue
+                        elif (line[:2] == "##"):
+                            continue
+                        elif (line[:1] == "#"):
+                            #parse which sample the current file has.
+                            sample = line.strip().split('\t')[9][2:]
+                            #print("Sample:", sample)
+                            if probandDataSet:
+                                for x in familyData:
+                                    if x.probandID == sample:
+                                        currentFatherAge = x.probandFatherAge
+                                        currentMotherAge = x.probandMotherAge
+                                        if (x.probandGender == "male") and (x.siblingGender == "male"):
+                                            currentDataSet = 0
+                                        elif (x.probandGender == "male") and (x.siblingGender == "female"):
+                                            currentDataSet = 1
+                                        elif (x.probandGender == "female") and (x.siblingGender == "male"):
+                                            currentDataSet = 2
+                                        elif (x.probandGender == "female") and (x.siblingGender == "female"):
+                                            currentDataSet = 3
+                                        #print(currentDataSet, x.probandGender, x.siblingGender)
+                                        break            
+                            else:
+                                for x in familyData:
+                                    if x.siblingID == sample:
+                                        currentFatherAge = x.siblingFatherAge
+                                        currentMotherAge = x.siblingMotherAge
+                                        if (x.probandGender == "male") and (x.siblingGender == "male"):
+                                            currentDataSet = 0
+                                        elif (x.probandGender == "male") and (x.siblingGender == "female"):
+                                            currentDataSet = 1
+                                        elif (x.probandGender == "female") and (x.siblingGender == "male"):
+                                            currentDataSet = 2
+                                        elif (x.probandGender == "female") and (x.siblingGender == "female"):
+                                            currentDataSet = 3
+                                        break    
+                            continue
+
+                        s = line.strip().split('\t')
+                        IDField = s[2].split('-')[0]
+
+                        insert = 0
+                        Del = 0
+                        snv = 0
+
+                        #Parse if the variant is an insertion, deletion or both
+                        if any(x in IDField for x in ["BND", '+', '_', "DUP"]):
+                            continue
+                        else:
+                            if ("I" in IDField):
+                                insert += 1
+                            if ("Y" in IDField):
+                                insert += 1
+                            if ("D" in IDField):
+                                Del += 1
+                            if ("X" in IDField):
+                                snv += 1
+
+                        variantCount = insert + Del + snv
+
+                        #Place the variant in the right megabase bin
+                        #New chromosome means we add a new key to the dictionary and append a new megabase counter.
+                        ##s[0] is the chromosome, s[1] is the position
+                        if (len(s[0]) > 5):
+                            continue
+                        if (s[0] != currentChrom):
+                            currentMegaBaseEnd = result[currentDataSet][s[0]][0].transcriptEnd
+                            currentChrom = s[0]
+
+                        for gene in result[currentDataSet][currentChrom]:
+                            if gene.transcriptStart <= int(s[1]) and gene.transcriptEnd >= int(s[1]):
+                                gene.count += variantCount
+                                gene.insertion += insert
+                                gene.deletion += Del
+                                gene.snv += snv
+                                if currentFatherAge != "":
+                                    gene.fatherAge.append(int(currentFatherAge))
+                                else:
+                                    gene.fatherAge.append("NA")
+                                if currentMotherAge != "":
+                                    gene.motherAge.append(int(currentMotherAge))
+                                else:
+                                    gene.motherAge.append("NA")
+                            elif gene.transcriptStart > int(s[1]):
+                                break
+                            
+                        #updateChromInfoDict(result[currentDataSet], currentMegaBaseIndex, s[0], variantCount, insert, Del, snv, currentFatherAge, currentMotherAge, False)
+                        
+
+    outputIndex = 0
+    typePrefix = ["MM", "MF", "FM", "FF"]
+    for x in result:
+        wCounts = csv.writer(open(outputPrefix + typePrefix[outputIndex] + ".geneCounts.csv", "w"))
+        fAgeCounts = csv.writer(open(outputPrefix + typePrefix[outputIndex] + ".geneAgeVector.csv", "w"))
+        fAgeCounts.writerow(["Chrom", "Start", "End", "FatherAge", "MotherAge"])
+        wCounts.writerow(["Chrom", "Start", "End", "Count", "Insertions", "Deletions", "SNV", "MeanFatherAge", "MeanMotherAge"])
+        for key in x.keys():
+            for val in x[key]:
+                fAgeCounts.writerow([key, val.transcriptStart, val.transcriptEnd, val.fatherAge, val.motherAge])
+                if val.fatherAge == [] or val.motherAge == []:
+                    wCounts.writerow([key, val.transcriptStart, val.transcriptEnd, val.count, val.insertion, val.deletion, val.snv, "NA", "NA"])
+                else:
+                    wCounts.writerow([key, val.transcriptStart, val.transcriptEnd, val.count, val.insertion, val.deletion, val.snv, ageMean(val.fatherAge), ageMean(val.motherAge)])
+        outputIndex += 1
+
+    return result
+
+    
 def megabaseCountMergeFamily(file, overlap, binsize, outputPrefix, familyData):
     megabaseSize = binsize
     probandDataSet = True
@@ -264,10 +426,13 @@ def megabaseCountMergeFamily(file, overlap, binsize, outputPrefix, familyData):
     typePrefix = ["MM", "MF", "FM", "FF"]
     for x in result:
         wCounts = csv.writer(open(outputPrefix + typePrefix[outputIndex] + ".megaBaseCounts.csv", "w"))
+        mAgeCounts = csv.writer(open(outputPrefix + typePrefix[outputIndex] + ".megaBaseFatherAgeVector.csv", "w"))
+        mAgeCounts.writerow(["Chrom", "Start", "End", "FatherAge"])
         wCounts.writerow(["Chrom", "Start", "End", "Count", "Insertions", "Deletions", "SNV", "MeanFatherAge", "MeanMotherAge"])
         for key in x.keys():
             for val in x[key]:
                 #print(val.fatherAge)
+                mAgeCounts.writerow([key, val.start, val.end, val.fatherAge])
                 if val.fatherAge == [] or val.motherAge == []:
                     wCounts.writerow([key, val.start, val.end, val.count, val.insertion, val.deletion, val.snv, "NA", "NA"])
                 else:
@@ -477,6 +642,7 @@ def main(argv):
     outputPrefix = ""
     path = '-'
     merge = False
+    geneMode = False
     binsize = 1000000
     famFile = ""
 
@@ -490,7 +656,10 @@ def main(argv):
         elif opt == '--overlap':
             overlap = float(arg)
         elif opt == '--binsize':
-            binsize = int(arg)
+            if binsize == "gene":
+                geneMode = True
+            else:
+                binsize = int(arg)
         elif opt == '--famFile':
             famFile = arg
         elif opt == '--sampleFile':
@@ -509,6 +678,8 @@ def main(argv):
     if (merge):
         if famFile == "":
             megabaseCountMerge(path, overlap, binsize, outputPrefix)
+        elif geneMode:
+            geneCountMergeFamily(path, outputPrefix, familyData)
         else:
             megabaseCountMergeFamily(path, overlap, binsize, outputPrefix, familyData)
     else:
