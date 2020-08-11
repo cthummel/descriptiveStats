@@ -140,11 +140,12 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
 
     #generate bins
     with open("orderedRefFlat.txt", mode='rt') as f:
+        header = f.readline()
         for line in f:
             s = line.strip().split("\t")
 
             #s=[GeneName, name, chrom, strand, txStart, txEnd, cdsStart, cdsEnd, exonCount, exonStart, exonEnd] 
-            for i in np.arange():
+            for i in np.arange(0, len(result)):
                 if (s[0] not in result[i].keys()):
                     result[i][s[2]] = [geneInfo(s[0], int(s[4]), int(s[5]), s[9], s[10], 0, 0, 0, 0, [], [])]
                 else:
