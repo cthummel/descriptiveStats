@@ -656,7 +656,7 @@ def main(argv):
         elif opt == '--overlap':
             overlap = float(arg)
         elif opt == '--binsize':
-            if binsize == "gene":
+            if arg == "gene":
                 geneMode = True
             else:
                 binsize = int(arg)
