@@ -143,7 +143,8 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
         header = f.readline()
         for line in f:
             s = line.strip().split("\t")
-
+            if len(s[2]) > 5:
+                continue
             #s=[GeneName, name, chrom, strand, txStart, txEnd, cdsStart, cdsEnd, exonCount, exonStart, exonEnd] 
             for i in np.arange(0, len(result)):
                 if (s[0] not in result[i].keys()):
@@ -234,6 +235,7 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
                         if (len(s[0]) > 5):
                             continue
                         if (s[0] != currentChrom):
+                            
                             currentMegaBaseEnd = result[currentDataSet][s[0]][0].transcriptEnd
                             currentChrom = s[0]
 
