@@ -145,6 +145,11 @@ def binStatsGene(probandData, siblingData, outputPrefix):
         for row in np.arange(0, len(KStestResults[i])):
             wCounts.writerow([KStestResults[i][row][0], KStestResults[i][row][1], KStestResults[i][row][2], resultsBon[0][row], resultsBon[1][row], resultsSidak[0][row], resultsSidak[1][row],resultsHolm[0][row], resultsHolm[1][row], reject[row], adjPvalue[row]])
 
+    geneNormTestStatsProband, geneNormTestPvaluesProband = stats.kstest(probandWholeGenome[0], 'norm')
+    geneNormTestStatsSibling, geneNormTestPvaluesSibling = stats.kstest(siblingWholeGenome[0], 'norm')
+    print("Proband", geneNormTestStatsProband, geneNormTestPvaluesProband)
+    print("Sibling", geneNormTestStatsSibling, geneNormTestPvaluesSibling)
+    
 
 
 
