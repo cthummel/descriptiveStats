@@ -42,6 +42,13 @@ def holmBonferroni(pvalues, alpha, m):
     
     return k
 
+def ageVectorStats(fatherAgeVector, motherAgeVector):
+    pvalues = []
+    testStat, pvalue = stats.ks_2samp(fatherAgeVector, motherAgeVector)
+    pvalues.append(pvalue)
+    return pvalues
+
+
 
 def binStats(probandData, siblingData, outputPrefix):
     output = ["count.", "mom.", "dad."]
@@ -53,28 +60,29 @@ def binStats(probandData, siblingData, outputPrefix):
 
     for row in probandData:
         if row[0] not in probandChromDict:
-            probandChromDict[row[0]] = [[row[3]], [row[4]], [row[5]]]
+            probandChromDict[row[0]] = [[row[3]], [row[7]], [row[8]]]
             uniqueChromList.add(row[0])
         else:
             #[Count], [FatherAge], [MotherAge]
             probandChromDict[row[0]][0].append(row[3])
-            probandChromDict[row[0]][1].append(row[4])
-            probandChromDict[row[0]][2].append(row[5])
+            probandChromDict[row[0]][1].append(row[7])
+            probandChromDict[row[0]][2].append(row[8])
 
     for row in siblingData:
         if row[0] not in siblingChromDict:
-            siblingChromDict[row[0]] = [[row[3]], [row[4]], [row[5]]]
+            siblingChromDict[row[0]] = [[row[3]], [row[7]], [row[8]]]
             uniqueChromList.add(row[0])
         else:
             siblingChromDict[row[0]][0].append(row[3])
-            siblingChromDict[row[0]][1].append(row[4])
-            siblingChromDict[row[0]][2].append(row[5])
+            siblingChromDict[row[0]][1].append(row[7])
+            siblingChromDict[row[0]][2].append(row[8])
 
     for chrom in uniqueChromList:
         # if (len(chrom) > 5):
         #     continue
         if (chrom in probandChromDict.keys()) and (chrom in siblingChromDict.keys()):
             for i in np.arange(0, len(pvalues)):
+                
                 testStat, pvalue = stats.ks_2samp(probandChromDict[chrom][i], siblingChromDict[chrom][i])
                 # fatherTestStat, fatherPvalue = stats.ks_2samp(probandChromDict[chrom][1], siblingChromDict[chrom][1])
                 # motherTestStat, motherPvalue = stats.ks_2samp(probandChromDict[chrom][2], siblingChromDict[chrom][2])
@@ -88,7 +96,7 @@ def binStats(probandData, siblingData, outputPrefix):
                 # KStestResults[1].append([chrom, fatherTestStat, fatherPvalue])
                 # KStestResults[2].append([chrom, motherTestStat, motherPvalue])
 
-    for i in np.arange(0, len(KStestResults) - 1):
+    for i in np.arange(0, len(KStestResults)):
         resultsBon = statsmodels.stats.multitest.multipletests(pvalues[i], alpha=0.05, method='bonferroni', is_sorted=False, returnsorted=False)
         resultsSidak = statsmodels.stats.multitest.multipletests(pvalues[i], alpha=0.05, method='sidak', is_sorted=False, returnsorted=False)
         resultsHolm = statsmodels.stats.multitest.multipletests(pvalues[i], alpha=0.05, method='holm', is_sorted=False, returnsorted=False)  
@@ -96,11 +104,46 @@ def binStats(probandData, siblingData, outputPrefix):
 
         wCounts = csv.writer(open(outputPrefix + output[i] + "megaBaseKS.csv", "w"))
         wCounts.writerow(["Chrom", "TestStat", "Pvalue", "BonPass", "BonCorrect", "SidakPass", "SidakCorrect", "HolmsPass", "HolmsCorrect", "FDRPass", "FDRCorrect"])
-        for row in np.arange(0, len(KStestResults[i]) - 1):
+        for row in np.arange(0, len(KStestResults[i])):
             wCounts.writerow([KStestResults[i][row][0], KStestResults[i][row][1], KStestResults[i][row][2], resultsBon[0][row], resultsBon[1][row], resultsSidak[0][row], resultsSidak[1][row],resultsHolm[0][row], resultsHolm[1][row], reject[row], adjPvalue[row]])
 
 
+def binStatsGene(probandData, siblingData, outputPrefix):
+    output = ["count.", "mom.", "dad."]
+    probandWholeGenome = [[],[],[],[]]
+    siblingWholeGenome = [[],[],[],[]]
+    KStestResults = [[],[],[]]
+    pvalues = [[],[],[]]
 
+    for row in probandData:
+        #[Count], [FatherAge], [MotherAge]
+        probandWholeGenome[0].append(row[3])
+        probandWholeGenome[1].append(row[7])
+        probandWholeGenome[2].append(row[8])
+        probandWholeGenome[3].append(row[9])
+
+    for row in siblingData:
+        #[Count], [FatherAge], [MotherAge]
+        siblingWholeGenome[0].append(row[3])
+        siblingWholeGenome[1].append(row[7])
+        siblingWholeGenome[2].append(row[8])
+        siblingWholeGenome[3].append(row[9])
+
+    for i in np.arange(0, len(probandWholeGenome)):      
+        testStat, pvalue = stats.ks_2samp(probandWholeGenome[i], siblingWholeGenome[i])
+        pvalues[i].append(pvalue)
+        KStestResults[i].append([testStat, pvalue])
+
+    for i in np.arange(0, len(KStestResults)):
+        resultsBon = statsmodels.stats.multitest.multipletests(pvalues[i], alpha=0.05, method='bonferroni', is_sorted=False, returnsorted=False)
+        resultsSidak = statsmodels.stats.multitest.multipletests(pvalues[i], alpha=0.05, method='sidak', is_sorted=False, returnsorted=False)
+        resultsHolm = statsmodels.stats.multitest.multipletests(pvalues[i], alpha=0.05, method='holm', is_sorted=False, returnsorted=False)  
+        reject, adjPvalue = statsmodels.stats.multitest.fdrcorrection(pvalues[i], alpha=0.05, method='indep', is_sorted=False)
+
+        wCounts = csv.writer(open(outputPrefix + output[i] + "megaBaseKS.csv", "w"))
+        wCounts.writerow(["Chrom", "TestStat", "Pvalue", "BonPass", "BonCorrect", "SidakPass", "SidakCorrect", "HolmsPass", "HolmsCorrect", "FDRPass", "FDRCorrect"])
+        for row in np.arange(0, len(KStestResults[i])):
+            wCounts.writerow([KStestResults[i][row][0], KStestResults[i][row][1], KStestResults[i][row][2], resultsBon[0][row], resultsBon[1][row], resultsSidak[0][row], resultsSidak[1][row],resultsHolm[0][row], resultsHolm[1][row], reject[row], adjPvalue[row]])
 
 
 
@@ -219,54 +262,54 @@ def main(argv):
     probandMegaBaseData = readMegaBase(probandMegaFilename)
     siblingMegaBaseData = readMegaBase(siblingMegaFilename)
 
-    probandChromDict = {}
-    siblingChromDict = {}
-    KStestResults = []
-    pvalues = []
-    uniqueChromList = set()
+    # probandChromDict = {}
+    # siblingChromDict = {}
+    # KStestResults = []
+    # pvalues = []
+    # uniqueChromList = set()
 
-    for row in probandMegaBaseData:
-        if row[0] not in probandChromDict:
-            probandChromDict[row[0]] = [row[3]]
-            uniqueChromList.add(row[0])
-        else:
-            probandChromDict[row[0]].append(row[3])
+    # for row in probandMegaBaseData:
+    #     if row[0] not in probandChromDict:
+    #         probandChromDict[row[0]] = [row[3]]
+    #         uniqueChromList.add(row[0])
+    #     else:
+    #         probandChromDict[row[0]].append(row[3])
 
-    for row in siblingMegaBaseData:
-        if row[0] not in siblingChromDict:
-            siblingChromDict[row[0]] = [row[3]]
-            uniqueChromList.add(row[0])
-        else:
-            siblingChromDict[row[0]].append(row[3])
+    # for row in siblingMegaBaseData:
+    #     if row[0] not in siblingChromDict:
+    #         siblingChromDict[row[0]] = [row[3]]
+    #         uniqueChromList.add(row[0])
+    #     else:
+    #         siblingChromDict[row[0]].append(row[3])
 
-    for chrom in uniqueChromList:
-        # if (len(chrom) > 5):
-        #     continue
-        if (chrom in probandChromDict.keys()) and (chrom in siblingChromDict.keys()):
-            testStat, pvalue = stats.ks_2samp(probandChromDict[chrom], siblingChromDict[chrom])
-            print("---- KS Test using Megabase Bins in Chromosome (" + chrom + ")----")
-            print("Test Statistic:", testStat)
-            print("P-value", pvalue, "\n")
-            pvalues.append(pvalue)
-            KStestResults.append([chrom, testStat, pvalue])
-
-    # binBinomialTestResults = []
     # for chrom in uniqueChromList:
+    #     # if (len(chrom) > 5):
+    #     #     continue
     #     if (chrom in probandChromDict.keys()) and (chrom in siblingChromDict.keys()):
+    #         testStat, pvalue = stats.ks_2samp(probandChromDict[chrom], siblingChromDict[chrom])
+    #         print("---- KS Test using Megabase Bins in Chromosome (" + chrom + ")----")
+    #         print("Test Statistic:", testStat)
+    #         print("P-value", pvalue, "\n")
+    #         pvalues.append(pvalue)
+    #         KStestResults.append([chrom, testStat, pvalue])
+
+    # # binBinomialTestResults = []
+    # # for chrom in uniqueChromList:
+    # #     if (chrom in probandChromDict.keys()) and (chrom in siblingChromDict.keys()):
 
 
     
-    resultsBon = statsmodels.stats.multitest.multipletests(pvalues, alpha=0.05, method='bonferroni', is_sorted=False, returnsorted=False)
-    resultsSidak = statsmodels.stats.multitest.multipletests(pvalues, alpha=0.05, method='sidak', is_sorted=False, returnsorted=False)
-    resultsHolm = statsmodels.stats.multitest.multipletests(pvalues, alpha=0.05, method='holm', is_sorted=False, returnsorted=False)  
-    reject, adjPvalue = statsmodels.stats.multitest.fdrcorrection(pvalues, alpha=0.05, method='indep', is_sorted=False)
+    # resultsBon = statsmodels.stats.multitest.multipletests(pvalues, alpha=0.05, method='bonferroni', is_sorted=False, returnsorted=False)
+    # resultsSidak = statsmodels.stats.multitest.multipletests(pvalues, alpha=0.05, method='sidak', is_sorted=False, returnsorted=False)
+    # resultsHolm = statsmodels.stats.multitest.multipletests(pvalues, alpha=0.05, method='holm', is_sorted=False, returnsorted=False)  
+    # reject, adjPvalue = statsmodels.stats.multitest.fdrcorrection(pvalues, alpha=0.05, method='indep', is_sorted=False)
 
-    #print(resultsBon, resultsHolm, resultsSidak)
+    # #print(resultsBon, resultsHolm, resultsSidak)
 
-    wCounts = csv.writer(open(outputPrefix + "megaBaseKS.csv", "w"))
-    wCounts.writerow(["Chrom", "TestStat", "Pvalue", "BonPass", "BonCorrect", "SidakPass", "SidakCorrect", "HolmsPass", "HolmsCorrect", "FDRPass", "FDRCorrect"])
-    for row in np.arange(0, len(KStestResults) - 1):
-        wCounts.writerow([KStestResults[row][0], KStestResults[row][1], KStestResults[row][2], resultsBon[0][row], resultsBon[1][row], resultsSidak[0][row], resultsSidak[1][row],resultsHolm[0][row], resultsHolm[1][row], reject[row], adjPvalue[row]])
+    # wCounts = csv.writer(open(outputPrefix + "megaBaseKS.csv", "w"))
+    # wCounts.writerow(["Chrom", "TestStat", "Pvalue", "BonPass", "BonCorrect", "SidakPass", "SidakCorrect", "HolmsPass", "HolmsCorrect", "FDRPass", "FDRCorrect"])
+    # for row in np.arange(0, len(KStestResults) - 1):
+    #     wCounts.writerow([KStestResults[row][0], KStestResults[row][1], KStestResults[row][2], resultsBon[0][row], resultsBon[1][row], resultsSidak[0][row], resultsSidak[1][row],resultsHolm[0][row], resultsHolm[1][row], reject[row], adjPvalue[row]])
 
 
 
