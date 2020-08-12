@@ -129,7 +129,7 @@ def binStatsGene(probandData, siblingData, outputPrefix):
         siblingWholeGenome[2].append(row[8])
         siblingWholeGenome[3].append(row[9])
 
-    for i in np.arange(0, len(probandWholeGenome)):      
+    for i in np.arange(0, len(pvalues)):      
         testStat, pvalue = stats.ks_2samp(probandWholeGenome[i], siblingWholeGenome[i])
         pvalues[i].append(pvalue)
         KStestResults[i].append([testStat, pvalue])
