@@ -13,12 +13,12 @@ class megabaseInfo:
         self.motherAge = motherAge
 
 class geneInfo:
-    def __init__(self, name, transcriptStart, transcriptEnd, exonStart, exonEnd, count, insertion, deletion, snv, fatherAge, motherAge):
+    def __init__(self, name, transcriptStart, transcriptEnd, count, insertion, deletion, snv, fatherAge, motherAge):
         self.name = name
         self.transcriptStart = transcriptStart
         self.transcriptEnd = transcriptEnd
-        self.exonStart = exonStart
-        self.exonEnd = exonEnd
+        # self.exonStart = exonStart
+        # self.exonEnd = exonEnd
         self.count = count
         self.insertion = insertion
         self.deletion = deletion
@@ -139,18 +139,22 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
     result = [{}, {}, {}, {}]
 
     #generate bins
-    with open("orderedRefFlat.txt", mode='rt') as f:
-        header = f.readline()
+    with gzip.open("gencode.v34.annotation.gff3.gz", mode='rt') as f:
         for line in f:
-            s = line.strip().split("\t")
-            if len(s[2]) > 5:
+            if s[0] == "#":
                 continue
-            #s=[GeneName, name, chrom, strand, txStart, txEnd, cdsStart, cdsEnd, exonCount, exonStart, exonEnd] 
-            for i in np.arange(0, len(result)):
-                if (s[0] not in result[i].keys()):
-                    result[i][s[2]] = [geneInfo(s[0], int(s[4]), int(s[5]), s[9], s[10], 0, 0, 0, 0, [], [])]
-                else:
-                    result[i][s[2]].append(geneInfo(s[0], int(s[4]), int(s[5]), s[9], s[10], 0, 0, 0, 0, [], []))
+            s = line.strip().split("\t")
+            infoField = s[8].strip().split(";")
+            # if len(s[2]) > 5:
+            #     continue
+             
+            if s[2] == "gene" and infoField[2][10:] == "protein_coding": #gene_type=
+                geneName = infoField[3][10:]
+                for i in np.arange(0, len(result)):
+                    if (s[0] not in result[i].keys()):
+                        result[i][s[0]] = [geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, [], [])]
+                    else:
+                        result[i][s[0]].append(geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, [], []))
 
 
     for root, dirs, files in os.walk(file):
