@@ -140,7 +140,7 @@ def binStatsGene(probandData, siblingData, outputPrefix):
         resultsHolm = statsmodels.stats.multitest.multipletests(pvalues[i], alpha=0.05, method='holm', is_sorted=False, returnsorted=False)  
         reject, adjPvalue = statsmodels.stats.multitest.fdrcorrection(pvalues[i], alpha=0.05, method='indep', is_sorted=False)
 
-        wCounts = csv.writer(open(outputPrefix + output[i] + "megaBaseKS.csv", "w"))
+        wCounts = csv.writer(open(outputPrefix + output[i] + "genomeWide.csv", "w"))
         wCounts.writerow(["Chrom", "TestStat", "Pvalue", "BonPass", "BonCorrect", "SidakPass", "SidakCorrect", "HolmsPass", "HolmsCorrect", "FDRPass", "FDRCorrect"])
         for row in np.arange(0, len(KStestResults[i])):
             wCounts.writerow([KStestResults[i][row][0], KStestResults[i][row][1], KStestResults[i][row][2], resultsBon[0][row], resultsBon[1][row], resultsSidak[0][row], resultsSidak[1][row],resultsHolm[0][row], resultsHolm[1][row], reject[row], adjPvalue[row]])
@@ -319,6 +319,7 @@ def main(argv):
 
 
     binStats(probandMegaBaseData, siblingMegaBaseData, outputPrefix)
+    binStatsGene(probandMegaBaseData, siblingMegaBaseData, outputPrefix)
         
 
 
