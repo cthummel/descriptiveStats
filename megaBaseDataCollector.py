@@ -141,12 +141,12 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
     #generate bins
     with gzip.open("gencode.v34.annotation.gff3.gz", mode='rt') as f:
         for line in f:
-            if s[0] == "#":
-                continue
+            
             s = line.strip().split("\t")
+            if s[0][0] == "#":
+                continue
+
             infoField = s[8].strip().split(";")
-            # if len(s[2]) > 5:
-            #     continue
              
             if s[2] == "gene" and infoField[2][10:] == "protein_coding": #gene_type=
                 geneName = infoField[3][10:]
