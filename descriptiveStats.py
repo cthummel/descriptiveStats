@@ -60,20 +60,20 @@ def binStats(probandData, siblingData, outputPrefix):
 
     for row in probandData:
         if row[0] not in probandChromDict:
-            probandChromDict[row[0]] = [[row[3]], [row[7]], [row[8]]]
+            probandChromDict[row[0]] = [[row[3] / (row[2] - row[1])], [row[7]], [row[8]]]
             uniqueChromList.add(row[0])
         else:
             #[Count], [FatherAge], [MotherAge]
-            probandChromDict[row[0]][0].append(row[3])
+            probandChromDict[row[0]][0].append(row[3] / (row[2] - row[1]))
             probandChromDict[row[0]][1].append(row[7])
             probandChromDict[row[0]][2].append(row[8])
 
     for row in siblingData:
         if row[0] not in siblingChromDict:
-            siblingChromDict[row[0]] = [[row[3]], [row[7]], [row[8]]]
+            siblingChromDict[row[0]] = [[row[3] / (row[2] - row[1])], [row[7]], [row[8]]]
             uniqueChromList.add(row[0])
         else:
-            siblingChromDict[row[0]][0].append(row[3])
+            siblingChromDict[row[0]][0].append(row[3] / (row[2] - row[1]))
             siblingChromDict[row[0]][1].append(row[7])
             siblingChromDict[row[0]][2].append(row[8])
 
