@@ -67,17 +67,17 @@ def ageVectorStats(probandAgeVectorFile, siblingAgeVectorFile, outputPrefix):
                 fatherAge = []
                 motherAge = []
                 for x in s[4][1:-1].split(","):
+                    if x.find("NA"):
+                        continue
                     if x[0] == " ":
                         fatherAge.append(int(x[1:]))
-                    elif x.find("NA"):
-                        continue
                     else:
                         fatherAge.append(int(x))
                 for x in s[5][1:-1].split(","):
+                    if x.find("NA"):
+                        continue
                     if x[0] == " ":
                         motherAge.append(int(x[1:]))
-                    elif x.find("NA"):
-                        continue
                     else:
                         motherAge.append(int(x))
                 #print([s[0], s[1], s[2], s[3], fatherAge, motherAge])
@@ -96,17 +96,18 @@ def ageVectorStats(probandAgeVectorFile, siblingAgeVectorFile, outputPrefix):
                 fatherAge = []
                 motherAge = []
                 for x in s[4][1:-1].split(","):
+                    print(x)
+                    if x.find("NA"):
+                        continue
                     if x[0] == " ":
                         fatherAge.append(int(x[1:]))
-                    elif x.find("NA"):
-                        continue
                     else:
                         fatherAge.append(int(x))
                 for x in s[5][1:-1].split(","):
+                    if x.find("NA"):
+                        continue
                     if x[0] == " ":
                         motherAge.append(int(x[1:]))
-                    elif x.find("NA"):
-                        continue
                     else:
                         motherAge.append(int(x))
                 #print([s[0], s[1], s[2], s[3], fatherAge, motherAge])
