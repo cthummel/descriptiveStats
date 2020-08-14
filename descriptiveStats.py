@@ -66,9 +66,15 @@ def ageVectorStats(probandAgeVectorFile, siblingAgeVectorFile):
                 fatherAge = []
                 motherAge = []
                 for x in s[4][1:-1].split(","):
-                    fatherAge.append(int(x[1:]))
+                    if x[0] == " ":
+                        fatherAge.append(int(x[1:]))
+                    else:
+                        fatherAge.append(int(x))
                 for x in s[5][1:-1].split(","):
-                    motherAge.append(int(x[1:]))
+                    if x[0] == " ":
+                        motherAge.append(int(x[1:]))
+                    else:
+                        motherAge.append(int(x))
                 print([s[0], s[1], s[2], s[3], fatherAge, motherAge])
                 probandAgeVector.append(ageAnalysis(s[0], s[1], s[2], s[3], fatherAge, motherAge))
             else:
