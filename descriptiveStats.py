@@ -84,7 +84,7 @@ def ageVectorStats(probandAgeVectorFile, siblingAgeVectorFile, outputPrefix):
                         motherAge.append(int(x))
                 #print([s[0], s[1], s[2], s[3], fatherAge, motherAge])
                 probandAgeVector.append(ageAnalysis(s[0], s[1], s[2], s[3], fatherAge, motherAge))
-            else:
+            #else:
                 #print(s)
                 #probandAgeVector.append(ageAnalysis(s[0], s[1], s[2], s[3], [], []))
             
@@ -114,7 +114,7 @@ def ageVectorStats(probandAgeVectorFile, siblingAgeVectorFile, outputPrefix):
                         motherAge.append(int(x))
                 #print([s[0], s[1], s[2], s[3], fatherAge, motherAge])
                 siblingAgeVector.append(ageAnalysis(s[0], s[1], s[2], s[3], fatherAge, motherAge))
-            else:
+            #else:
                 #print(s)
                 #siblingAgeVector.append(ageAnalysis(s[0], s[1], s[2], s[3], [], []))
 
