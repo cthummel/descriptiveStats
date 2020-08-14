@@ -63,8 +63,8 @@ def ageVectorStats(probandAgeVectorFile, siblingAgeVectorFile):
             s = line.strip().split("\t")
             if s[4] != '[]' and s[5] != '[]':
                 #print(s, s[4][1:-1], s[4][1:-1].split(","))
-                print([s[0], s[1], s[2], s[3], ''.join(s[4][1:-1].split(",")), ''.join(s[5][1:-1].split(",")]))
-                probandAgeVector.append(ageAnalysis(s[0], s[1], s[2], s[3], ''.join(s[4][1:-1].split(",")), ''.join(s[5][1:-1].split(",")))
+                print([s[0], s[1], s[2], s[3], ''.join(s[4][1:-1].split(",")), ''.join(s[5][1:-1].split(","))])
+                probandAgeVector.append(ageAnalysis(s[0], s[1], s[2], s[3], ''.join(s[4][1:-1].split(",")), ''.join(s[5][1:-1].split(","))))
             else:
                 #print(s)
                 probandAgeVector.append(ageAnalysis(s[0], s[1], s[2], s[3], [], []))
