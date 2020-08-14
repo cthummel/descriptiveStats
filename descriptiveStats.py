@@ -52,8 +52,9 @@ def holmBonferroni(pvalues, alpha, m):
     
     return k
 
-def ageVectorStats(probandAgeVectorFile, siblingAgeVectorFile):
-    pvalues = []
+def ageVectorStats(probandAgeVectorFile, siblingAgeVectorFile, outputPrefix):
+    fatherResults = []
+    motherResults = []
     probandAgeVector = []
     siblingAgeVector = []
 
@@ -75,7 +76,7 @@ def ageVectorStats(probandAgeVectorFile, siblingAgeVectorFile):
                         motherAge.append(int(x[1:]))
                     else:
                         motherAge.append(int(x))
-                print([s[0], s[1], s[2], s[3], fatherAge, motherAge])
+                #print([s[0], s[1], s[2], s[3], fatherAge, motherAge])
                 probandAgeVector.append(ageAnalysis(s[0], s[1], s[2], s[3], fatherAge, motherAge))
             else:
                 #print(s)
@@ -86,12 +87,50 @@ def ageVectorStats(probandAgeVectorFile, siblingAgeVectorFile):
         header = f.readline()
         for line in f:
             s = line.strip().split("\t")
-            siblingAgeVector.append(ageAnalysis(s[0], s[1], s[2], s[3], s[4], s[5]))
+            if s[4] != '[]' and s[5] != '[]':
+                #print(s, s[4][1:-1], s[4][1:-1].split(","))
+                fatherAge = []
+                motherAge = []
+                for x in s[4][1:-1].split(","):
+                    if x[0] == " ":
+                        fatherAge.append(int(x[1:]))
+                    else:
+                        fatherAge.append(int(x))
+                for x in s[5][1:-1].split(","):
+                    if x[0] == " ":
+                        motherAge.append(int(x[1:]))
+                    else:
+                        motherAge.append(int(x))
+                #print([s[0], s[1], s[2], s[3], fatherAge, motherAge])
+                siblingAgeVector.append(ageAnalysis(s[0], s[1], s[2], s[3], fatherAge, motherAge))
+            else:
+                #print(s)
+                siblingAgeVector.append(ageAnalysis(s[0], s[1], s[2], s[3], [], []))
 
     for i in np.arange(0, len(probandAgeVector)):
-        testStat, pvalue = stats.ks_2samp(probandAgeVector[i].fatherAge, siblingAgeVector[i].motherAge)
-        pvalues.append(pvalue)
-    return pvalues
+        if probandAgeVector[i].fatherAge == [] or siblingAgeVector[i].fatherAge == []:
+            fatherResults.append([probandAgeVector[i].chrom, probandAgeVector[i].name, probandAgeVector[i].start, probandAgeVector[i].end, 99999, 1.0])
+        else:
+            testStat, pvalue = stats.ks_2samp(probandAgeVector[i].fatherAge, siblingAgeVector[i].fatherAge)
+            fatherResults.append([probandAgeVector[i].chrom, probandAgeVector[i].name, probandAgeVector[i].start, probandAgeVector[i].end, testStat, pvalue])
+            
+        if probandAgeVector[i].motherAge == [] or siblingAgeVector[i].motherAge == []:
+            motherResults.append([probandAgeVector[i].chrom, probandAgeVector[i].name, probandAgeVector[i].start, probandAgeVector[i].end, 99999, 1.0])
+        else:
+            testStat, pvalue = stats.ks_2samp(probandAgeVector[i].motherAge, siblingAgeVector[i].motherAge)
+            motherResults.append([probandAgeVector[i].chrom, probandAgeVector[i].name, probandAgeVector[i].start, probandAgeVector[i].end, testStat, pvalue])
+
+    fCounts = csv.writer(open(outputPrefix + "fatherAgeStats.csv", "w"))
+    fCounts.writerow(["Chrom", "Gene", "Start", "End", "TestStat", "Pvalue"])
+    for row in np.arange(0, len(fatherResults)):
+        fCounts.writerow(fatherResults[row][0], fatherResults[row][1], fatherResults[row][2], fatherResults[row][3], fatherResults[row][4], fatherResults[row][5])
+
+    mCounts = csv.writer(open(outputPrefix + "motherAgeStats.csv", "w"))
+    mCounts.writerow(["Chrom", "Gene", "Start", "End", "TestStat", "Pvalue"])
+    for row in np.arange(0, len(motherResults)):
+        mCounts.writerow(motherResults[row][0], motherResults[row][1], motherResults[row][2], motherResults[row][3], motherResults[row][4], motherResults[row][5])
+
+    return fatherResults, motherResults
 
 
 
