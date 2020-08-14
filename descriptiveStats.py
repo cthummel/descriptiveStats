@@ -67,14 +67,14 @@ def ageVectorStats(probandAgeVectorFile, siblingAgeVectorFile, outputPrefix):
                 fatherAge = []
                 motherAge = []
                 for x in s[4][1:-1].split(","):
-                    if x.find("NA"):
+                    if x.find("NA") != -1:
                         continue
                     if x[0] == " ":
                         fatherAge.append(int(x[1:]))
                     else:
                         fatherAge.append(int(x))
                 for x in s[5][1:-1].split(","):
-                    if x.find("NA"):
+                    if x.find("NA") != -1:
                         continue
                     if x[0] == " ":
                         motherAge.append(int(x[1:]))
@@ -97,14 +97,14 @@ def ageVectorStats(probandAgeVectorFile, siblingAgeVectorFile, outputPrefix):
                 motherAge = []
                 for x in s[4][1:-1].split(","):
                     #print(x)
-                    if x.find("NA"):
+                    if x.find("NA") != -1:
                         continue
                     if x[0] == " ":
                         fatherAge.append(int(x[1:]))
                     else:
                         fatherAge.append(int(x))
                 for x in s[5][1:-1].split(","):
-                    if x.find("NA"):
+                    if x.find("NA") != -1:
                         continue
                     if x[0] == " ":
                         motherAge.append(int(x[1:]))
@@ -117,6 +117,7 @@ def ageVectorStats(probandAgeVectorFile, siblingAgeVectorFile, outputPrefix):
                 siblingAgeVector.append(ageAnalysis(s[0], s[1], s[2], s[3], [], []))
 
     for i in np.arange(0, len(probandAgeVector)):
+        print(probandAgeVector[i].fatherAge, siblingAgeVector[i].fatherAge)
         if probandAgeVector[i].fatherAge == [] or siblingAgeVector[i].fatherAge == []:
             fatherResults.append([probandAgeVector[i].chrom, probandAgeVector[i].name, probandAgeVector[i].start, probandAgeVector[i].end, 99999, 1.0])
         else:
