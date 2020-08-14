@@ -268,11 +268,11 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
     for x in result:
         wCounts = csv.writer(open(outputPrefix + typePrefix[outputIndex] + ".geneCounts.csv", "w"))
         fAgeCounts = csv.writer(open(outputPrefix + typePrefix[outputIndex] + ".geneAgeVector.csv", "w"), delimiter="\t")
-        fAgeCounts.writerow(["Chrom", "Start", "End", "FatherAge", "MotherAge"])
+        fAgeCounts.writerow(["Chrom", "Gene", "Start", "End", "FatherAge", "MotherAge"])
         wCounts.writerow(["Chrom", "Start", "End", "Count", "Insertions", "Deletions", "SNV", "MeanFatherAge", "MeanMotherAge", "Gene"])
         for key in x.keys():
             for val in x[key]:
-                fAgeCounts.writerow([key, val.transcriptStart, val.transcriptEnd, val.fatherAge, val.motherAge])
+                fAgeCounts.writerow([key, val.name, val.transcriptStart, val.transcriptEnd, val.fatherAge, val.motherAge])
                 if val.fatherAge == [] or val.motherAge == []:
                     wCounts.writerow([key, val.transcriptStart, val.transcriptEnd, val.count, val.insertion, val.deletion, val.snv, "NA", "NA", val.name])
                 else:
