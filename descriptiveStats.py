@@ -96,7 +96,7 @@ def ageVectorStats(probandAgeVectorFile, siblingAgeVectorFile, outputPrefix):
                 fatherAge = []
                 motherAge = []
                 for x in s[4][1:-1].split(","):
-                    print(x)
+                    #print(x)
                     if x.find("NA"):
                         continue
                     if x[0] == " ":
@@ -132,12 +132,12 @@ def ageVectorStats(probandAgeVectorFile, siblingAgeVectorFile, outputPrefix):
     fCounts = csv.writer(open(outputPrefix + "fatherAgeStats.csv", "w"))
     fCounts.writerow(["Chrom", "Gene", "Start", "End", "TestStat", "Pvalue"])
     for row in np.arange(0, len(fatherResults)):
-        fCounts.writerow(fatherResults[row][0], fatherResults[row][1], fatherResults[row][2], fatherResults[row][3], fatherResults[row][4], fatherResults[row][5])
+        fCounts.writerow([fatherResults[row][0], fatherResults[row][1], fatherResults[row][2], fatherResults[row][3], fatherResults[row][4], fatherResults[row][5]])
 
     mCounts = csv.writer(open(outputPrefix + "motherAgeStats.csv", "w"))
     mCounts.writerow(["Chrom", "Gene", "Start", "End", "TestStat", "Pvalue"])
     for row in np.arange(0, len(motherResults)):
-        mCounts.writerow(motherResults[row][0], motherResults[row][1], motherResults[row][2], motherResults[row][3], motherResults[row][4], motherResults[row][5])
+        mCounts.writerow([motherResults[row][0], motherResults[row][1], motherResults[row][2], motherResults[row][3], motherResults[row][4], motherResults[row][5]])
 
     return fatherResults, motherResults
 
