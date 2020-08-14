@@ -380,7 +380,7 @@ def main(argv):
     probandMegaBaseData = readMegaBase(probandMegaFilename)
     siblingMegaBaseData = readMegaBase(siblingMegaFilename)
 
-    ageVectorStats(probandMegaFilename[0:-18] + ".geneAgeVector.csv", siblingMegaFilename[0:-18] + ".geneAgeVector.csv", outputPrefix)
+    ageVectorStats(probandMegaFilename[0:-15] + ".geneAgeVector.csv", siblingMegaFilename[0:-15] + ".geneAgeVector.csv", outputPrefix)
 
     # probandChromDict = {}
     # siblingChromDict = {}
