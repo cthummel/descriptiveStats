@@ -55,6 +55,8 @@ def holmBonferroni(pvalues, alpha, m):
 def ageVectorStats(probandAgeVectorFile, siblingAgeVectorFile, outputPrefix):
     fatherResults = []
     motherResults = []
+    fatherPvalues = []
+    motherPvalues = []
     probandAgeVector = []
     siblingAgeVector = []
 
@@ -117,28 +119,43 @@ def ageVectorStats(probandAgeVectorFile, siblingAgeVectorFile, outputPrefix):
                 siblingAgeVector.append(ageAnalysis(s[0], s[1], s[2], s[3], [], []))
 
     for i in np.arange(0, len(probandAgeVector)):
-        print(probandAgeVector[i].fatherAge, siblingAgeVector[i].fatherAge)
+        #print(probandAgeVector[i].fatherAge, siblingAgeVector[i].fatherAge)
         if probandAgeVector[i].fatherAge == [] or siblingAgeVector[i].fatherAge == []:
             fatherResults.append([probandAgeVector[i].chrom, probandAgeVector[i].name, probandAgeVector[i].start, probandAgeVector[i].end, 99999, 1.0])
+            fatherPvalues.append(1.0)
         else:
             testStat, pvalue = stats.ks_2samp(probandAgeVector[i].fatherAge, siblingAgeVector[i].fatherAge)
+            fatherPvalues.append(pvalue)
             fatherResults.append([probandAgeVector[i].chrom, probandAgeVector[i].name, probandAgeVector[i].start, probandAgeVector[i].end, testStat, pvalue])
             
         if probandAgeVector[i].motherAge == [] or siblingAgeVector[i].motherAge == []:
             motherResults.append([probandAgeVector[i].chrom, probandAgeVector[i].name, probandAgeVector[i].start, probandAgeVector[i].end, 99999, 1.0])
+            motherPvalues.append(1.0)
         else:
             testStat, pvalue = stats.ks_2samp(probandAgeVector[i].motherAge, siblingAgeVector[i].motherAge)
+            motherPvalues.append(pvalue)
             motherResults.append([probandAgeVector[i].chrom, probandAgeVector[i].name, probandAgeVector[i].start, probandAgeVector[i].end, testStat, pvalue])
 
+    fatherBon = statsmodels.stats.multitest.multipletests(fatherPvalues, alpha=0.05, method='bonferroni', is_sorted=False, returnsorted=False)
+    fatherSidak = statsmodels.stats.multitest.multipletests(fatherPvalues, alpha=0.05, method='sidak', is_sorted=False, returnsorted=False)
+    fatherHolm = statsmodels.stats.multitest.multipletests(fatherPvalues, alpha=0.05, method='holm', is_sorted=False, returnsorted=False)  
+    fatherFDR = statsmodels.stats.multitest.fdrcorrection(fatherPvalues, alpha=0.05, method='indep', is_sorted=False)
+
+    motherBon = statsmodels.stats.multitest.multipletests(motherPvalues, alpha=0.05, method='bonferroni', is_sorted=False, returnsorted=False)
+    motherSidak = statsmodels.stats.multitest.multipletests(motherPvalues, alpha=0.05, method='sidak', is_sorted=False, returnsorted=False)
+    motherHolm = statsmodels.stats.multitest.multipletests(motherPvalues, alpha=0.05, method='holm', is_sorted=False, returnsorted=False)  
+    motherFDR = statsmodels.stats.multitest.fdrcorrection(motherPvalues, alpha=0.05, method='indep', is_sorted=False)
+
+
     fCounts = csv.writer(open(outputPrefix + "fatherAgeStats.csv", "w"))
-    fCounts.writerow(["Chrom", "Gene", "Start", "End", "TestStat", "Pvalue"])
+    fCounts.writerow(["Chrom", "Gene", "Start", "End", "TestStat", "Pvalue", "BonPvalue", "SidakPvalue", "HolmPvalue", "FDRPvalue"])
     for row in np.arange(0, len(fatherResults)):
-        fCounts.writerow([fatherResults[row][0], fatherResults[row][1], fatherResults[row][2], fatherResults[row][3], fatherResults[row][4], fatherResults[row][5]])
+        fCounts.writerow([fatherResults[row][0], fatherResults[row][1], fatherResults[row][2], fatherResults[row][3], fatherResults[row][4], fatherResults[row][5], fatherBon[1][row], fatherSidak[1][row], fatherHolm[1][row], fatherFDR[1][row]])
 
     mCounts = csv.writer(open(outputPrefix + "motherAgeStats.csv", "w"))
-    mCounts.writerow(["Chrom", "Gene", "Start", "End", "TestStat", "Pvalue"])
+    mCounts.writerow(["Chrom", "Gene", "Start", "End", "TestStat", "Pvalue", "BonPvalue", "SidakPvalue", "HolmPvalue", "FDRPvalue"])
     for row in np.arange(0, len(motherResults)):
-        mCounts.writerow([motherResults[row][0], motherResults[row][1], motherResults[row][2], motherResults[row][3], motherResults[row][4], motherResults[row][5]])
+        mCounts.writerow([motherResults[row][0], motherResults[row][1], motherResults[row][2], motherResults[row][3], motherResults[row][4], motherResults[row][5], motherBon[1][row], motherSidak[1][row], motherHolm[1][row], motherFDR[1][row]])
 
     return fatherResults, motherResults
 
