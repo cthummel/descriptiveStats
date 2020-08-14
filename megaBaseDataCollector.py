@@ -267,7 +267,7 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
     typePrefix = ["MM", "MF", "FM", "FF"]
     for x in result:
         wCounts = csv.writer(open(outputPrefix + typePrefix[outputIndex] + ".geneCounts.csv", "w"))
-        fAgeCounts = csv.writer(open(outputPrefix + typePrefix[outputIndex] + ".geneAgeVector.csv", "w"))
+        fAgeCounts = csv.writer(open(outputPrefix + typePrefix[outputIndex] + ".geneAgeVector.csv", "w", delimiter="\t"))
         fAgeCounts.writerow(["Chrom", "Start", "End", "FatherAge", "MotherAge"])
         wCounts.writerow(["Chrom", "Start", "End", "Count", "Insertions", "Deletions", "SNV", "MeanFatherAge", "MeanMotherAge", "Gene"])
         for key in x.keys():
