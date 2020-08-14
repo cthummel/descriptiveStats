@@ -2,6 +2,16 @@ import numpy as np
 from scipy import stats
 import sys, getopt, math, binFinder, csv, statsmodels.stats.multitest
 
+class ageAnalysis():
+    def __init__(self, chrom, name, start, end, fatherAge, motherAge):
+        self.start = start
+        self.end = end
+        self.chrom = chrom
+        self.name = name
+        self.fatherAge = fatherAge
+        self.motherAge = motherAge
+
+
 def readMegaBase(filename):
     results = []
     with open(filename, mode='rt') as f:
@@ -42,10 +52,32 @@ def holmBonferroni(pvalues, alpha, m):
     
     return k
 
-def ageVectorStats(fatherAgeVector, motherAgeVector):
+def ageVectorStats(probandAgeVectorFile, siblingAgeVectorFile):
     pvalues = []
-    testStat, pvalue = stats.ks_2samp(fatherAgeVector, motherAgeVector)
-    pvalues.append(pvalue)
+    probandAgeVector = []
+    siblingAgeVector = []
+
+    with open(probandAgeVectorFile, mode='rt') as f:
+        header = f.readline()
+        for line in f:
+            s = line.strip().split("\t")
+            if len(s[4]) > 2:
+                print(s, s[4][1:-1], s[4][1:-1].split(","))
+                probandAgeVector.append(ageAnalysis(s[0], s[1], s[2], s[3], s[4][1:-1].split(","), s[5]))
+            else:
+                print(s)
+                probandAgeVector.append(ageAnalysis(s[0], s[1], s[2], s[3], [], []))
+            
+
+    with open(siblingAgeVectorFile, mode='rt') as f:
+        header = f.readline()
+        for line in f:
+            s = line.strip().split("\t")
+            siblingAgeVector.append(ageAnalysis(s[0], s[1], s[2], s[3], s[4], s[5]))
+
+    for i in np.arange(0, len(probandAgeVector)):
+        testStat, pvalue = stats.ks_2samp(probandAgeVector[i].fatherAge, siblingAgeVector[i].motherAge)
+        pvalues.append(pvalue)
     return pvalues
 
 
@@ -266,6 +298,8 @@ def main(argv):
     #KS Test for Megabase Paired data
     probandMegaBaseData = readMegaBase(probandMegaFilename)
     siblingMegaBaseData = readMegaBase(siblingMegaFilename)
+
+    ageVectorStats("proband.merged.MM.geneAgeVector.csv", "sibling.merged.MM.geneAgeVector.csv")
 
     # probandChromDict = {}
     # siblingChromDict = {}
