@@ -13,7 +13,7 @@ class megabaseInfo:
         self.motherAge = motherAge
 
 class geneInfo:
-    def __init__(self, name, transcriptStart, transcriptEnd, count, insertion, deletion, snv, fatherAge, motherAge):
+    def __init__(self, name, transcriptStart, transcriptEnd, count, insertion, deletion, snv, fatherAge, motherAge, varPos):
         self.name = name
         self.transcriptStart = transcriptStart
         self.transcriptEnd = transcriptEnd
@@ -25,6 +25,7 @@ class geneInfo:
         self.snv = snv
         self.fatherAge = fatherAge
         self.motherAge = motherAge
+        self.variantPosition = varPos
 
 
 class familyInfo:
@@ -152,9 +153,9 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
                 geneName = infoField[3][10:]
                 for i in np.arange(0, len(result)):
                     if (s[0] not in result[i].keys()):
-                        result[i][s[0]] = [geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, [], [])]
+                        result[i][s[0]] = [geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, [], [], [])]
                     else:
-                        result[i][s[0]].append(geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, [], []))
+                        result[i][s[0]].append(geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, [], [], []))
 
 
     for root, dirs, files in os.walk(file):
@@ -249,6 +250,7 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
                                 gene.insertion += insert
                                 gene.deletion += Del
                                 gene.snv += snv
+                                gene.variantPosition.append(int(s[1]))
                                 if currentFatherAge != "":
                                     gene.fatherAge.append(int(currentFatherAge))
                                 else:
@@ -268,11 +270,11 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
     for x in result:
         wCounts = csv.writer(open(outputPrefix + typePrefix[outputIndex] + ".geneCounts.csv", "w"))
         fAgeCounts = csv.writer(open(outputPrefix + typePrefix[outputIndex] + ".geneAgeVector.csv", "w"), delimiter="\t")
-        fAgeCounts.writerow(["Chrom", "Gene", "Start", "End", "FatherAge", "MotherAge"])
+        fAgeCounts.writerow(["Chrom", "Gene", "Start", "End", "FatherAge", "MotherAge", "VariantPosition"])
         wCounts.writerow(["Chrom", "Start", "End", "Count", "Insertions", "Deletions", "SNV", "MeanFatherAge", "MeanMotherAge", "Gene"])
         for key in x.keys():
             for val in x[key]:
-                fAgeCounts.writerow([key, val.name, val.transcriptStart, val.transcriptEnd, val.fatherAge, val.motherAge])
+                fAgeCounts.writerow([key, val.name, val.transcriptStart, val.transcriptEnd, val.fatherAge, val.motherAge, val.variantPosition])
                 if val.fatherAge == [] or val.motherAge == []:
                     wCounts.writerow([key, val.transcriptStart, val.transcriptEnd, val.count, val.insertion, val.deletion, val.snv, "NA", "NA", val.name])
                 else:
