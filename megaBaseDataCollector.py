@@ -422,7 +422,7 @@ def megabaseCountMergeFamily(file, overlap, binsize, outputPrefix, familyData):
     typePrefix = ["MM", "MF", "FM", "FF"]
     for x in result:
         wCounts = csv.writer(open(outputPrefix + typePrefix[outputIndex] + ".megaBaseCounts.csv", "w"))
-        mAgeCounts = csv.writer(open(outputPrefix + typePrefix[outputIndex] + ".megaBaseAgeVector.csv", "w"))
+        mAgeCounts = csv.writer(open(outputPrefix + typePrefix[outputIndex] + ".megaBaseAgeVector.csv", "w"), delimiter="\t")
         mAgeCounts.writerow(["Chrom", "Gene", "Start", "End", "FatherAge", "MotherAge", "VariantPosition"])
         wCounts.writerow(["Chrom", "Start", "End", "Count", "Insertions", "Deletions", "SNV", "MeanFatherAge", "MeanMotherAge"])
         for key in x.keys():
