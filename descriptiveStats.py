@@ -272,7 +272,7 @@ def binStatsGene(probandData, siblingData, outputPrefix):
 
 
 def main(argv):
-    opts, args = getopt.getopt(argv, "ho:", ['proHist=', 'proCount=', 'proMega=', 'sibHist=', 'sibCount=', 'sibMega=', 'output='])
+    opts, args = getopt.getopt(argv, "ho:", ['proHist=', 'proCount=', 'proMega=', 'proAge=', 'sibHist=', 'sibCount=', 'sibMega=', 'sibAge=', 'output='])
     outputPrefix = ""
 
     for opt, arg in opts:
@@ -282,12 +282,16 @@ def main(argv):
             siblingHistogramFilename = arg
         elif opt == '--proCount':
             probandCountFilename = arg
+        elif opt == '--proAge':
+            probandAgeFilename = arg
         elif opt == '--sibCount':
             siblingCountFilename = arg
         elif opt == '--proMega':
             probandMegaFilename = arg
         elif opt == '--sibMega':
             siblingMegaFilename = arg
+        elif opt == '--sibAge':
+            siblingAgeFilename = arg
         elif opt in ('-h'):
             print("Use", ['--proHist', '--proCount', '--sibHist', '--sibCount'], "to input filenames")
             print("-o for output file.")
@@ -385,8 +389,11 @@ def main(argv):
     probandMegaBaseData = readMegaBase(probandMegaFilename)
     siblingMegaBaseData = readMegaBase(siblingMegaFilename)
 
-    probandVectorData = readVectorData(probandMegaFilename[0:-15] + ".geneAgeVector.csv")
-    siblingVectorData = readVectorData(siblingMegaFilename[0:-15] + ".geneAgeVector.csv")
+    #probandVectorData = readVectorData(probandMegaFilename[0:-15] + ".geneAgeVector.csv")
+    #siblingVectorData = readVectorData(siblingMegaFilename[0:-15] + ".geneAgeVector.csv")
+    probandVectorData = readVectorData(probandAgeFilename)
+    siblingVectorData = readVectorData(siblingAgeFilename)
+
 
     ageVectorStats(probandVectorData, siblingVectorData, outputPrefix)
 
