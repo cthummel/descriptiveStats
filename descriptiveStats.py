@@ -2,14 +2,15 @@ import numpy as np
 from scipy import stats
 import sys, getopt, math, binFinder, csv, statsmodels.stats.multitest
 
-class ageAnalysis():
-    def __init__(self, chrom, name, start, end, fatherAge, motherAge):
+class vectorAnalysis():
+    def __init__(self, chrom, name, start, end, fatherAge, motherAge, varPos):
         self.start = start
         self.end = end
         self.chrom = chrom
         self.name = name
         self.fatherAge = fatherAge
         self.motherAge = motherAge
+        self.variantPosition = varPos
 
 
 def readMegaBase(filename):
@@ -52,91 +53,72 @@ def holmBonferroni(pvalues, alpha, m):
     
     return k
 
-def ageVectorStats(probandAgeVectorFile, siblingAgeVectorFile, outputPrefix):
+def readVectorData(filename):
+    results = []
+    with open(filename, mode='rt') as f:
+        header = f.readline()
+        for line in f:
+            s = line.strip().split("\t")
+            if s[4] != '[]' and s[5] != '[]':
+                #print(s, s[4][1:-1], s[4][1:-1].split(","))
+                fatherAge = []
+                motherAge = []
+                varPos = []
+                for x in s[4][1:-1].split(","):
+                    if x.find("NA") != -1:
+                        continue
+                    if x[0] == " ":
+                        fatherAge.append(int(x[1:]))
+                    else:
+                        fatherAge.append(int(x))
+                for x in s[5][1:-1].split(","):
+                    if x.find("NA") != -1:
+                        continue
+                    if x[0] == " ":
+                        motherAge.append(int(x[1:]))
+                    else:
+                        motherAge.append(int(x))
+                for x in s[6][1:-1].split(","):
+                    if x.find("NA") != -1:
+                        continue
+                    if x[0] == " ":
+                        varPos.append(int(x[1:]))
+                    else:
+                        varPos.append(int(x))
+                #print([s[0], s[1], s[2], s[3], fatherAge, motherAge])
+                results.append(vectorAnalysis(s[0], s[1], s[2], s[3], fatherAge, motherAge, varPos))
+            else:
+                #print(s)
+                results.append(vectorAnalysis(s[0], s[1], s[2], s[3], [], [], []))
+    return results
+            
+
+def ageVectorStats(probandAgeVector, siblingAgeVector, outputPrefix):
     fatherResults = []
     motherResults = []
     fatherPvalues = []
     motherPvalues = []
-    probandAgeVector = []
-    siblingAgeVector = []
-
-    with open(probandAgeVectorFile, mode='rt') as f:
-        header = f.readline()
-        for line in f:
-            s = line.strip().split("\t")
-            if s[4] != '[]' and s[5] != '[]':
-                #print(s, s[4][1:-1], s[4][1:-1].split(","))
-                fatherAge = []
-                motherAge = []
-                for x in s[4][1:-1].split(","):
-                    if x.find("NA") != -1:
-                        continue
-                    if x[0] == " ":
-                        fatherAge.append(int(x[1:]))
-                    else:
-                        fatherAge.append(int(x))
-                for x in s[5][1:-1].split(","):
-                    if x.find("NA") != -1:
-                        continue
-                    if x[0] == " ":
-                        motherAge.append(int(x[1:]))
-                    else:
-                        motherAge.append(int(x))
-                #print([s[0], s[1], s[2], s[3], fatherAge, motherAge])
-                probandAgeVector.append(ageAnalysis(s[0], s[1], s[2], s[3], fatherAge, motherAge))
-            else:
-                #print(s)
-                probandAgeVector.append(ageAnalysis(s[0], s[1], s[2], s[3], [], []))
-            
-
-    with open(siblingAgeVectorFile, mode='rt') as f:
-        header = f.readline()
-        for line in f:
-            s = line.strip().split("\t")
-            if s[4] != '[]' and s[5] != '[]':
-                #print(s, s[4][1:-1], s[4][1:-1].split(","))
-                fatherAge = []
-                motherAge = []
-                for x in s[4][1:-1].split(","):
-                    #print(x)
-                    if x.find("NA") != -1:
-                        continue
-                    if x[0] == " ":
-                        fatherAge.append(int(x[1:]))
-                    else:
-                        fatherAge.append(int(x))
-                for x in s[5][1:-1].split(","):
-                    if x.find("NA") != -1:
-                        continue
-                    if x[0] == " ":
-                        motherAge.append(int(x[1:]))
-                    else:
-                        motherAge.append(int(x))
-                #print([s[0], s[1], s[2], s[3], fatherAge, motherAge])
-                siblingAgeVector.append(ageAnalysis(s[0], s[1], s[2], s[3], fatherAge, motherAge))
-            else:
-                #print(s)
-                siblingAgeVector.append(ageAnalysis(s[0], s[1], s[2], s[3], [], []))
+    minimumVariantCount = 5
 
     for i in np.arange(0, len(probandAgeVector)):
         #print(probandAgeVector[i].fatherAge, siblingAgeVector[i].fatherAge)
-        if probandAgeVector[i].fatherAge == [] or siblingAgeVector[i].fatherAge == []:
+        if len(probandAgeVector[i].fatherAge) < minimumVariantCount or len(siblingAgeVector[i].fatherAge) < minimumVariantCount:
             skip = True
             #fatherResults.append([probandAgeVector[i].chrom, probandAgeVector[i].name, probandAgeVector[i].start, probandAgeVector[i].end, 99999, 1.0])
             #fatherPvalues.append(1.0)
         else:
             testStat, pvalue = stats.ks_2samp(probandAgeVector[i].fatherAge, siblingAgeVector[i].fatherAge)
             fatherPvalues.append(pvalue)
-            fatherResults.append([probandAgeVector[i].chrom, probandAgeVector[i].name, probandAgeVector[i].start, probandAgeVector[i].end, testStat, pvalue])
+            fatherResults.append([probandAgeVector[i].chrom, probandAgeVector[i].name, probandAgeVector[i].start, probandAgeVector[i].end, testStat, pvalue, len(probandAgeVector[i].fatherAge), len(siblingAgeVector[i].fatherAge)])
             
-        if probandAgeVector[i].motherAge == [] or siblingAgeVector[i].motherAge == []:
+        if len(probandAgeVector[i].motherAge) < minimumVariantCount or len(siblingAgeVector[i].motherAge) < minimumVariantCount:
             skip = True
             #motherResults.append([probandAgeVector[i].chrom, probandAgeVector[i].name, probandAgeVector[i].start, probandAgeVector[i].end, 99999, 1.0])
             #motherPvalues.append(1.0)
         else:
             testStat, pvalue = stats.ks_2samp(probandAgeVector[i].motherAge, siblingAgeVector[i].motherAge)
             motherPvalues.append(pvalue)
-            motherResults.append([probandAgeVector[i].chrom, probandAgeVector[i].name, probandAgeVector[i].start, probandAgeVector[i].end, testStat, pvalue])
+            motherResults.append([probandAgeVector[i].chrom, probandAgeVector[i].name, probandAgeVector[i].start, probandAgeVector[i].end, testStat, pvalue, len(probandAgeVector[i].motherAge), len(siblingAgeVector[i].motherAge)])
 
     fatherBon = statsmodels.stats.multitest.multipletests(fatherPvalues, alpha=0.05, method='bonferroni', is_sorted=False, returnsorted=False)
     fatherSidak = statsmodels.stats.multitest.multipletests(fatherPvalues, alpha=0.05, method='sidak', is_sorted=False, returnsorted=False)
@@ -150,17 +132,40 @@ def ageVectorStats(probandAgeVectorFile, siblingAgeVectorFile, outputPrefix):
 
 
     fCounts = csv.writer(open(outputPrefix + "fatherAgeStats.csv", "w"))
-    fCounts.writerow(["Chrom", "Gene", "Start", "End", "TestStat", "Pvalue", "BonPvalue", "SidakPvalue", "HolmPvalue", "FDRPvalue"])
+    fCounts.writerow(["Chrom", "Gene", "Start", "End", "Length", "ProbandVariantCount", "SiblingVariantCount", "TestStat", "Pvalue", "BonPvalue", "SidakPvalue", "HolmPvalue", "FDRPvalue"])
     for row in np.arange(0, len(fatherResults)):
-        fCounts.writerow([fatherResults[row][0], fatherResults[row][1], fatherResults[row][2], fatherResults[row][3], fatherResults[row][4], fatherResults[row][5], fatherBon[1][row], fatherSidak[1][row], fatherHolm[1][row], fatherFDR[1][row]])
+        fCounts.writerow([fatherResults[row][0], fatherResults[row][1], fatherResults[row][2], fatherResults[row][3], int(fatherResults[row][3]) - int(fatherResults[row][2]), fatherResults[row][6], fatherResults[row][7], fatherResults[row][4], fatherResults[row][5], fatherBon[1][row], fatherSidak[1][row], fatherHolm[1][row], fatherFDR[1][row]])
 
     mCounts = csv.writer(open(outputPrefix + "motherAgeStats.csv", "w"))
-    mCounts.writerow(["Chrom", "Gene", "Start", "End", "TestStat", "Pvalue", "BonPvalue", "SidakPvalue", "HolmPvalue", "FDRPvalue"])
+    mCounts.writerow(["Chrom", "Gene", "Start", "End", "Length", "ProbandVariantCount", "SiblingVariantCount", "TestStat", "Pvalue", "BonPvalue", "SidakPvalue", "HolmPvalue", "FDRPvalue"])
     for row in np.arange(0, len(motherResults)):
-        mCounts.writerow([motherResults[row][0], motherResults[row][1], motherResults[row][2], motherResults[row][3], motherResults[row][4], motherResults[row][5], motherBon[1][row], motherSidak[1][row], motherHolm[1][row], motherFDR[1][row]])
+        mCounts.writerow([motherResults[row][0], motherResults[row][1], motherResults[row][2], motherResults[row][3], int(motherResults[row][3]) - int(motherResults[row][2]), motherResults[row][6], motherResults[row][7], motherResults[row][4], motherResults[row][5], motherBon[1][row], motherSidak[1][row], motherHolm[1][row], motherFDR[1][row]])
 
     return fatherResults, motherResults
 
+
+def chromosomePositionTest(probandData, siblingData, outputPrefix):
+    pvalues = [[],[]]
+
+    # for x in np.arange(0, len(probandData)):
+    #     if (probandData[x].variantPosition > 4):
+    #         W, pvalue = stats.shapiro(probandData[x].variantPosition)
+    #         pvalue[0].append(pvalue)
+
+    # for x in np.arange(0, len(siblingData)):
+    #     W, pvalue = stats.shapiro(siblingData[x].variantPosition)
+    #     pvalue[1].append(pvalue)
+
+    # for i in np.arange(0, len(KStestResults)):
+    #     resultsBon = statsmodels.stats.multitest.multipletests(pvalues[i], alpha=0.05, method='bonferroni', is_sorted=False, returnsorted=False)
+    #     resultsSidak = statsmodels.stats.multitest.multipletests(pvalues[i], alpha=0.05, method='sidak', is_sorted=False, returnsorted=False)
+    #     resultsHolm = statsmodels.stats.multitest.multipletests(pvalues[i], alpha=0.05, method='holm', is_sorted=False, returnsorted=False)  
+    #     reject, adjPvalue = statsmodels.stats.multitest.fdrcorrection(pvalues[i], alpha=0.05, method='indep', is_sorted=False)
+
+    #     wCounts = csv.writer(open(outputPrefix + output[i] + "geneNormTest.csv", "w"))
+    #     wCounts.writerow(["TestStat", "Pvalue", "BonPass", "BonCorrect", "SidakPass", "SidakCorrect", "HolmsPass", "HolmsCorrect", "FDRPass", "FDRCorrect"])
+    #     for row in np.arange(0, len(KStestResults[i])):
+    #         wCounts.writerow([KStestResults[i][row][0], KStestResults[i][row][1], resultsBon[0][row], resultsBon[1][row], resultsSidak[0][row], resultsSidak[1][row],resultsHolm[0][row], resultsHolm[1][row], reject[row], adjPvalue[row]])
 
 
 def binStats(probandData, siblingData, outputPrefix):
@@ -380,7 +385,10 @@ def main(argv):
     probandMegaBaseData = readMegaBase(probandMegaFilename)
     siblingMegaBaseData = readMegaBase(siblingMegaFilename)
 
-    ageVectorStats(probandMegaFilename[0:-15] + ".geneAgeVector.csv", siblingMegaFilename[0:-15] + ".geneAgeVector.csv", outputPrefix)
+    probandVectorData = readVectorData(probandMegaFilename[0:-15] + ".geneAgeVector.csv")
+    siblingVectorData = readVectorData(siblingMegaFilename[0:-15] + ".geneAgeVector.csv")
+
+    ageVectorStats(probandVectorData, siblingVectorData, outputPrefix)
 
     # probandChromDict = {}
     # siblingChromDict = {}
