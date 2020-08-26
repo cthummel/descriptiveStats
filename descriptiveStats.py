@@ -139,7 +139,7 @@ def ageVectorStats(probandAgeVector, siblingAgeVector, outputPrefix):
     mCounts = csv.writer(open(outputPrefix + "motherAgeStats.csv", "w"))
     mCounts.writerow(["Chrom", "Gene", "Start", "End", "Length", "ProbandVariantCount", "SiblingVariantCount", "TestStat", "Pvalue", "BonPvalue", "SidakPvalue", "HolmPvalue", "FDRPvalue"])
     for row in np.arange(0, len(motherResults)):
-        mCounts.writerow([motherResults[row][0], motherResults[row][1], motherResults[row][2], motherResults[row][3], int(motherResults[row][3]) - int(motherResults[row][2]), motherResults[row][6], motherResults[row][7], motherResults[row][4], motherResults[row][5], motherBon[1][row], motherSidak[1][row], motherHolm[1][row], motherFDR[1][row]])
+        mCounts.writerow([motherResults[row][0], motherResults[row][1], motherResults[row][2], motherResults[row][3], int(float(motherResults[row][3])) - int(float(motherResults[row][2])), motherResults[row][6], motherResults[row][7], motherResults[row][4], motherResults[row][5], motherBon[1][row], motherSidak[1][row], motherHolm[1][row], motherFDR[1][row]])
 
     return fatherResults, motherResults
 
