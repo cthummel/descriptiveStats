@@ -134,7 +134,7 @@ def ageVectorStats(probandAgeVector, siblingAgeVector, outputPrefix):
     fCounts = csv.writer(open(outputPrefix + "fatherAgeStats.csv", "w"))
     fCounts.writerow(["Chrom", "Gene", "Start", "End", "Length", "ProbandVariantCount", "SiblingVariantCount", "TestStat", "Pvalue", "BonPvalue", "SidakPvalue", "HolmPvalue", "FDRPvalue"])
     for row in np.arange(0, len(fatherResults)):
-        fCounts.writerow([fatherResults[row][0], fatherResults[row][1], fatherResults[row][2], fatherResults[row][3], int(fatherResults[row][3]) - int(fatherResults[row][2]), fatherResults[row][6], fatherResults[row][7], fatherResults[row][4], fatherResults[row][5], fatherBon[1][row], fatherSidak[1][row], fatherHolm[1][row], fatherFDR[1][row]])
+        fCounts.writerow([fatherResults[row][0], fatherResults[row][1], fatherResults[row][2], fatherResults[row][3], int(float(fatherResults[row][3])) - int(float(fatherResults[row][2])), fatherResults[row][6], fatherResults[row][7], fatherResults[row][4], fatherResults[row][5], fatherBon[1][row], fatherSidak[1][row], fatherHolm[1][row], fatherFDR[1][row]])
 
     mCounts = csv.writer(open(outputPrefix + "motherAgeStats.csv", "w"))
     mCounts.writerow(["Chrom", "Gene", "Start", "End", "Length", "ProbandVariantCount", "SiblingVariantCount", "TestStat", "Pvalue", "BonPvalue", "SidakPvalue", "HolmPvalue", "FDRPvalue"])
