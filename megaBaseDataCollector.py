@@ -430,9 +430,9 @@ def megabaseCountMergeFamily(file, overlap, binsize, outputPrefix, familyData):
                 #print(val.fatherAge)
                 mAgeCounts.writerow([key, "NA", val.start, val.end, val.fatherAge, val.motherAge, val.variantPosition])
                 if val.fatherAge == [] or val.motherAge == []:
-                    wCounts.writerow([key, val.start, val.end, val.count, val.insertion, val.deletion, val.snv, "NA", "NA"])
+                    wCounts.writerow([key, int(val.start), int(val.end), val.count, val.insertion, val.deletion, val.snv, "NA", "NA"])
                 else:
-                    wCounts.writerow([key, val.start, val.end, val.count, val.insertion, val.deletion, val.snv, ageMean(val.fatherAge), ageMean(val.motherAge)])
+                    wCounts.writerow([key, int(val.start), int(val.end), val.count, val.insertion, val.deletion, val.snv, ageMean(val.fatherAge), ageMean(val.motherAge)])
         outputIndex += 1
 
     return result
