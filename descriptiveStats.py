@@ -68,23 +68,23 @@ def readVectorData(filename):
                     if x.find("NA") != -1:
                         continue
                     if x[0] == " ":
-                        fatherAge.append(int(x[1:]))
+                        fatherAge.append(float(x[1:]))
                     else:
-                        fatherAge.append(int(x))
+                        fatherAge.append(float(x))
                 for x in s[5][1:-1].split(","):
                     if x.find("NA") != -1:
                         continue
                     if x[0] == " ":
-                        motherAge.append(int(x[1:]))
+                        motherAge.append(float(x[1:]))
                     else:
-                        motherAge.append(int(x))
+                        motherAge.append(float(x))
                 for x in s[6][1:-1].split(","):
                     if x.find("NA") != -1:
                         continue
                     if x[0] == " ":
-                        varPos.append(int(x[1:]))
+                        varPos.append(float(x[1:]))
                     else:
-                        varPos.append(int(x))
+                        varPos.append(float(x))
                 #print([s[0], s[1], s[2], s[3], fatherAge, motherAge])
                 results.append(vectorAnalysis(s[0], s[1], s[2], s[3], fatherAge, motherAge, varPos))
             else:
