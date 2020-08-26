@@ -424,15 +424,15 @@ def megabaseCountMergeFamily(file, overlap, binsize, outputPrefix, familyData):
         wCounts = csv.writer(open(outputPrefix + typePrefix[outputIndex] + ".megaBaseCounts.csv", "w"))
         mAgeCounts = csv.writer(open(outputPrefix + typePrefix[outputIndex] + ".megaBaseAgeVector.csv", "w"), delimiter="\t")
         mAgeCounts.writerow(["Chrom", "Gene", "Start", "End", "FatherAge", "MotherAge", "VariantPosition"])
-        wCounts.writerow(["Chrom", "Start", "End", "Count", "Insertions", "Deletions", "SNV", "MeanFatherAge", "MeanMotherAge"])
+        wCounts.writerow(["Chrom", "Start", "End", "Count", "Insertions", "Deletions", "SNV", "MeanFatherAge", "MeanMotherAge", "Gene"])
         for key in x.keys():
             for val in x[key]:
                 #print(val.fatherAge)
                 mAgeCounts.writerow([key, "NA", val.start, val.end, val.fatherAge, val.motherAge, val.variantPosition])
                 if val.fatherAge == [] or val.motherAge == []:
-                    wCounts.writerow([key, int(val.start), int(val.end), val.count, val.insertion, val.deletion, val.snv, "NA", "NA"])
+                    wCounts.writerow([key, int(val.start), int(val.end), val.count, val.insertion, val.deletion, val.snv, "NA", "NA", "NA"])
                 else:
-                    wCounts.writerow([key, int(val.start), int(val.end), val.count, val.insertion, val.deletion, val.snv, ageMean(val.fatherAge), ageMean(val.motherAge)])
+                    wCounts.writerow([key, int(val.start), int(val.end), val.count, val.insertion, val.deletion, val.snv, ageMean(val.fatherAge), ageMean(val.motherAge), "NA"])
         outputIndex += 1
 
     return result
