@@ -144,6 +144,37 @@ def ageVectorStats(probandAgeVector, siblingAgeVector, outputPrefix):
     return fatherResults, motherResults
 
 
+def geneCountStats(probandData, siblingData, outputPrefix):
+    positionResults = []
+    positionPvalues = []
+    minimumVariantCount = 5
+
+    for i in np.arange(0, len(probandData)):
+        #print(probandAgeVector[i].fatherAge, siblingData[i].fatherAge)
+        if len(probandData[i].variantPosition) < minimumVariantCount or len(siblingData[i].variantPosition) < minimumVariantCount:
+            skip = True
+            #fatherResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, 99999, 1.0])
+            #fatherPvalues.append(1.0)
+        else:
+            testStat, pvalue = stats.ks_2samp(probandData[i].variantPosition, siblingData[i].variantPosition)
+            positionPvalues.append(pvalue)
+            positionResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, testStat, pvalue, len(probandData[i].variantPosition), len(siblingData[i].variantPosition)])
+            
+
+    positionBon = statsmodels.stats.multitest.multipletests(positionPvalues, alpha=0.05, method='bonferroni', is_sorted=False, returnsorted=False)
+    positionSidak = statsmodels.stats.multitest.multipletests(positionPvalues, alpha=0.05, method='sidak', is_sorted=False, returnsorted=False)
+    positionHolm = statsmodels.stats.multitest.multipletests(positionPvalues, alpha=0.05, method='holm', is_sorted=False, returnsorted=False)  
+    positionFDR = statsmodels.stats.multitest.fdrcorrection(positionPvalues, alpha=0.05, method='indep', is_sorted=False)
+
+
+    fCounts = csv.writer(open(outputPrefix + "positionStats.csv", "w"))
+    fCounts.writerow(["Chrom", "Gene", "Start", "End", "Length", "ProbandVariantCount", "SiblingVariantCount", "TestStat", "Pvalue", "BonPvalue", "SidakPvalue", "HolmPvalue", "FDRPvalue"])
+    for row in np.arange(0, len(positionResults)):
+        fCounts.writerow([positionResults[row][0], positionResults[row][1], positionResults[row][2], positionResults[row][3], int(float(positionResults[row][3])) - int(float(positionResults[row][2])), positionResults[row][6], positionResults[row][7], positionResults[row][4], positionResults[row][5], positionBon[1][row], positionSidak[1][row], positionHolm[1][row], positionFDR[1][row]])
+
+    return positionResults
+
+
 def chromosomePositionTest(probandData, siblingData, outputPrefix):
     pvalues = [[],[]]
 
@@ -396,6 +427,7 @@ def main(argv):
 
 
     ageVectorStats(probandVectorData, siblingVectorData, outputPrefix)
+    geneCountStats(probandVectorData, siblingVectorData, outputPrefix)
 
     # probandChromDict = {}
     # siblingChromDict = {}
@@ -450,6 +482,7 @@ def main(argv):
 
     binStats(probandMegaBaseData, siblingMegaBaseData, outputPrefix)
     binStatsGene(probandMegaBaseData, siblingMegaBaseData, outputPrefix)
+    
         
 
 
