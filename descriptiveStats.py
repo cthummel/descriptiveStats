@@ -184,23 +184,23 @@ def geneCountStats(probandData, siblingData, outputPrefix):
                 #More sibling data for the chromosome so we need to move it forward
                 if probandData[i].chrom != currentChrom and siblingData[j].chrom == currentChrom:
                     print("sibling should be behind", probandData[i].chrom, siblingData[j].chrom, probandData[i].start, siblingData[j].start)
-                    while probandData[i].chrom != currentChrom and siblingData[j].chrom == currentChrom:
+                    while probandData[i].chrom != siblingData[j].chrom:
                         j += 1
                     print("sibling should be caught up", probandData[i].chrom, siblingData[j].chrom, probandData[i].start, siblingData[j].start)
                     currentChrom = probandData[i].chrom
                 #More proband data for the chromosome so we need to move it forward
                 elif probandData[i].chrom == currentChrom and siblingData[j].chrom != currentChrom:
                     print("proband should be behind", probandData[i].chrom, siblingData[j].chrom, probandData[i].start, siblingData[j].start)
-                    while probandData[i].chrom == currentChrom and siblingData[j].chrom != currentChrom:
+                    while probandData[i].chrom != siblingData[j].chrom:
                         i += 1
                     print("proband should be caught up", probandData[i].chrom, siblingData[j].chrom)
                     currentChrom = probandData[i].chrom
 
             while probandData[i].start < siblingData[j].start:
-                print("proband start behind", probandData[i].start, siblingData[j].start)
+                #print("proband start behind", probandData[i].start, siblingData[j].start)
                 i += 1
-            while probandData[i].start > siblingData[j].start:\
-                print("sibling start behind", probandData[i].start, siblingData[j].start)
+            while probandData[i].start > siblingData[j].start:
+                #print("sibling start behind", probandData[i].start, siblingData[j].start)
                 j += 1
 
             print("everything should match", probandData[i].chrom, siblingData[j].chrom, probandData[i].start, siblingData[j].start)
