@@ -169,6 +169,8 @@ def geneCountStats(probandData, siblingData, outputPrefix):
             currentChrom = probandData[i].chrom
         elif probandData[i].chrom != currentChrom and siblingData[j].chrom != currentChrom:
             currentChrom = probandData[i].chrom
+        else:
+            print("everything should match", probandData[i].chrom, siblingData[j].chrom, probandData[i].start, siblingData[j].start)
             
         if (probandData[i].chrom != siblingData[j].chrom):
             print("We messed up chromosome", probandData[i].chrom, siblingData[j].chrom)
