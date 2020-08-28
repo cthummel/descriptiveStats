@@ -178,7 +178,7 @@ def geneCountStats(probandData, siblingData, outputPrefix):
         #     print("We messed up start", probandData[i].start, siblingData[j].start)
 
         if (probandData[i].chrom == siblingData[j].chrom and probandData[i].start == siblingData[j].start):
-            skip = True
+            currentChrom = probandData[i].chrom
         else:
             print("mismatch detected", currentChrom, probandData[i].chrom, siblingData[j].chrom, probandData[i].start, siblingData[j].start)
             if probandData[i].chrom != siblingData[j].chrom:
