@@ -180,6 +180,7 @@ def geneCountStats(probandData, siblingData, outputPrefix):
         if (probandData[i].chrom == siblingData[j].chrom and probandData[i].start == siblingData[j].start):
             skip = True
         else:
+            print("mismatch detected", currentChrom, probandData[i].chrom, siblingData[j].chrom, probandData[i].start, siblingData[j].start)
             if probandData[i].chrom != siblingData[j].chrom:
                 #More sibling data for the chromosome so we need to move it forward
                 if probandData[i].chrom != currentChrom and siblingData[j].chrom == currentChrom:
@@ -203,7 +204,7 @@ def geneCountStats(probandData, siblingData, outputPrefix):
                 #print("sibling start behind", probandData[i].start, siblingData[j].start)
                 j += 1
 
-            print("everything should match", probandData[i].chrom, siblingData[j].chrom, probandData[i].start, siblingData[j].start)
+            print("mismatch resolved", currentChrom, probandData[i].chrom, siblingData[j].chrom, probandData[i].start, siblingData[j].start)
 
             
 
