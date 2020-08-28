@@ -183,6 +183,10 @@ def geneCountStats(probandData, siblingData, outputPrefix):
             testStat, pvalue = stats.ks_2samp(probandData[i].variantPosition, siblingData[j].variantPosition)
             positionPvalues.append(pvalue)
             positionResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, testStat, pvalue, len(probandData[i].variantPosition), len(siblingData[j].variantPosition)])
+        
+        if i + 1 == len(probandData) or j + 1 == len(siblingData):
+            break
+
         j += 1
             
 
