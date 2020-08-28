@@ -167,10 +167,10 @@ def geneCountStats(probandData, siblingData, outputPrefix):
         elif probandData[i].chrom != currentChrom and siblingData[j].chrom != currentChrom:
             currentChrom = probandData[i].chrom
             
-        # if (probandData[i].chrom != siblingData[j].chrom):
-        #     print("We messed up chromosome", probandData[i].chrom, siblingData[j].chrom)
-        # if (probandData[i].start != siblingData[j].start):
-        #     print("We messed up start", probandData[i].start, siblingData[j].start)
+        if (probandData[i].chrom != siblingData[j].chrom):
+            print("We messed up chromosome", probandData[i].chrom, siblingData[j].chrom)
+        if (probandData[i].start != siblingData[j].start):
+            print("We messed up start", probandData[i].start, siblingData[j].start)
 
         if len(probandData[i].variantPosition) < minimumVariantCount or len(siblingData[j].variantPosition) < minimumVariantCount:
             skip = True
