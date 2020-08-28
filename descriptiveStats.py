@@ -156,6 +156,7 @@ def geneCountStats(probandData, siblingData, outputPrefix):
         #More sibling data for the chromosome so we need to move it forward.
         if probandData[i].chrom != currentChrom and siblingData[j].chrom == currentChrom:
             while probandData[i].chrom != currentChrom and siblingData[j].chrom == currentChrom:
+
                 j += 1
             currentChrom = probandData[i].chrom
         #More proband data for the chromosome so we need to move it forward
@@ -163,11 +164,13 @@ def geneCountStats(probandData, siblingData, outputPrefix):
             while probandData[i].chrom == currentChrom and siblingData[j].chrom != currentChrom:
                 i += 1
             currentChrom = probandData[i].chrom
+        elif probandData[i].chrom != currentChrom and siblingData[j].chrom != currentChrom:
+            currentChrom = probandData[i].chrom
             
-        if (probandData[i].chrom != siblingData[j].chrom):
-            print("We messed up chromosome", probandData[i].chrom, siblingData[j].chrom)
-        if (probandData[i].start != siblingData[j].start):
-            print("We messed up start", probandData[i].start, siblingData[j].start)
+        # if (probandData[i].chrom != siblingData[j].chrom):
+        #     print("We messed up chromosome", probandData[i].chrom, siblingData[j].chrom)
+        # if (probandData[i].start != siblingData[j].start):
+        #     print("We messed up start", probandData[i].start, siblingData[j].start)
 
         if len(probandData[i].variantPosition) < minimumVariantCount or len(siblingData[j].variantPosition) < minimumVariantCount:
             skip = True
