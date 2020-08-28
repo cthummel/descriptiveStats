@@ -147,18 +147,37 @@ def ageVectorStats(probandAgeVector, siblingAgeVector, outputPrefix):
 def geneCountStats(probandData, siblingData, outputPrefix):
     positionResults = []
     positionPvalues = []
+    currentChrom = probandData[0].chrom
     minimumVariantCount = 5
 
+    j = 0
+
     for i in np.arange(0, len(probandData)):
-        #print(probandAgeVector[i].fatherAge, siblingData[i].fatherAge)
-        if len(probandData[i].variantPosition) < minimumVariantCount or len(siblingData[i].variantPosition) < minimumVariantCount:
+        #More sibling data for the chromosome so we need to move it forward.
+        if probandData[i].chrom != currentChrom and siblingData[j].chrom == currentChrom:
+            while probandData[i].chrom != currentChrom and siblingData[j].chrom == currentChrom:
+                j += 1
+            currentChrom = probandData[i].chrom
+        #More proband data for the chromosome so we need to move it forward
+        elif probandData[i].chrom == currentChrom and siblingData[j].chrom != currentChrom:
+            while probandData[i].chrom == currentChrom and siblingData[j].chrom != currentChrom:
+                i += 1
+            currentChrom = probandData[i].chrom
+            
+        if (probandData[i].chrom != siblingData[j].chrom):
+            print("We messed up chromosome", probandData[i].chrom, siblingData[j].chrom)
+        if (probandData[i].start != siblingData[j].start):
+            print("We messed up start", probandData[i].start, siblingData[j].start)
+
+        if len(probandData[i].variantPosition) < minimumVariantCount or len(siblingData[j].variantPosition) < minimumVariantCount:
             skip = True
             #fatherResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, 99999, 1.0])
             #fatherPvalues.append(1.0)
         else:
-            testStat, pvalue = stats.ks_2samp(probandData[i].variantPosition, siblingData[i].variantPosition)
+            testStat, pvalue = stats.ks_2samp(probandData[i].variantPosition, siblingData[j].variantPosition)
             positionPvalues.append(pvalue)
-            positionResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, testStat, pvalue, len(probandData[i].variantPosition), len(siblingData[i].variantPosition)])
+            positionResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, testStat, pvalue, len(probandData[i].variantPosition), len(siblingData[j].variantPosition)])
+        j += 1
             
 
     positionBon = statsmodels.stats.multitest.multipletests(positionPvalues, alpha=0.05, method='bonferroni', is_sorted=False, returnsorted=False)
