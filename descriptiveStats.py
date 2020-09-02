@@ -12,6 +12,77 @@ class vectorAnalysis():
         self.motherAge = motherAge
         self.variantPosition = varPos
 
+def megaBaseDataMatch(probandData, siblingData):
+    newProband = []
+    newSibling = []
+    chromList = []
+
+    for i in np.arange(0, len(probandData)):
+        #More sibling data for the chromosome so we need to move it forward.
+        # if probandData[i].chrom != currentChrom and siblingData[j].chrom == currentChrom:
+        #     print("sibling should be behind", probandData[i].chrom, siblingData[j].chrom, probandData[i].start, siblingData[j].start)
+        #     while probandData[i].chrom != currentChrom and siblingData[j].chrom == currentChrom:
+        #         j += 1
+        #     print("sibling should be caught up", probandData[i].chrom, siblingData[j].chrom, probandData[i].start, siblingData[j].start)
+        #     currentChrom = probandData[i].chrom
+        # #More proband data for the chromosome so we need to move it forward
+        # elif probandData[i].chrom == currentChrom and siblingData[j].chrom != currentChrom:
+        #     print("proband should be behind", probandData[i].chrom, siblingData[j].chrom, probandData[i].start, siblingData[j].start)
+        #     while probandData[i].chrom == currentChrom and siblingData[j].chrom != currentChrom:
+        #         i += 1
+        #     print("proband should be caught up", probandData[i].chrom, siblingData[j].chrom, probandData[i].start, siblingData[j].start)
+        #     currentChrom = probandData[i].chrom
+        # elif probandData[i].chrom != currentChrom and siblingData[j].chrom != currentChrom:
+        #     currentChrom = probandData[i].chrom
+        # else:
+        #     print("everything should match", probandData[i].chrom, siblingData[j].chrom, probandData[i].start, siblingData[j].start)
+            
+        # if (probandData[i].chrom != siblingData[j].chrom):
+        #     print("We messed up chromosome", probandData[i].chrom, siblingData[j].chrom)
+        # if (probandData[i].start != siblingData[j].start):
+        #     print("We messed up start", probandData[i].start, siblingData[j].start)
+
+        if (probandData[i].chrom == siblingData[j].chrom and probandData[i].start == siblingData[j].start):
+            currentChrom = probandData[i].chrom
+        else:
+            print("mismatch detected", currentChrom, probandData[i].chrom, siblingData[j].chrom, probandData[i].start, siblingData[j].start)
+            if probandData[i].chrom != siblingData[j].chrom:
+                #More sibling data for the chromosome so we need to move it forward
+                if probandData[i].chrom != currentChrom and siblingData[j].chrom == currentChrom:
+                    print("sibling should be behind", probandData[i].chrom, siblingData[j].chrom, probandData[i].start, siblingData[j].start)
+                    while probandData[i].chrom != siblingData[j].chrom:
+                        j += 1
+                    print("sibling should be caught up", probandData[i].chrom, siblingData[j].chrom, probandData[i].start, siblingData[j].start)
+                    currentChrom = probandData[i].chrom
+                #More proband data for the chromosome so we need to move it forward
+                elif probandData[i].chrom == currentChrom and siblingData[j].chrom != currentChrom:
+                    print("proband should be behind", probandData[i].chrom, siblingData[j].chrom, probandData[i].start, siblingData[j].start)
+                    while probandData[i].chrom != siblingData[j].chrom:
+                        i += 1
+                    print("proband should be caught up", probandData[i].chrom, siblingData[j].chrom)
+                    currentChrom = probandData[i].chrom
+                #Both changed to a new chromosome that isnt the same as the other.
+                else:
+                    while chromList.index(probandData[i].chrom) < chromList.index(siblingData[j].chrom):
+                        i += 1
+                    while chromList.index(probandData[i].chrom) > chromList.index(siblingData[j].chrom):
+                        j += 1
+
+
+
+            while probandData[i].start < siblingData[j].start:
+                #print("proband start behind", probandData[i].start, siblingData[j].start)
+                i += 1
+            while probandData[i].start > siblingData[j].start:
+                #print("sibling start behind", probandData[i].start, siblingData[j].start)
+                j += 1
+
+            print("mismatch resolved", currentChrom, probandData[i].chrom, siblingData[j].chrom, probandData[i].start, siblingData[j].start)
+
+            
+
+
+    return newProband, newSibling
 
 def readMegaBase(filename):
     results = []
@@ -147,6 +218,7 @@ def ageVectorStats(probandAgeVector, siblingAgeVector, outputPrefix):
 def geneCountStats(probandData, siblingData, outputPrefix):
     positionResults = []
     positionPvalues = []
+    chromList = ["chr1", "chr10", "chr11", "chr12", "chr13", "chr14", "chr15", "chr16", "chr17", "chr18", "chr19", "chr2", "chr20", "chr21", "chr22", "chr23", "chrX", "chrY"]
     currentChrom = probandData[0].chrom
     minimumVariantCount = 5
 
@@ -196,6 +268,12 @@ def geneCountStats(probandData, siblingData, outputPrefix):
                         i += 1
                     print("proband should be caught up", probandData[i].chrom, siblingData[j].chrom)
                     currentChrom = probandData[i].chrom
+                #Both changed to a new chromosome that isnt the same as the other.
+                else:
+                    while chromList.index(probandData[i].chrom) < chromList.index(siblingData[j].chrom):
+                        i += 1
+                    while chromList.index(probandData[i].chrom) > chromList.index(siblingData[j].chrom):
+                        j += 1
 
             while probandData[i].start < siblingData[j].start:
                 #print("proband start behind", probandData[i].start, siblingData[j].start)
