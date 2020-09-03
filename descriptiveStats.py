@@ -266,6 +266,7 @@ def geneCountStats(probandData, siblingData, outputPrefix):
                             done == True
                             break
                     if done:
+                        print("done is true")
                         break
                     print("sibling should be caught up", probandData[i].chrom, siblingData[j].chrom, probandData[i].start, siblingData[j].start)
                     currentChrom = probandData[i].chrom
