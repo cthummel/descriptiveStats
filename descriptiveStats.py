@@ -248,7 +248,9 @@ def geneCountStats(probandData, siblingData, outputPrefix):
         #     print("We messed up chromosome", probandData[i].chrom, siblingData[j].chrom)
         # if (probandData[i].start != siblingData[j].start):
         #     print("We messed up start", probandData[i].start, siblingData[j].start)
-
+        probandSize = len(probandData)
+        siblingSize = len(siblingData)
+        done = False
         if (probandData[i].chrom == siblingData[j].chrom and probandData[i].start == siblingData[j].start):
             currentChrom = probandData[i].chrom
         else:
@@ -259,6 +261,11 @@ def geneCountStats(probandData, siblingData, outputPrefix):
                     print("sibling should be behind", probandData[i].chrom, siblingData[j].chrom, probandData[i].start, siblingData[j].start)
                     while probandData[i].chrom != siblingData[j].chrom:
                         j += 1
+                        if (j == siblingSize):
+                            done == True
+                            break
+                    if done:
+                        break
                     print("sibling should be caught up", probandData[i].chrom, siblingData[j].chrom, probandData[i].start, siblingData[j].start)
                     currentChrom = probandData[i].chrom
                 #More proband data for the chromosome so we need to move it forward
@@ -266,21 +273,46 @@ def geneCountStats(probandData, siblingData, outputPrefix):
                     print("proband should be behind", probandData[i].chrom, siblingData[j].chrom, probandData[i].start, siblingData[j].start)
                     while probandData[i].chrom != siblingData[j].chrom:
                         i += 1
+                        if (i == probandSize):
+                            done == True
+                            break
+                    if done:
+                        break
                     print("proband should be caught up", probandData[i].chrom, siblingData[j].chrom)
                     currentChrom = probandData[i].chrom
                 #Both changed to a new chromosome that isnt the same as the other.
                 else:
                     while chromList.index(probandData[i].chrom) < chromList.index(siblingData[j].chrom):
                         i += 1
+                        if (i == probandSize):
+                            done == True
+                            break
+                    if done:
+                        break
                     while chromList.index(probandData[i].chrom) > chromList.index(siblingData[j].chrom):
                         j += 1
+                        if (j == siblingSize):
+                            done == True
+                            break
+                    if done:
+                        break
 
             while probandData[i].start < siblingData[j].start:
                 #print("proband start behind", probandData[i].start, siblingData[j].start)
                 i += 1
+                if (i == probandSize):
+                    done == True
+                    break
+            if done:
+                break
             while probandData[i].start > siblingData[j].start:
                 #print("sibling start behind", probandData[i].start, siblingData[j].start)
                 j += 1
+                if (j == siblingSize):
+                    done == True
+                    break
+            if done:
+                break
 
             print("mismatch resolved", currentChrom, probandData[i].chrom, siblingData[j].chrom, probandData[i].start, siblingData[j].start)
 
