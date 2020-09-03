@@ -262,6 +262,7 @@ def geneCountStats(probandData, siblingData, outputPrefix):
                     while probandData[i].chrom != siblingData[j].chrom:
                         j += 1
                         if (j == siblingSize):
+                            print("Completed looking through sibling")
                             done == True
                             break
                     if done:
