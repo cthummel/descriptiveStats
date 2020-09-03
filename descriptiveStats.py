@@ -172,6 +172,75 @@ def ageVectorStats(probandAgeVector, siblingAgeVector, outputPrefix):
     minimumVariantCount = 5
 
     for i in np.arange(0, len(probandAgeVector)):
+        probandSize = len(probandAgeVector)
+        siblingSize = len(siblingAgeVector)
+        done = False
+        if (probandAgeVector[i].chrom == siblingAgeVector[j].chrom and probandAgeVector[i].start == siblingAgeVector[j].start):
+            currentChrom = probandAgeVector[i].chrom
+        else:
+            print("mismatch detected", currentChrom, probandAgeVector[i].chrom, siblingAgeVector[j].chrom, probandAgeVector[i].start, siblingAgeVector[j].start)
+            if probandAgeVector[i].chrom != siblingAgeVector[j].chrom:
+                #More sibling data for the chromosome so we need to move it forward
+                if probandAgeVector[i].chrom != currentChrom and siblingAgeVector[j].chrom == currentChrom:
+                    print("sibling should be behind", probandAgeVector[i].chrom, siblingAgeVector[j].chrom, probandAgeVector[i].start, siblingAgeVector[j].start)
+                    while probandAgeVector[i].chrom != siblingAgeVector[j].chrom:
+                        j += 1
+                        if (j == siblingSize):
+                            print("Completed looking through sibling")
+                            done = True
+                            break
+                    if done:
+                        break
+                    print("sibling should be caught up", probandAgeVector[i].chrom, siblingAgeVector[j].chrom, probandAgeVector[i].start, siblingAgeVector[j].start)
+                    currentChrom = probandAgeVector[i].chrom
+                #More proband data for the chromosome so we need to move it forward
+                elif probandAgeVector[i].chrom == currentChrom and siblingAgeVector[j].chrom != currentChrom:
+                    print("proband should be behind", probandAgeVector[i].chrom, siblingAgeVector[j].chrom, probandAgeVector[i].start, siblingAgeVector[j].start)
+                    while probandAgeVector[i].chrom != siblingAgeVector[j].chrom:
+                        i += 1
+                        if (i == probandSize):
+                            done = True
+                            break
+                    if done:
+                        break
+                    print("proband should be caught up", probandAgeVector[i].chrom, siblingAgeVector[j].chrom)
+                    currentChrom = probandAgeVector[i].chrom
+                #Both changed to a new chromosome that isnt the same as the other.
+                else:
+                    while chromList.index(probandAgeVector[i].chrom) < chromList.index(siblingAgeVector[j].chrom):
+                        i += 1
+                        if (i == probandSize):
+                            done = True
+                            break
+                    if done:
+                        break
+                    while chromList.index(probandAgeVector[i].chrom) > chromList.index(siblingAgeVector[j].chrom):
+                        j += 1
+                        if (j == siblingSize):
+                            done = True
+                            break
+                    if done:
+                        break
+
+            while probandAgeVector[i].start < siblingAgeVector[j].start:
+                #print("proband start behind", probandAgeVector[i].start, siblingAgeVector[j].start)
+                i += 1
+                if (i == probandSize):
+                    done = True
+                    break
+            if done:
+                break
+            while probandAgeVector[i].start > siblingAgeVector[j].start:
+                #print("sibling start behind", probandAgeVector[i].start, siblingAgeVector[j].start)
+                j += 1
+                if (j == siblingSize):
+                    done = True
+                    break
+            if done:
+                break
+
+            print("mismatch resolved", currentChrom, probandAgeVector[i].chrom, siblingAgeVector[j].chrom, probandAgeVector[i].start, siblingAgeVector[j].start)
+
         #print(probandAgeVector[i].fatherAge, siblingAgeVector[i].fatherAge)
         if len(probandAgeVector[i].fatherAge) < minimumVariantCount or len(siblingAgeVector[i].fatherAge) < minimumVariantCount:
             skip = True
