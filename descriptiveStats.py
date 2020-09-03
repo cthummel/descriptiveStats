@@ -169,6 +169,7 @@ def ageVectorStats(probandAgeVector, siblingAgeVector, outputPrefix):
     motherResults = []
     fatherPvalues = []
     motherPvalues = []
+    j = 0
     minimumVariantCount = 5
 
     for i in np.arange(0, len(probandAgeVector)):
