@@ -263,10 +263,9 @@ def geneCountStats(probandData, siblingData, outputPrefix):
                         j += 1
                         if (j == siblingSize):
                             print("Completed looking through sibling")
-                            done == True
+                            done = True
                             break
                     if done:
-                        print("done is true")
                         break
                     print("sibling should be caught up", probandData[i].chrom, siblingData[j].chrom, probandData[i].start, siblingData[j].start)
                     currentChrom = probandData[i].chrom
@@ -276,7 +275,7 @@ def geneCountStats(probandData, siblingData, outputPrefix):
                     while probandData[i].chrom != siblingData[j].chrom:
                         i += 1
                         if (i == probandSize):
-                            done == True
+                            done = True
                             break
                     if done:
                         break
@@ -287,14 +286,14 @@ def geneCountStats(probandData, siblingData, outputPrefix):
                     while chromList.index(probandData[i].chrom) < chromList.index(siblingData[j].chrom):
                         i += 1
                         if (i == probandSize):
-                            done == True
+                            done = True
                             break
                     if done:
                         break
                     while chromList.index(probandData[i].chrom) > chromList.index(siblingData[j].chrom):
                         j += 1
                         if (j == siblingSize):
-                            done == True
+                            done = True
                             break
                     if done:
                         break
@@ -303,7 +302,7 @@ def geneCountStats(probandData, siblingData, outputPrefix):
                 #print("proband start behind", probandData[i].start, siblingData[j].start)
                 i += 1
                 if (i == probandSize):
-                    done == True
+                    done = True
                     break
             if done:
                 break
@@ -311,7 +310,7 @@ def geneCountStats(probandData, siblingData, outputPrefix):
                 #print("sibling start behind", probandData[i].start, siblingData[j].start)
                 j += 1
                 if (j == siblingSize):
-                    done == True
+                    done = True
                     break
             if done:
                 break
