@@ -250,6 +250,7 @@ def ageVectorStats(probandAgeVector, siblingAgeVector, outputPrefix):
 def geneCountStats(probandData, siblingData, outputPrefix):
     positionResults = []
     positionPvalues = []
+    currentChrom = probandData[0].chrom
     minimumVariantCount = 5
 
     j = 0
@@ -593,7 +594,7 @@ def main(argv):
     binStats(probandMegaBaseData, siblingMegaBaseData, outputPrefix)
     binStatsGene(probandMegaBaseData, siblingMegaBaseData, outputPrefix)
     geneCountStats(probandMegaBaseData, siblingMegaBaseData, outputPrefix)
-    
+
 
     # tempProband = [34296170, 34038118, 33969149, 33804533, 33897533, 34262966, 34101972, 34302323, 34046133, 34499237, 34264576, 34403749, 34042175, 33556121, 34418068, 34373311, 34428879, 34428880, 34004365, 33686874, 34023799, 34422787, 34249934, 33920501, 33907808, 34318097]
     # tempSibling = [33533207, 34304953, 33711308, 33554223, 33710378, 33759165, 33688167, 33931893, 34151661, 34151797, 33639300, 33639301, 33501920, 33725904, 34330898, 33707310, 33768958, 34099877, 33589316, 33548425, 33707411, 34156030]
