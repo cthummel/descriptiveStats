@@ -89,7 +89,7 @@ def binomialCounts(probandData, siblingData, outputPrefix):
                 #fatherResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, 99999, 1.0])
                 #fatherPvalues.append(1.0)
             else:
-                pvalue = stats.binom_test(probandData[i].count, int(float(probandData[i].end)) - int(float(probandData[i].start)), siblingData[j].count * 1.0 / float(siblingData[i].end) - float(siblingData[i].start))
+                pvalue = stats.binom_test(probandData[i].count, int(float(probandData[i].end)) - int(float(probandData[i].start)), siblingData[j].count * 1.0 / (float(siblingData[i].end) - float(siblingData[i].start)))
                 countPvalues.append(pvalue)
                 countResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, "NA", pvalue, len(probandData[i].variantPosition), len(siblingData[j].variantPosition)])
 
