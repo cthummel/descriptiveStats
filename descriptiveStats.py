@@ -539,6 +539,7 @@ def main(argv):
 
     ageVectorStats(probandVectorData, siblingVectorData, outputPrefix)
     geneCountStats(probandVectorData, siblingVectorData, outputPrefix)
+    binomialCounts(probandVectorData, siblingVectorData, outputPrefix)
 
     # probandChromDict = {}
     # siblingChromDict = {}
@@ -593,7 +594,7 @@ def main(argv):
 
     binStats(probandMegaBaseData, siblingMegaBaseData, outputPrefix)
     binStatsGene(probandMegaBaseData, siblingMegaBaseData, outputPrefix)
-    geneCountStats(probandMegaBaseData, siblingMegaBaseData, outputPrefix)
+    #geneCountStats(probandMegaBaseData, siblingMegaBaseData, outputPrefix)
 
 
     # tempProband = [34296170, 34038118, 33969149, 33804533, 33897533, 34262966, 34101972, 34302323, 34046133, 34499237, 34264576, 34403749, 34042175, 33556121, 34418068, 34373311, 34428879, 34428880, 34004365, 33686874, 34023799, 34422787, 34249934, 33920501, 33907808, 34318097]
