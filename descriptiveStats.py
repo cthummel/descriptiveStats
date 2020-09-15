@@ -18,7 +18,7 @@ def resolveMismatch(i, j, probandData, siblingData, currentChrom, minimumVariant
     probandSize = len(probandData)
     siblingSize = len(siblingData)
     done = False
-    print(probandData[i].chrom, siblingData[j].chrom, probandData[i].start, siblingData[j].start)
+    #print(probandData[i].chrom, siblingData[j].chrom, probandData[i].start, siblingData[j].start)
     if (probandData[i].chrom == siblingData[j].chrom and probandData[i].start == siblingData[j].start):
         currentChrom = probandData[i].chrom
         return i, j, currentChrom, False
@@ -78,8 +78,9 @@ def binomialCounts(probandData, siblingData, outputPrefix):
     currentChrom = probandData[0].chrom
     minimumVariantCount = 5
     j = 0
+    i = 0
 
-    for i in np.arange(0, len(probandData)):
+    while i < len(probandData):
         i, j, currentChrom, done = resolveMismatch(i, j, probandData, siblingData, currentChrom, minimumVariantCount)
 
         if done:
@@ -95,6 +96,7 @@ def binomialCounts(probandData, siblingData, outputPrefix):
                 countResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, "NA", pvalue, len(probandData[i].variantPosition), len(siblingData[j].variantPosition)])
 
         j += 1
+        i += 1
             
 
     countBon = statsmodels.stats.multitest.multipletests(countPvalues, alpha=0.05, method='bonferroni', is_sorted=False, returnsorted=False)
@@ -201,9 +203,9 @@ def ageVectorStats(probandAgeVector, siblingAgeVector, outputPrefix):
     minimumVariantCount = 5
 
     while i < len(probandAgeVector):
-        print("premismatch check", i, j, currentChrom)
+        #print("premismatch check", i, j, currentChrom)
         i, j, currentChrom, done = resolveMismatch(i, j, probandAgeVector, siblingAgeVector, currentChrom, minimumVariantCount)
-        print("postmismatch check", i, j, currentChrom)
+        #print("postmismatch check", i, j, currentChrom)
         if done:
             break
         else:
@@ -257,10 +259,10 @@ def geneCountStats(probandData, siblingData, outputPrefix):
     positionPvalues = []
     currentChrom = probandData[0].chrom
     minimumVariantCount = 5
-
+    i = 0
     j = 0
 
-    for i in np.arange(0, len(probandData)):
+    while i < len(probandData):
         i, j, currentChrom, done = resolveMismatch(i, j, probandData, siblingData, currentChrom, minimumVariantCount)
         if done:
             break
@@ -274,6 +276,7 @@ def geneCountStats(probandData, siblingData, outputPrefix):
         
 
         j += 1
+        i += 1
             
 
     positionBon = statsmodels.stats.multitest.multipletests(positionPvalues, alpha=0.05, method='bonferroni', is_sorted=False, returnsorted=False)
