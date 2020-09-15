@@ -18,6 +18,7 @@ def resolveMismatch(i, j, probandData, siblingData, currentChrom, minimumVariant
     probandSize = len(probandData)
     siblingSize = len(siblingData)
     done = False
+    print(probandData[i].chrom, siblingData[j].chrom, probandData[i].start, siblingData[j].start)
     if (probandData[i].chrom == siblingData[j].chrom and probandData[i].start == siblingData[j].start):
         currentChrom = probandData[i].chrom
         return i, j, currentChrom, False
