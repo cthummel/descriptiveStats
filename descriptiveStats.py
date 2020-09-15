@@ -197,9 +197,10 @@ def ageVectorStats(probandAgeVector, siblingAgeVector, outputPrefix):
     motherPvalues = []
     currentChrom = probandAgeVector[0].chrom
     j = 0
+    i = 0
     minimumVariantCount = 5
 
-    for i in np.arange(0, len(probandAgeVector)):
+    while i < len(probandAgeVector):
         print("premismatch check", i, j, currentChrom)
         i, j, currentChrom, done = resolveMismatch(i, j, probandAgeVector, siblingAgeVector, currentChrom, minimumVariantCount)
         print("postmismatch check", i, j, currentChrom)
@@ -224,6 +225,8 @@ def ageVectorStats(probandAgeVector, siblingAgeVector, outputPrefix):
                 testStat, pvalue = stats.ks_2samp(probandAgeVector[i].motherAge, siblingAgeVector[i].motherAge)
                 motherPvalues.append(pvalue)
                 motherResults.append([probandAgeVector[i].chrom, probandAgeVector[i].name, probandAgeVector[i].start, probandAgeVector[i].end, testStat, pvalue, len(probandAgeVector[i].motherAge), len(siblingAgeVector[i].motherAge)])
+        j += 1
+        i += 1
 
     fatherBon = statsmodels.stats.multitest.multipletests(fatherPvalues, alpha=0.05, method='bonferroni', is_sorted=False, returnsorted=False)
     fatherSidak = statsmodels.stats.multitest.multipletests(fatherPvalues, alpha=0.05, method='sidak', is_sorted=False, returnsorted=False)
