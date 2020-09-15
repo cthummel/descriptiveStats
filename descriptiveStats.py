@@ -200,8 +200,9 @@ def ageVectorStats(probandAgeVector, siblingAgeVector, outputPrefix):
     minimumVariantCount = 5
 
     for i in np.arange(0, len(probandAgeVector)):
+        print("premismatch check", i, j, currentChrom)
         i, j, currentChrom, done = resolveMismatch(i, j, probandAgeVector, siblingAgeVector, currentChrom, minimumVariantCount)
-
+        print("postmismatch check", i, j, currentChrom)
         if done:
             break
         else:
@@ -257,9 +258,7 @@ def geneCountStats(probandData, siblingData, outputPrefix):
     j = 0
 
     for i in np.arange(0, len(probandData)):
-        print("premismatch check", i, j, currentChrom)
         i, j, currentChrom, done = resolveMismatch(i, j, probandData, siblingData, currentChrom, minimumVariantCount)
-        print("postmismatch check", i, j, currentChrom)
         if done:
             break
         else:
