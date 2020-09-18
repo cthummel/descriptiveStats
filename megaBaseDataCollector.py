@@ -275,7 +275,7 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
         fAgeCounts = csv.writer(open(outputPrefix + typePrefix[outputIndex] + ".geneAgeVector.csv", "w"), delimiter="\t")
         fAgeCounts.writerow(["Chrom", "Gene", "Start", "End", "FatherAge", "MotherAge", "VariantPosition"])
         wCounts.writerow(["Chrom", "Start", "End", "Count", "Insertions", "Deletions", "SNV", "MeanFatherAge", "MeanMotherAge", "Gene"])
-        for key in x.keys():
+        for key in sorted(x.keys()):
             for val in x[key]:
                 fAgeCounts.writerow([key, val.name, val.transcriptStart, val.transcriptEnd, val.fatherAge, val.motherAge, val.variantPosition])
                 if val.fatherAge == [] or val.motherAge == []:
@@ -425,7 +425,7 @@ def megabaseCountMergeFamily(file, overlap, binsize, outputPrefix, familyData):
         mAgeCounts = csv.writer(open(outputPrefix + typePrefix[outputIndex] + ".megaBaseAgeVector.csv", "w"), delimiter="\t")
         mAgeCounts.writerow(["Chrom", "Gene", "Start", "End", "FatherAge", "MotherAge", "VariantPosition"])
         wCounts.writerow(["Chrom", "Start", "End", "Count", "Insertions", "Deletions", "SNV", "MeanFatherAge", "MeanMotherAge", "Gene"])
-        for key in x.keys():
+        for key in sorted(x.keys()):
             for val in x[key]:
                 #print(val.fatherAge)
                 mAgeCounts.writerow([key, "NA", val.start, val.end, val.fatherAge, val.motherAge, val.variantPosition])

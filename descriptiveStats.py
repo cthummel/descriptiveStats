@@ -202,7 +202,7 @@ def ageVectorStats(probandAgeVector, siblingAgeVector, outputPrefix):
     i = 0
     minimumVariantCount = 5
 
-    while i < len(probandAgeVector):
+    while (i < len(probandAgeVector)) and (j < len(siblingAgeVector)):
         #print("premismatch check", i, j, currentChrom)
         i, j, currentChrom, done = resolveMismatch(i, j, probandAgeVector, siblingAgeVector, currentChrom, minimumVariantCount)
         #print("postmismatch check", i, j, currentChrom)
