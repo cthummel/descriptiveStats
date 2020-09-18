@@ -209,24 +209,24 @@ def ageVectorStats(probandAgeVector, siblingAgeVector, outputPrefix):
         if done:
             break
         else:
-            #print(probandAgeVector[i].fatherAge, siblingAgeVector[i].fatherAge)
-            if len(probandAgeVector[i].fatherAge) < minimumVariantCount or len(siblingAgeVector[i].fatherAge) < minimumVariantCount:
+            #print(probandAgeVector[i].fatherAge, siblingAgeVector[j].fatherAge)
+            if len(probandAgeVector[i].fatherAge) < minimumVariantCount or len(siblingAgeVector[j].fatherAge) < minimumVariantCount:
                 skip = True
                 #fatherResults.append([probandAgeVector[i].chrom, probandAgeVector[i].name, probandAgeVector[i].start, probandAgeVector[i].end, 99999, 1.0])
                 #fatherPvalues.append(1.0)
             else:
-                testStat, pvalue = stats.ks_2samp(probandAgeVector[i].fatherAge, siblingAgeVector[i].fatherAge)
+                testStat, pvalue = stats.ks_2samp(probandAgeVector[i].fatherAge, siblingAgeVector[j].fatherAge)
                 fatherPvalues.append(pvalue)
-                fatherResults.append([probandAgeVector[i].chrom, probandAgeVector[i].name, probandAgeVector[i].start, probandAgeVector[i].end, testStat, pvalue, len(probandAgeVector[i].fatherAge), len(siblingAgeVector[i].fatherAge)])
+                fatherResults.append([probandAgeVector[i].chrom, probandAgeVector[i].name, probandAgeVector[i].start, probandAgeVector[i].end, testStat, pvalue, len(probandAgeVector[i].fatherAge), len(siblingAgeVector[j].fatherAge)])
                 
-            if len(probandAgeVector[i].motherAge) < minimumVariantCount or len(siblingAgeVector[i].motherAge) < minimumVariantCount:
+            if len(probandAgeVector[i].motherAge) < minimumVariantCount or len(siblingAgeVector[j].motherAge) < minimumVariantCount:
                 skip = True
                 #motherResults.append([probandAgeVector[i].chrom, probandAgeVector[i].name, probandAgeVector[i].start, probandAgeVector[i].end, 99999, 1.0])
                 #motherPvalues.append(1.0)
             else:
-                testStat, pvalue = stats.ks_2samp(probandAgeVector[i].motherAge, siblingAgeVector[i].motherAge)
+                testStat, pvalue = stats.ks_2samp(probandAgeVector[i].motherAge, siblingAgeVector[j].motherAge)
                 motherPvalues.append(pvalue)
-                motherResults.append([probandAgeVector[i].chrom, probandAgeVector[i].name, probandAgeVector[i].start, probandAgeVector[i].end, testStat, pvalue, len(probandAgeVector[i].motherAge), len(siblingAgeVector[i].motherAge)])
+                motherResults.append([probandAgeVector[i].chrom, probandAgeVector[i].name, probandAgeVector[i].start, probandAgeVector[i].end, testStat, pvalue, len(probandAgeVector[i].motherAge), len(siblingAgeVector[j].motherAge)])
         j += 1
         i += 1
 
