@@ -134,11 +134,11 @@ def updateChromInfoDict(data, index, chrom, variantCount, insert, Del, snv, fath
 
 def geneCountMergeFamily(file, outputPrefix, familyData):
     probandDataSet = True
-    chromInfoDict = {}
-    chromInfoDictMM = {}
-    chromInfoDictMF = {}
-    chromInfoDictFM = {}
-    chromInfoDictFF = {}
+    # chromInfoDict = {}
+    # chromInfoDictMM = {}
+    # chromInfoDictMF = {}
+    # chromInfoDictFM = {}
+    # chromInfoDictFF = {}
     #[MM, MF, FM, FF]
     result = [{}, {}, {}, {}]
 
@@ -270,6 +270,17 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
 
     outputIndex = 0
     typePrefix = ["MM", "MF", "FM", "FF"]
+
+    maleCounts = csv.writer(open(outputPrefix + "male" + ".geneCounts.csv", "w"))
+    maleAgeCounts = csv.writer(open(outputPrefix + "male" + ".geneAgeVector.csv", "w"), delimiter="\t")
+    femaleCounts = csv.writer(open(outputPrefix + "female" + ".geneCounts.csv", "w"))
+    femaleAgeCounts = csv.writer(open(outputPrefix + "female" + ".geneAgeVector.csv", "w"), delimiter="\t")
+
+    maleCounts.writerow(["Chrom", "Start", "End", "Count", "Insertions", "Deletions", "SNV", "MeanFatherAge", "MeanMotherAge", "Gene"])
+    maleAgeCounts.writerow(["Chrom", "Gene", "Start", "End", "FatherAge", "MotherAge", "VariantPosition"])
+    femaleCounts.writerow(["Chrom", "Start", "End", "Count", "Insertions", "Deletions", "SNV", "MeanFatherAge", "MeanMotherAge", "Gene"])
+    femaleAgeCounts.writerow(["Chrom", "Gene", "Start", "End", "FatherAge", "MotherAge", "VariantPosition"])
+
     for x in result:
         wCounts = csv.writer(open(outputPrefix + typePrefix[outputIndex] + ".geneCounts.csv", "w"))
         fAgeCounts = csv.writer(open(outputPrefix + typePrefix[outputIndex] + ".geneAgeVector.csv", "w"), delimiter="\t")
@@ -278,10 +289,24 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
         for key in sorted(x.keys()):
             for val in x[key]:
                 fAgeCounts.writerow([key, val.name, val.transcriptStart, val.transcriptEnd, val.fatherAge, val.motherAge, val.variantPosition])
+                if outputIndex < 2:
+                    maleAgeCounts.writerow([key, val.name, val.transcriptStart, val.transcriptEnd, val.fatherAge, val.motherAge, val.variantPosition])
+                else:
+                    femaleAgeCounts.writerow([key, val.name, val.transcriptStart, val.transcriptEnd, val.fatherAge, val.motherAge, val.variantPosition])
+
                 if val.fatherAge == [] or val.motherAge == []:
                     wCounts.writerow([key, val.transcriptStart, val.transcriptEnd, val.count, val.insertion, val.deletion, val.snv, "NA", "NA", val.name])
+                    if outputIndex < 2:
+                        maleCounts.writerow([key, val.transcriptStart, val.transcriptEnd, val.count, val.insertion, val.deletion, val.snv, "NA", "NA", val.name])
+                    else:
+                        femaleCounts.writerow([key, val.transcriptStart, val.transcriptEnd, val.count, val.insertion, val.deletion, val.snv, "NA", "NA", val.name])
                 else:
                     wCounts.writerow([key, val.transcriptStart, val.transcriptEnd, val.count, val.insertion, val.deletion, val.snv, ageMean(val.fatherAge), ageMean(val.motherAge), val.name])
+                    if outputIndex < 2:
+                        maleCounts.writerow([key, val.transcriptStart, val.transcriptEnd, val.count, val.insertion, val.deletion, val.snv, ageMean(val.fatherAge), ageMean(val.motherAge), val.name])
+                    else:
+                        femaleCounts.writerow([key, val.transcriptStart, val.transcriptEnd, val.count, val.insertion, val.deletion, val.snv, ageMean(val.fatherAge), ageMean(val.motherAge), val.name])
+
         outputIndex += 1
 
     return result
@@ -418,6 +443,16 @@ def megabaseCountMergeFamily(file, overlap, binsize, outputPrefix, familyData):
                             
                         #print(chrom, int(s[1]), chromInfoDict[chrom][currentMegaBaseIndex].end - megabaseSize, chromInfoDict[chrom][currentMegaBaseIndex].end, chromInfoDict[chrom][currentMegaBaseIndex].count)
 
+    maleCounts = csv.writer(open(outputPrefix + "male" + ".megaBaseCounts.csv", "w"))
+    maleAgeCounts = csv.writer(open(outputPrefix + "male" + ".megaBaseAgeVector.csv", "w"), delimiter="\t")
+    femaleCounts = csv.writer(open(outputPrefix + "female" + ".megaBaseCounts.csv", "w"))
+    femaleAgeCounts = csv.writer(open(outputPrefix + "female" + ".megaBaseAgeVector.csv", "w"), delimiter="\t")
+
+    maleCounts.writerow(["Chrom", "Start", "End", "Count", "Insertions", "Deletions", "SNV", "MeanFatherAge", "MeanMotherAge", "Gene"])
+    maleAgeCounts.writerow(["Chrom", "Gene", "Start", "End", "FatherAge", "MotherAge", "VariantPosition"])
+    femaleCounts.writerow(["Chrom", "Start", "End", "Count", "Insertions", "Deletions", "SNV", "MeanFatherAge", "MeanMotherAge", "Gene"])
+    femaleAgeCounts.writerow(["Chrom", "Gene", "Start", "End", "FatherAge", "MotherAge", "VariantPosition"])
+
     outputIndex = 0
     typePrefix = ["MM", "MF", "FM", "FF"]
     for x in result:
@@ -429,10 +464,23 @@ def megabaseCountMergeFamily(file, overlap, binsize, outputPrefix, familyData):
             for val in x[key]:
                 #print(val.fatherAge)
                 mAgeCounts.writerow([key, "NA", val.start, val.end, val.fatherAge, val.motherAge, val.variantPosition])
+                if outputIndex < 2:
+                    maleAgeCounts.writerow([key, "NA", val.start, val.end, val.fatherAge, val.motherAge, val.variantPosition])
+                else:
+                    femaleAgeCounts.writerow([key, "NA", val.start, val.end, val.fatherAge, val.motherAge, val.variantPosition])
                 if val.fatherAge == [] or val.motherAge == []:
                     wCounts.writerow([key, int(val.start), int(val.end), val.count, val.insertion, val.deletion, val.snv, "NA", "NA", "NA"])
+                    if outputIndex < 2:
+                        maleCounts.writerow([key, int(val.start), int(val.end), val.count, val.insertion, val.deletion, val.snv, "NA", "NA", "NA"])
+                    else:
+                        femaleCounts.writerow([key, int(val.start), int(val.end), val.count, val.insertion, val.deletion, val.snv, "NA", "NA", "NA"])
                 else:
                     wCounts.writerow([key, int(val.start), int(val.end), val.count, val.insertion, val.deletion, val.snv, ageMean(val.fatherAge), ageMean(val.motherAge), "NA"])
+                    if outputIndex < 2:
+                        maleCounts.writerow([key, int(val.start), int(val.end), val.count, val.insertion, val.deletion, val.snv, ageMean(val.fatherAge), ageMean(val.motherAge), "NA"])
+                    else:
+                        femaleCounts.writerow([key, int(val.start), int(val.end), val.count, val.insertion, val.deletion, val.snv, ageMean(val.fatherAge), ageMean(val.motherAge), "NA"])
+
         outputIndex += 1
 
     return result
