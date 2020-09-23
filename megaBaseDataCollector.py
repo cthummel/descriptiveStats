@@ -175,8 +175,8 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
                     currentDataSet = 0
                     currentFatherAge = 0
                     currentMotherAge = 0
+                    gender = 4
                     for line in f:
-                        gender = 4
                         if len(line.strip()) == 0:
                             continue
                         elif (line[:2] == "##"):
@@ -343,7 +343,7 @@ def megabaseCountMergeFamily(file, overlap, binsize, outputPrefix, familyData):
     chromInfoDictMF = {}
     chromInfoDictFM = {}
     chromInfoDictFF = {}
-    #[MM, MF, FM, FF]
+    #[MM, MF, FM, FF, male, female]
     result = [{}, {}, {}, {}, {}, {}]
 
     for root, dirs, files in os.walk(file):
@@ -361,8 +361,8 @@ def megabaseCountMergeFamily(file, overlap, binsize, outputPrefix, familyData):
                     currentDataSet = 0
                     currentFatherAge = 0
                     currentMotherAge = 0
+                    gender = 4
                     for line in f:
-                        gender = 4
                         if len(line.strip()) == 0:
                             continue
                         elif (line[:2] == "##"):
