@@ -489,12 +489,12 @@ def megabaseCountMergeFamily(file, overlap, binsize, outputPrefix, familyData):
                                 genderCurrentMegaBaseIndex += 1
                             else:
                                 genderCurrentMegaBaseIndex += 1
-                                genderCurrentMegaBaseEnd = result[gender][s[0]][currentMegaBaseIndex].end
+                                genderCurrentMegaBaseEnd = result[gender][s[0]][genderCurrentMegaBaseIndex].end
                                 
 
                         #If we find a variant that falls in the overlap for two megabases.
                         if (int(s[1]) <= genderCurrentMegaBaseEnd and int(s[1]) > genderCurrentMegaBaseEnd - (megabaseSize * overlap)):
-                            if (currentMegaBaseIndex == len(result[gender][s[0]]) - 1):
+                            if (genderCurrentMegaBaseIndex == len(result[gender][s[0]]) - 1):
                                 newMegaBaseStart = genderCurrentMegaBaseEnd - (overlap * megabaseSize)
                                 appendChromInfoDict(result[gender], newMegaBaseStart, megabaseSize, s[0], variantCount, insert, Del, snv, currentFatherAge, currentMotherAge, int(s[1]))
                                 #chromInfoDict[s[0]].append(megabaseInfo(newMegaBaseStart, newMegaBaseStart + megabaseSize, variantCount, insert, Del, snv))
