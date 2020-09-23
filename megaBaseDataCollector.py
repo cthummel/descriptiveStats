@@ -134,6 +134,8 @@ def updateChromInfoDict(data, index, chrom, variantCount, insert, Del, snv, fath
 
 def geneCountMergeFamily(file, outputPrefix, familyData):
     probandDataSet = True
+    maleCount = 0
+    femaleCount = 0
     # chromInfoDict = {}
     # chromInfoDictMM = {}
     # chromInfoDictMF = {}
@@ -192,13 +194,17 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
                                         currentMotherAge = x.probandMotherAge
                                         if (x.probandGender == "male") and (x.siblingGender == "male"):
                                             currentDataSet = 0
+                                            maleCount += 1
                                         elif (x.probandGender == "male") and (x.siblingGender == "female"):
                                             currentDataSet = 1
+                                            maleCount += 1
                                         elif (x.probandGender == "female") and (x.siblingGender == "male"):
                                             currentDataSet = 2
+                                            femaleCount += 1
                                             gender = 5
                                         elif (x.probandGender == "female") and (x.siblingGender == "female"):
                                             currentDataSet = 3
+                                            femaleCount += 1
                                             gender = 5
                                         #print(currentDataSet, x.probandGender, x.siblingGender)
                                         break            
@@ -209,13 +215,17 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
                                         currentMotherAge = x.siblingMotherAge
                                         if (x.probandGender == "male") and (x.siblingGender == "male"):
                                             currentDataSet = 0
+                                            maleCount += 1
                                         elif (x.probandGender == "male") and (x.siblingGender == "female"):
                                             currentDataSet = 1
+                                            maleCount += 1
                                         elif (x.probandGender == "female") and (x.siblingGender == "male"):
                                             currentDataSet = 2
+                                            femaleCount += 1
                                             gender = 5
                                         elif (x.probandGender == "female") and (x.siblingGender == "female"):
                                             currentDataSet = 3
+                                            femaleCount += 1
                                             gender = 5
                                         break    
                             continue
@@ -304,6 +314,19 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
     # femaleCounts.writerow(["Chrom", "Start", "End", "Count", "Insertions", "Deletions", "SNV", "MeanFatherAge", "MeanMotherAge", "Gene"])
     # femaleAgeCounts.writerow(["Chrom", "Gene", "Start", "End", "FatherAge", "MotherAge", "VariantPosition"])
 
+    #Fix lopsided sample count
+    if maleCount > femaleCount:
+        for x in result[5]:
+            for key in x.keys():
+                for val in key:
+                    val.count = val.count * maleCount / femaleCount
+    elif femaleCount > maleCount:
+        for x in result[4]:
+            for key in x.keys():
+                for val in key:
+                    val.count = val.count * femaleCount / maleCount
+
+
     for x in result:
         wCounts = csv.writer(open(outputPrefix + typePrefix[outputIndex] + ".geneCounts.csv", "w"))
         fAgeCounts = csv.writer(open(outputPrefix + typePrefix[outputIndex] + ".geneAgeVector.csv", "w"), delimiter="\t")
@@ -337,6 +360,8 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
     
 def megabaseCountMergeFamily(file, overlap, binsize, outputPrefix, familyData):
     megabaseSize = binsize
+    maleCount = 0
+    femaleCount = 0
     probandDataSet = True
     chromInfoDict = {}
     chromInfoDictMM = {}
@@ -378,13 +403,17 @@ def megabaseCountMergeFamily(file, overlap, binsize, outputPrefix, familyData):
                                         currentMotherAge = x.probandMotherAge
                                         if (x.probandGender == "male") and (x.siblingGender == "male"):
                                             currentDataSet = 0
+                                            maleCount += 1
                                         elif (x.probandGender == "male") and (x.siblingGender == "female"):
                                             currentDataSet = 1
+                                            maleCount += 1
                                         elif (x.probandGender == "female") and (x.siblingGender == "male"):
                                             currentDataSet = 2
+                                            femaleCount += 1
                                             gender = 5
                                         elif (x.probandGender == "female") and (x.siblingGender == "female"):
                                             currentDataSet = 3
+                                            femaleCount += 1
                                             gender = 5
                                         #print(currentDataSet, x.probandGender, x.siblingGender)
                                         break            
@@ -395,13 +424,17 @@ def megabaseCountMergeFamily(file, overlap, binsize, outputPrefix, familyData):
                                         currentMotherAge = x.siblingMotherAge
                                         if (x.probandGender == "male") and (x.siblingGender == "male"):
                                             currentDataSet = 0
+                                            maleCount += 1
                                         elif (x.probandGender == "male") and (x.siblingGender == "female"):
                                             currentDataSet = 1
+                                            maleCount += 1
                                         elif (x.probandGender == "female") and (x.siblingGender == "male"):
                                             currentDataSet = 2
+                                            femaleCount += 1
                                             gender = 5
                                         elif (x.probandGender == "female") and (x.siblingGender == "female"):
                                             currentDataSet = 3
+                                            femaleCount += 1
                                             gender = 5
                                         break    
                             continue
@@ -516,6 +549,19 @@ def megabaseCountMergeFamily(file, overlap, binsize, outputPrefix, familyData):
     # maleAgeCounts.writerow(["Chrom", "Gene", "Start", "End", "FatherAge", "MotherAge", "VariantPosition"])
     # femaleCounts.writerow(["Chrom", "Start", "End", "Count", "Insertions", "Deletions", "SNV", "MeanFatherAge", "MeanMotherAge", "Gene"])
     # femaleAgeCounts.writerow(["Chrom", "Gene", "Start", "End", "FatherAge", "MotherAge", "VariantPosition"])
+
+    #Fix lopsided sample count
+    if maleCount > femaleCount:
+        for x in result[5]:
+            for key in x.keys():
+                for val in key:
+                    val.count = val.count * maleCount / femaleCount
+    elif femaleCount > maleCount:
+        for x in result[4]:
+            for key in x.keys():
+                for val in key:
+                    val.count = val.count * femaleCount / maleCount
+
 
     outputIndex = 0
     typePrefix = ["MM", "MF", "FM", "FF", "male", "female"]
