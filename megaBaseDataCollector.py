@@ -316,15 +316,13 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
 
     #Fix lopsided sample count
     if maleCount > femaleCount:
-        for x in result[5]:
-            for key in x.keys():
-                for val in key:
-                    val.count = val.count * maleCount / femaleCount
+        for key in result[5].keys():
+            for val in key:
+                val.count = val.count * maleCount / femaleCount
     elif femaleCount > maleCount:
-        for x in result[4]:
-            for key in x.keys():
-                for val in key:
-                    val.count = val.count * femaleCount / maleCount
+        for key in result[4].keys():
+            for val in key:
+                val.count = val.count * femaleCount / maleCount
 
 
     for x in result:
@@ -552,15 +550,13 @@ def megabaseCountMergeFamily(file, overlap, binsize, outputPrefix, familyData):
 
     #Fix lopsided sample count
     if maleCount > femaleCount:
-        for x in result[5]:
-            for key in x.keys():
-                for val in key:
-                    val.count = val.count * maleCount / femaleCount
+        for key in result[5].keys():
+            for val in key:
+                val.count = val.count * maleCount / femaleCount
     elif femaleCount > maleCount:
-        for x in result[4]:
-            for key in x.keys():
-                for val in key:
-                    val.count = val.count * femaleCount / maleCount
+        for key in result[4].keys():
+            for val in key:
+                val.count = val.count * femaleCount / maleCount
 
 
     outputIndex = 0
