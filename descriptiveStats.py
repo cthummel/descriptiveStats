@@ -197,6 +197,8 @@ def ageVectorStats(probandAgeVector, siblingAgeVector, outputPrefix):
     motherResults = []
     fatherPvalues = []
     motherPvalues = []
+    fatherTestStats = []
+    motherTestStats = []
     currentChrom = probandAgeVector[0].chrom
     j = 0
     i = 0
@@ -217,6 +219,7 @@ def ageVectorStats(probandAgeVector, siblingAgeVector, outputPrefix):
             else:
                 testStat, pvalue = stats.ks_2samp(probandAgeVector[i].fatherAge, siblingAgeVector[j].fatherAge)
                 fatherPvalues.append(pvalue)
+                fatherTestStats.append(testStat)
                 fatherResults.append([probandAgeVector[i].chrom, probandAgeVector[i].name, probandAgeVector[i].start, probandAgeVector[i].end, testStat, pvalue, len(probandAgeVector[i].fatherAge), len(siblingAgeVector[j].fatherAge)])
                 
             if len(probandAgeVector[i].motherAge) < minimumVariantCount or len(siblingAgeVector[j].motherAge) < minimumVariantCount:
@@ -226,6 +229,7 @@ def ageVectorStats(probandAgeVector, siblingAgeVector, outputPrefix):
             else:
                 testStat, pvalue = stats.ks_2samp(probandAgeVector[i].motherAge, siblingAgeVector[j].motherAge)
                 motherPvalues.append(pvalue)
+                motherTestStats.append(testStat)
                 motherResults.append([probandAgeVector[i].chrom, probandAgeVector[i].name, probandAgeVector[i].start, probandAgeVector[i].end, testStat, pvalue, len(probandAgeVector[i].motherAge), len(siblingAgeVector[j].motherAge)])
         j += 1
         i += 1
@@ -240,6 +244,15 @@ def ageVectorStats(probandAgeVector, siblingAgeVector, outputPrefix):
     motherHolm = statsmodels.stats.multitest.multipletests(motherPvalues, alpha=0.05, method='holm', is_sorted=False, returnsorted=False)  
     motherFDR = statsmodels.stats.multitest.fdrcorrection(motherPvalues, alpha=0.05, method='indep', is_sorted=False)
 
+    print("Father Chisq Test Stat test:", stats.ks_2samp(fatherTestStats, "chi2"))
+    print("Father Norm Test Stat test:", stats.ks_2samp(fatherTestStats, "norm"))
+    print("Father Expon Test Stat test:", stats.ks_2samp(fatherTestStats, "expon"))
+
+    print("Mother Chisq Test Stat test:", stats.ks_2samp(motherTestStats, "chi2"))
+    print("Mother Norm Test Stat test:", stats.ks_2samp(motherTestStats, "norm"))
+    print("Mother Expon Test Stat test:", stats.ks_2samp(motherTestStats, "expon"))
+    
+    print("Father Mann Test Stat test:", stats.mannwhitneyu(fatherTestStats, motherTestStats))
 
     fCounts = csv.writer(open(outputPrefix + "fatherAgeStats.csv", "w"))
     fCounts.writerow(["Chrom", "Gene", "Start", "End", "Length", "ProbandVariantCount", "SiblingVariantCount", "TestStat", "Pvalue", "BonPvalue", "SidakPvalue", "HolmPvalue", "FDRPvalue"])
@@ -257,12 +270,13 @@ def ageVectorStats(probandAgeVector, siblingAgeVector, outputPrefix):
 def geneCountStats(probandData, siblingData, outputPrefix):
     positionResults = []
     positionPvalues = []
+    positionTestStats = []
     currentChrom = probandData[0].chrom
     minimumVariantCount = 5
     i = 0
     j = 0
 
-    while i < len(probandData):
+    while i < len(probandData) and j < len(siblingData):
         i, j, currentChrom, done = resolveMismatch(i, j, probandData, siblingData, currentChrom, minimumVariantCount)
         if done:
             break
@@ -272,6 +286,7 @@ def geneCountStats(probandData, siblingData, outputPrefix):
             else:
                 testStat, pvalue = stats.ks_2samp(probandData[i].variantPosition, siblingData[j].variantPosition)
                 positionPvalues.append(pvalue)
+                positionTestStats.append(testStat)
                 positionResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, testStat, pvalue, len(probandData[i].variantPosition), len(siblingData[j].variantPosition)])
         
 
@@ -327,20 +342,20 @@ def binStats(probandData, siblingData, outputPrefix):
 
     for row in probandData:
         if row[0] not in probandChromDict:
-            probandChromDict[row[0]] = [[int(row[3]) / (int(row[2]) - int(row[1]))], [row[7]], [row[8]]]
+            probandChromDict[row[0]] = [[float(row[3]) / (int(row[2]) - int(row[1]))], [row[7]], [row[8]]]
             uniqueChromList.add(row[0])
         else:
             #[Count], [FatherAge], [MotherAge]
-            probandChromDict[row[0]][0].append(int(row[3]) / (int(row[2]) - int(row[1])))
+            probandChromDict[row[0]][0].append(float(row[3]) / (int(row[2]) - int(row[1])))
             probandChromDict[row[0]][1].append(row[7])
             probandChromDict[row[0]][2].append(row[8])
 
     for row in siblingData:
         if row[0] not in siblingChromDict:
-            siblingChromDict[row[0]] = [[int(row[3]) / (int(row[2]) - int(row[1]))], [row[7]], [row[8]]]
+            siblingChromDict[row[0]] = [[float(row[3]) / (int(row[2]) - int(row[1]))], [row[7]], [row[8]]]
             uniqueChromList.add(row[0])
         else:
-            siblingChromDict[row[0]][0].append(int(row[3]) / (int(row[2]) - int(row[1])))
+            siblingChromDict[row[0]][0].append(float(row[3]) / (int(row[2]) - int(row[1])))
             siblingChromDict[row[0]][1].append(row[7])
             siblingChromDict[row[0]][2].append(row[8])
 
@@ -477,61 +492,61 @@ def main(argv):
     #print(probandRemovedCount)
     #print(siblingRemovedCount)
 
-    pMax = np.max(probandCountData)
-    pMin = np.min(probandCountData)
-    pMean = np.mean(probandCountData)
-    pMedian = np.median(probandCountData)
-    pMode = stats.mode(probandCountData)
-    pVariance = np.var(probandCountData)
-    pSd = np.sqrt(pVariance)
+    # pMax = np.max(probandCountData)
+    # pMin = np.min(probandCountData)
+    # pMean = np.mean(probandCountData)
+    # pMedian = np.median(probandCountData)
+    # pMode = stats.mode(probandCountData)
+    # pVariance = np.var(probandCountData)
+    # pSd = np.sqrt(pVariance)
 
-    sMax = np.max(siblingCountData)
-    sMin = np.min(siblingCountData)
-    sMean = np.mean(siblingCountData)
-    sMedian = np.median(siblingCountData)
-    sMode = stats.mode(siblingCountData)
-    sVariance = np.var(siblingCountData)
-    sSd = np.sqrt(sVariance)
+    # sMax = np.max(siblingCountData)
+    # sMin = np.min(siblingCountData)
+    # sMean = np.mean(siblingCountData)
+    # sMedian = np.median(siblingCountData)
+    # sMode = stats.mode(siblingCountData)
+    # sVariance = np.var(siblingCountData)
+    # sSd = np.sqrt(sVariance)
 
-    print("Proband Min:", pMin)
-    print("Proband Max:", pMax)
-    print("Proband Mean:", pMean)
-    print("Proband Median:", pMedian)
-    print("Proband Mode:", pMode.mode)
-    print("Proband Variance:", pVariance)
-    print("Proband SD:", pSd, "\n")
+    # print("Proband Min:", pMin)
+    # print("Proband Max:", pMax)
+    # print("Proband Mean:", pMean)
+    # print("Proband Median:", pMedian)
+    # print("Proband Mode:", pMode.mode)
+    # print("Proband Variance:", pVariance)
+    # print("Proband SD:", pSd, "\n")
 
-    print("Sibling Min:", sMin)
-    print("Sibling Max:", sMax)
-    print("Sibling Mean:", sMean)
-    print("Sibling Median:", sMedian)
-    print("Sibling Mode:", sMode.mode)
-    print("Sibling Variance:", sVariance)
-    print("Sibling SD:", sSd, "\n")
+    # print("Sibling Min:", sMin)
+    # print("Sibling Max:", sMax)
+    # print("Sibling Mean:", sMean)
+    # print("Sibling Median:", sMedian)
+    # print("Sibling Mode:", sMode.mode)
+    # print("Sibling Variance:", sVariance)
+    # print("Sibling SD:", sSd, "\n")
 
-    testStat, pvalue = stats.ks_2samp(probandHistogramData, siblingHistogramData)
-    print("----KS Test using Histograms----")
-    print("Test Statistic:", testStat)
-    print("P-value", pvalue, "\n")
+    # testStat, pvalue = stats.ks_2samp(probandHistogramData, siblingHistogramData)
+    # print("----KS Test using Histograms----")
+    # print("Test Statistic:", testStat)
+    # print("P-value", pvalue, "\n")
 
-    testStat, pvalue = stats.ks_2samp(probandCountData, siblingCountData)
-    print("----KS Test using Counts----")
-    print("Test Statistic:", testStat)
-    print("P-value", pvalue, "\n")
+    # testStat, pvalue = stats.ks_2samp(probandCountData, siblingCountData)
+    # print("----KS Test using Counts----")
+    # print("Test Statistic:", testStat)
+    # print("P-value", pvalue, "\n")
     
-    #Binwise binomial test
-    print("Binwise Binomial Test")
-    for bin in np.arange(0, binFinder.binCount() - 1):
-        probandBinCount = probandHistogramData[bin]
-        probandN = sum(probandHistogramData)
+    # #Binwise binomial test
+    # print("Binwise Binomial Test")
+    # for bin in np.arange(0, binFinder.binCount() - 1):
+    #     probandBinCount = probandHistogramData[bin]
+    #     probandN = sum(probandHistogramData)
 
-        siblingBinCount = siblingHistogramData[bin]
-        siblingN = sum(siblingHistogramData)
-        siblingProportion = siblingBinCount * 1.0 / siblingN
+    #     siblingBinCount = siblingHistogramData[bin]
+    #     siblingN = sum(siblingHistogramData)
+    #     siblingProportion = siblingBinCount * 1.0 / siblingN
 
-        print(bin, probandBinCount, probandN, siblingBinCount, siblingN, siblingProportion, probandBinCount * 1.0/ probandN)
-        binomPvalue = stats.binom_test(probandBinCount, n=probandN, p=siblingProportion)
-        print(binFinder.binSize(bin) + ":", '%.4f' % binomPvalue, "\n")
+    #     print(bin, probandBinCount, probandN, siblingBinCount, siblingN, siblingProportion, probandBinCount * 1.0/ probandN)
+    #     binomPvalue = stats.binom_test(probandBinCount, n=probandN, p=siblingProportion)
+    #     print(binFinder.binSize(bin) + ":", '%.4f' % binomPvalue, "\n")
 
     
     #KS Test for Megabase Paired data
