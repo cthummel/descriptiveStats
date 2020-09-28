@@ -318,10 +318,12 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
     if maleCount > femaleCount:
         for key in result[5].keys():
             for val in key:
+                print(val.count)
                 val.count = val.count * maleCount / femaleCount
     elif femaleCount > maleCount:
         for key in result[4].keys():
             for val in key:
+                print(val.count)
                 val.count = val.count * femaleCount / maleCount
 
 
@@ -552,10 +554,12 @@ def megabaseCountMergeFamily(file, overlap, binsize, outputPrefix, familyData):
     if maleCount > femaleCount:
         for key in result[5].keys():
             for val in key:
+                print(val.count)
                 val.count = val.count * maleCount / femaleCount
     elif femaleCount > maleCount:
         for key in result[4].keys():
             for val in key:
+                print(val.count)
                 val.count = val.count * femaleCount / maleCount
 
 
