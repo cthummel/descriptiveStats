@@ -315,6 +315,7 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
     # femaleAgeCounts.writerow(["Chrom", "Gene", "Start", "End", "FatherAge", "MotherAge", "VariantPosition"])
 
     #Fix lopsided sample count
+    print("MaleCount:", maleCount, "FemaleCount", femaleCount)
     if maleCount > femaleCount:
         for key in result[5].keys():
             for val in result[5][key]:
@@ -549,6 +550,7 @@ def megabaseCountMergeFamily(file, overlap, binsize, outputPrefix, familyData):
     # femaleAgeCounts.writerow(["Chrom", "Gene", "Start", "End", "FatherAge", "MotherAge", "VariantPosition"])
 
     #Fix lopsided sample count
+    print("MaleCount:", maleCount, "FemaleCount", femaleCount)
     if maleCount > femaleCount:
         for key in result[5].keys():
             for val in result[5][key]:
