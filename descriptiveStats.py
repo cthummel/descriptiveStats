@@ -247,14 +247,14 @@ def ageVectorStats(probandAgeVector, siblingAgeVector, outputPrefix):
     #print("Father Chisq Test Stat test:", stats.kstest(fatherTestStats, "chi2"))
     normParam = { "scale": np.std(fatherTestStats), "loc": np.mean(fatherTestStats) }
     exponParam = { "scale": 1.0 / np.mean(fatherTestStats) }
-    print("Father Norm Test Stat test:", stats.kstest(fatherTestStats, "norm", args=stats.norm(**normParam)))
-    print("Father Expon Test Stat test:", stats.kstest(fatherTestStats, "expon", args=stats.expon(**exponParam)))
+    #print("Father Norm Test Stat test:", stats.kstest(fatherTestStats, "norm", args=stats.norm(**normParam)))
+    #print("Father Expon Test Stat test:", stats.kstest(fatherTestStats, "expon", args=stats.expon(**exponParam)))
 
     #print("Mother Chisq Test Stat test:", stats.kstest(motherTestStats, "chi2"))
-    print("Mother Norm Test Stat test:", stats.kstest(motherTestStats, "norm", args=stats.norm(**normParam)))
-    print("Mother Expon Test Stat test:", stats.kstest(motherTestStats, "expon", args=stats.expon(**exponParam)))
+    #print("Mother Norm Test Stat test:", stats.kstest(motherTestStats, "norm", args=stats.norm(**normParam)))
+    #print("Mother Expon Test Stat test:", stats.kstest(motherTestStats, "expon", args=stats.expon(**exponParam)))
     
-    print("Father Mann Test Stat test:", stats.mannwhitneyu(fatherTestStats, motherTestStats))
+    #print("Father Mann Test Stat test:", stats.mannwhitneyu(fatherTestStats, motherTestStats))
 
     fCounts = csv.writer(open(outputPrefix + "fatherAgeStats.csv", "w"))
     fCounts.writerow(["Chrom", "Gene", "Start", "End", "Length", "ProbandVariantCount", "SiblingVariantCount", "TestStat", "Pvalue", "BonPvalue", "SidakPvalue", "HolmPvalue", "FDRPvalue"])
