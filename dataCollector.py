@@ -131,7 +131,7 @@ def read(path):
                             variantSize.append(int(IDField[0:stringPos]))
                             break
                         elif (char == "D"):
-                            print(IDField)
+                            #print(IDField)
                             variantSize.append(-int(IDField[0:stringPos]))
                             break
                         elif (char == 'X'):
@@ -152,8 +152,8 @@ def read(path):
                         #print(countData)
                         countData[sample].append(variantSize)
                         for variant in variantSize:
-                            if variant == -91967987:
-                                print(path)
+                            if variant < -1000000:
+                                print(variant, path)
                             binnedData[binFinder.findBin(variant)] += 1
 
 
