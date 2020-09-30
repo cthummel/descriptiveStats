@@ -3,7 +3,7 @@ from scipy import stats
 import sys, getopt, math, binFinder, csv, statsmodels.stats.multitest
 
 class vectorAnalysis():
-    def __init__(self, chrom, name, start, end, fatherAge, motherAge, varPos):
+    def __init__(self, chrom, name, start, end, fatherAge, motherAge, varPos, count):
         self.start = start
         self.end = end
         self.chrom = chrom
@@ -11,7 +11,7 @@ class vectorAnalysis():
         self.fatherAge = fatherAge
         self.motherAge = motherAge
         self.variantPosition = varPos
-        self.count = len(varPos)
+        self.count = float(count)
 
 def resolveMismatch(i, j, probandData, siblingData, currentChrom, minimumVariantCount):
     chromList = ["chr1", "chr10", "chr11", "chr12", "chr13", "chr14", "chr15", "chr16", "chr17", "chr18", "chr19", "chr2", "chr20", "chr21", "chr22", "chr23", "chr3", "chr4", "chr5", "chr6", "chr7", "chr8", "chr9", "chrX", "chrY"]
@@ -76,7 +76,7 @@ def binomialCounts(probandData, siblingData, outputPrefix):
     countResults = []
     countPvalues = []
     currentChrom = probandData[0].chrom
-    minimumVariantCount = 5
+    minimumVariantCount = 0
     j = 0
     i = 0
 
@@ -86,7 +86,7 @@ def binomialCounts(probandData, siblingData, outputPrefix):
         if done:
             break
         else:
-            if len(probandData[i].variantPosition) < minimumVariantCount or len(siblingData[j].variantPosition) < minimumVariantCount:
+            if probandData[i].count < minimumVariantCount or siblingData[j].count < minimumVariantCount:
                 skip = True
                 #fatherResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, 99999, 1.0])
                 #fatherPvalues.append(1.0)
@@ -163,6 +163,7 @@ def readVectorData(filename):
                 fatherAge = []
                 motherAge = []
                 varPos = []
+                count = s[7]
                 for x in s[4][1:-1].split(","):
                     if x.find("NA") != -1:
                         continue
@@ -185,10 +186,10 @@ def readVectorData(filename):
                     else:
                         varPos.append(float(x))
                 #print([s[0], s[1], s[2], s[3], fatherAge, motherAge])
-                results.append(vectorAnalysis(s[0], s[1], s[2], s[3], fatherAge, motherAge, varPos))
+                results.append(vectorAnalysis(s[0], s[1], s[2], s[3], fatherAge, motherAge, varPos, count))
             else:
                 #print(s)
-                results.append(vectorAnalysis(s[0], s[1], s[2], s[3], [], [], []))
+                results.append(vectorAnalysis(s[0], s[1], s[2], s[3], [], [], [], 0))
     return results
             
 
@@ -212,7 +213,7 @@ def ageVectorStats(probandAgeVector, siblingAgeVector, outputPrefix):
             break
         else:
             #print(probandAgeVector[i].fatherAge, siblingAgeVector[j].fatherAge)
-            if len(probandAgeVector[i].fatherAge) < minimumVariantCount or len(siblingAgeVector[j].fatherAge) < minimumVariantCount:
+            if probandAgeVector[i].count < minimumVariantCount or siblingAgeVector[j].count < minimumVariantCount:
                 skip = True
                 #fatherResults.append([probandAgeVector[i].chrom, probandAgeVector[i].name, probandAgeVector[i].start, probandAgeVector[i].end, 99999, 1.0])
                 #fatherPvalues.append(1.0)
@@ -222,7 +223,7 @@ def ageVectorStats(probandAgeVector, siblingAgeVector, outputPrefix):
                 fatherTestStats.append(testStat)
                 fatherResults.append([probandAgeVector[i].chrom, probandAgeVector[i].name, probandAgeVector[i].start, probandAgeVector[i].end, testStat, pvalue, len(probandAgeVector[i].fatherAge), len(siblingAgeVector[j].fatherAge)])
                 
-            if len(probandAgeVector[i].motherAge) < minimumVariantCount or len(siblingAgeVector[j].motherAge) < minimumVariantCount:
+            if probandAgeVector[i].count < minimumVariantCount or siblingAgeVector[j].count < minimumVariantCount:
                 skip = True
                 #motherResults.append([probandAgeVector[i].chrom, probandAgeVector[i].name, probandAgeVector[i].start, probandAgeVector[i].end, 99999, 1.0])
                 #motherPvalues.append(1.0)
@@ -283,7 +284,7 @@ def geneCountStats(probandData, siblingData, outputPrefix):
         if done:
             break
         else:
-            if len(probandData[i].variantPosition) < minimumVariantCount or len(siblingData[j].variantPosition) < minimumVariantCount:
+            if probandData[i].count < minimumVariantCount or siblingData[j].count < minimumVariantCount:
                 skip = True
             else:
                 testStat, pvalue = stats.ks_2samp(probandData[i].variantPosition, siblingData[j].variantPosition)
