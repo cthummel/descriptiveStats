@@ -11,7 +11,7 @@ class vectorAnalysis():
         self.fatherAge = fatherAge
         self.motherAge = motherAge
         self.variantPosition = varPos
-        self.count = float(count)
+        self.count = count
 
 def resolveMismatch(i, j, probandData, siblingData, currentChrom, minimumVariantCount):
     chromList = ["chr1", "chr10", "chr11", "chr12", "chr13", "chr14", "chr15", "chr16", "chr17", "chr18", "chr19", "chr2", "chr20", "chr21", "chr22", "chr23", "chr3", "chr4", "chr5", "chr6", "chr7", "chr8", "chr9", "chrX", "chrY"]
@@ -93,7 +93,7 @@ def binomialCounts(probandData, siblingData, outputPrefix):
             else:
                 pvalue = stats.binom_test(probandData[i].count, int(float(probandData[i].end)) - int(float(probandData[i].start)), siblingData[j].count * 1.0 / (float(siblingData[i].end) - float(siblingData[i].start)))
                 countPvalues.append(pvalue)
-                countResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, "NA", pvalue, len(probandData[i].variantPosition), len(siblingData[j].variantPosition)])
+                countResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, "NA", pvalue, probandData[i].count, siblingData[j].count])
 
         j += 1
         i += 1
@@ -163,7 +163,7 @@ def readVectorData(filename):
                 fatherAge = []
                 motherAge = []
                 varPos = []
-                count = s[7]
+                count = int(float(s[7]))
                 for x in s[4][1:-1].split(","):
                     if x.find("NA") != -1:
                         continue
@@ -221,7 +221,7 @@ def ageVectorStats(probandAgeVector, siblingAgeVector, outputPrefix):
                 testStat, pvalue = stats.ks_2samp(probandAgeVector[i].fatherAge, siblingAgeVector[j].fatherAge)
                 fatherPvalues.append(pvalue)
                 fatherTestStats.append(testStat)
-                fatherResults.append([probandAgeVector[i].chrom, probandAgeVector[i].name, probandAgeVector[i].start, probandAgeVector[i].end, testStat, pvalue, len(probandAgeVector[i].fatherAge), len(siblingAgeVector[j].fatherAge)])
+                fatherResults.append([probandAgeVector[i].chrom, probandAgeVector[i].name, probandAgeVector[i].start, probandAgeVector[i].end, testStat, pvalue, probandAgeVector[i].count, siblingAgeVector[j].count])
                 
             if probandAgeVector[i].count < minimumVariantCount or siblingAgeVector[j].count < minimumVariantCount:
                 skip = True
@@ -231,7 +231,7 @@ def ageVectorStats(probandAgeVector, siblingAgeVector, outputPrefix):
                 testStat, pvalue = stats.ks_2samp(probandAgeVector[i].motherAge, siblingAgeVector[j].motherAge)
                 motherPvalues.append(pvalue)
                 motherTestStats.append(testStat)
-                motherResults.append([probandAgeVector[i].chrom, probandAgeVector[i].name, probandAgeVector[i].start, probandAgeVector[i].end, testStat, pvalue, len(probandAgeVector[i].motherAge), len(siblingAgeVector[j].motherAge)])
+                motherResults.append([probandAgeVector[i].chrom, probandAgeVector[i].name, probandAgeVector[i].start, probandAgeVector[i].end, testStat, pvalue, probandAgeVector[i].count, siblingAgeVector[j].count])
         j += 1
         i += 1
 
@@ -290,7 +290,7 @@ def geneCountStats(probandData, siblingData, outputPrefix):
                 testStat, pvalue = stats.ks_2samp(probandData[i].variantPosition, siblingData[j].variantPosition)
                 positionPvalues.append(pvalue)
                 positionTestStats.append(testStat)
-                positionResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, testStat, pvalue, len(probandData[i].variantPosition), len(siblingData[j].variantPosition)])
+                positionResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, testStat, pvalue, probandData[i].count, siblingData[j].count])
         
 
         j += 1
