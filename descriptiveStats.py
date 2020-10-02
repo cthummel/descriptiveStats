@@ -76,7 +76,7 @@ def binomialCounts(probandData, siblingData, outputPrefix):
     countResults = []
     countPvalues = []
     currentChrom = probandData[0].chrom
-    minimumVariantCount = 0
+    minimumVariantCount = 5
     j = 0
     i = 0
 
@@ -91,9 +91,15 @@ def binomialCounts(probandData, siblingData, outputPrefix):
                 #fatherResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, 99999, 1.0])
                 #fatherPvalues.append(1.0)
             else:
-                pvalue = stats.binom_test(probandData[i].count, int(float(probandData[i].end)) - int(float(probandData[i].start)), siblingData[j].count * 1.0 / (float(siblingData[i].end) - float(siblingData[i].start)))
-                countPvalues.append(pvalue)
-                countResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, "NA", pvalue, probandData[i].count, siblingData[j].count])
+                probandWidth = int(float(probandData[i].end)) - int(float(probandData[i].start))
+                siblingWidth = int(float(siblingData[i].end)) - int(float(siblingData[i].start))
+                #siblingRatio = siblingData[j].count * 1.0 / (float(siblingData[i].end) - float(siblingData[i].start))
+                table = np.array([[probandData[i].count, siblingData[i].count],[probandData[i].count - probandWidth, siblingData[i].count - siblingWidth]])
+
+                chiSquare, chiPvalue, df, expected = stats.chi2_contingency(table)
+                #pvalue = stats.binom_test(probandData[i].count, probandWidth, siblingRatio)
+                countPvalues.append(chiPvalue)
+                countResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, chiSquare, chiPvalue, probandData[i].count, siblingData[j].count])
 
         j += 1
         i += 1
@@ -190,6 +196,16 @@ def readVectorData(filename):
             else:
                 #print(s)
                 results.append(vectorAnalysis(s[0], s[1], s[2], s[3], [], [], [], 0))
+    return results
+
+def readKnownGeneList(filename):
+    results = []
+    with open(filename, mode='rt') as f:
+        header = f.readline()
+        for line in f:
+            s = line.strip().split("\t")
+
+
     return results
             
 
@@ -435,6 +451,25 @@ def binStatsGene(probandData, siblingData, outputPrefix):
     # print("Proband", geneNormTestStatsProband, geneNormTestPvaluesProband)
     # print("Sibling", geneNormTestStatsSibling, geneNormTestPvaluesSibling)
     
+def knownGeneComparison(geneCountData, binStatsGeneData, filename):
+    #Sort the data sets
+    geneCountData[geneCountData[:,8].argsort()]
+    binStatsGeneData[binStatsGeneData[:,8].argsort()]
+    ranks = [[],[]]
+
+    compare = readKnownGeneList(filename)
+
+    for i in np.arange(0, len(geneCountData)):
+        if geneCountData[i][1] in compare[i]:
+            ranks[0].append(i)
+    
+    for i in np.arange(0, len(binStatsGeneData)):
+        if binStatsGeneData[i][1] in compare[i]:
+            ranks[1].append(i)
+
+    print("Average Rank of Known Genes for", filename, ":", np.mean(ranks[0]))
+
+
 
 
 
