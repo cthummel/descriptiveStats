@@ -80,7 +80,7 @@ def binomialCounts(probandData, siblingData, outputPrefix):
     j = 0
     i = 0
 
-    while i < len(probandData):
+    while i < len(probandData) and j < len(siblingData):
         i, j, currentChrom, done = resolveMismatch(i, j, probandData, siblingData, currentChrom, minimumVariantCount)
 
         if done:
