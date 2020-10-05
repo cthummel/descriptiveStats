@@ -94,7 +94,7 @@ def binomialCounts(probandData, siblingData, outputPrefix):
                 probandWidth = int(float(probandData[i].end)) - int(float(probandData[i].start))
                 siblingWidth = int(float(siblingData[i].end)) - int(float(siblingData[i].start))
                 #siblingRatio = siblingData[j].count * 1.0 / (float(siblingData[i].end) - float(siblingData[i].start))
-                table = np.array([[probandData[i].count, siblingData[i].count],[probandData[i].count - probandWidth, siblingData[i].count - siblingWidth]])
+                table = np.array([[probandData[i].count, siblingData[i].count],[probandWidth - probandData[i].count, siblingWidth - siblingData[i].count]])
 
                 chiSquare, chiPvalue, df, expected = stats.chi2_contingency(table)
                 #pvalue = stats.binom_test(probandData[i].count, probandWidth, siblingRatio)
