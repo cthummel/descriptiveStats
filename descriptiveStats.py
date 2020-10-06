@@ -204,7 +204,7 @@ def readKnownGeneList(filename):
         header = f.readline()
         for line in f:
             s = line.strip().split("\t")
-
+            results.append(s[0])
 
     return results
             
@@ -451,31 +451,37 @@ def binStatsGene(probandData, siblingData, outputPrefix):
     # print("Proband", geneNormTestStatsProband, geneNormTestPvaluesProband)
     # print("Sibling", geneNormTestStatsSibling, geneNormTestPvaluesSibling)
     
-def knownGeneComparison(geneCountData, binStatsGeneData, filename):
+def knownGeneComparison(geneCountData, genePositionData, filenames):
     #Sort the data sets
     geneCountData[geneCountData[:,8].argsort()]
-    binStatsGeneData[binStatsGeneData[:,8].argsort()]
+    genePositionData[genePositionData[:,8].argsort()]
     ranks = [[],[]]
 
-    compare = readKnownGeneList(filename)
+    for x in filenames:
+        compare = readKnownGeneList(x)
 
-    for i in np.arange(0, len(geneCountData)):
-        if geneCountData[i][1] in compare[i]:
-            ranks[0].append(i)
-    
-    for i in np.arange(0, len(binStatsGeneData)):
-        if binStatsGeneData[i][1] in compare[i]:
-            ranks[1].append(i)
+        for i in np.arange(0, len(compare)):
+            for j in np.arange(0, len(geneCountData)):
+                if geneCountData[j][1] == compare[i]:
+                    ranks[0].append(j)
+                    break
 
-    print("Average Rank of Known Genes for", filename, ":", np.mean(ranks[0]))
+            for j in np.arange(0, len(genePositionData)):
+                if genePositionData[j][1] == compare[i]:
+                    ranks[1].append(j)
+                    break
+
+        print("Average Rank of Known Genes for Count Data in", x, ":", np.mean(ranks[0]), "out of", len(geneCountData), "ranks with pvalue", stats.binom_test(np.mean(ranks[0]), n=len(geneCountData), p=.50))
+        print("Average Rank of Known Genes for Position Data in ", x, ":", np.mean(ranks[1]), "out of", len(genePositionData), "ranks with pvalue", stats.binom_test(np.mean(ranks[1]), n=len(genePositionData), p=.50))
 
 
 
 
 
 def main(argv):
-    opts, args = getopt.getopt(argv, "ho:", ['proHist=', 'proCount=', 'proMega=', 'proAge=', 'sibHist=', 'sibCount=', 'sibMega=', 'sibAge=', 'output='])
+    opts, args = getopt.getopt(argv, "ho:", ['proHist=', 'proCount=', 'proMega=', 'proAge=', 'sibHist=', 'sibCount=', 'sibMega=', 'sibAge=', 'output=', 'knownGene='])
     outputPrefix = ""
+    knownGeneList = []
 
     for opt, arg in opts:
         if opt == '--proHist':
@@ -494,6 +500,8 @@ def main(argv):
             siblingMegaFilename = arg
         elif opt == '--sibAge':
             siblingAgeFilename = arg
+        elif opt == '--knownGene':
+            knownGeneList = arg.strip().split(",")
         elif opt in ('-h'):
             print("Use", ['--proHist', '--proCount', '--sibHist', '--sibCount'], "to input filenames")
             print("-o for output file.")
@@ -598,8 +606,8 @@ def main(argv):
 
 
     ageVectorStats(probandVectorData, siblingVectorData, outputPrefix)
-    geneCountStats(probandVectorData, siblingVectorData, outputPrefix)
-    binomialCounts(probandVectorData, siblingVectorData, outputPrefix)
+    genePositionData = geneCountStats(probandVectorData, siblingVectorData, outputPrefix)
+    geneCountData = binomialCounts(probandVectorData, siblingVectorData, outputPrefix)
 
     # probandChromDict = {}
     # siblingChromDict = {}
@@ -656,12 +664,8 @@ def main(argv):
     binStatsGene(probandMegaBaseData, siblingMegaBaseData, outputPrefix)
     #geneCountStats(probandMegaBaseData, siblingMegaBaseData, outputPrefix)
 
-
-    # tempProband = [34296170, 34038118, 33969149, 33804533, 33897533, 34262966, 34101972, 34302323, 34046133, 34499237, 34264576, 34403749, 34042175, 33556121, 34418068, 34373311, 34428879, 34428880, 34004365, 33686874, 34023799, 34422787, 34249934, 33920501, 33907808, 34318097]
-    # tempSibling = [33533207, 34304953, 33711308, 33554223, 33710378, 33759165, 33688167, 33931893, 34151661, 34151797, 33639300, 33639301, 33501920, 33725904, 34330898, 33707310, 33768958, 34099877, 33589316, 33548425, 33707411, 34156030]
-    # print(stats.ks_2samp(tempProband, tempSibling))
-    
-        
+    if len(knownGeneList) != 0:
+        knownGeneComparison(geneCountData, genePositionData, knownGeneList)
 
 
 
