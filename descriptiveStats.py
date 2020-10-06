@@ -453,6 +453,10 @@ def binStatsGene(probandData, siblingData, outputPrefix):
     
 def knownGeneComparison(geneCountData, genePositionData, filenames):
     #Sort the data sets
+    for x in geneCountData:
+        if isinstance(x, list):
+            "We have a list in this thing"
+    print(np.array(geneCountData))
     sortedCount = np.array(geneCountData)[:,8].sort(key=float)
     sortedPos = np.array(genePositionData)[:,8].sort(key=float)
     ranks = [[],[]]
