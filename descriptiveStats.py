@@ -453,26 +453,26 @@ def binStatsGene(probandData, siblingData, outputPrefix):
     
 def knownGeneComparison(geneCountData, genePositionData, filenames):
     #Sort the data sets
-    geneCountData[geneCountData[:,8].argsort()]
-    genePositionData[genePositionData[:,8].argsort()]
+    sortedCount = geneCountData[:,8].sort(key=float)
+    sortedPos = genePositionData[:,8].sort(key=float)
     ranks = [[],[]]
 
     for x in filenames:
         compare = readKnownGeneList(x)
 
         for i in np.arange(0, len(compare)):
-            for j in np.arange(0, len(geneCountData)):
-                if geneCountData[j][1] == compare[i]:
+            for j in np.arange(0, len(sortedCount)):
+                if sortedCount[j][1] == compare[i]:
                     ranks[0].append(j)
                     break
 
-            for j in np.arange(0, len(genePositionData)):
-                if genePositionData[j][1] == compare[i]:
+            for j in np.arange(0, len(sortedPos)):
+                if sortedPos[j][1] == compare[i]:
                     ranks[1].append(j)
                     break
 
-        print("Average Rank of Known Genes for Count Data in", x, ":", np.mean(ranks[0]), "out of", len(geneCountData), "ranks with pvalue", stats.binom_test(np.mean(ranks[0]), n=len(geneCountData), p=.50))
-        print("Average Rank of Known Genes for Position Data in ", x, ":", np.mean(ranks[1]), "out of", len(genePositionData), "ranks with pvalue", stats.binom_test(np.mean(ranks[1]), n=len(genePositionData), p=.50))
+        print("Average Rank of Known Genes for Count Data in", x, ":", np.mean(ranks[0]), "out of", len(sortedCount), "ranks with pvalue", stats.binom_test(np.mean(ranks[0]), n=len(sortedCount), p=.50))
+        print("Average Rank of Known Genes for Position Data in ", x, ":", np.mean(ranks[1]), "out of", len(sortedPos), "ranks with pvalue", stats.binom_test(np.mean(ranks[1]), n=len(sortedPos), p=.50))
 
 
 
