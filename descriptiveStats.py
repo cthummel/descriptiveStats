@@ -451,7 +451,7 @@ def binStatsGene(probandData, siblingData, outputPrefix):
     # print("Proband", geneNormTestStatsProband, geneNormTestPvaluesProband)
     # print("Sibling", geneNormTestStatsSibling, geneNormTestPvaluesSibling)
     
-def knownGeneComparison(geneCountData, genePositionData, filenames):
+def knownGeneComparison(geneCountData, genePositionData, filenames, outputPrefix):
     #Sort the data sets
     for x in geneCountData:
         if isinstance(x, list):
@@ -465,6 +465,12 @@ def knownGeneComparison(geneCountData, genePositionData, filenames):
 
     countSize = len(sortedCount)
     posSize = len(sortedPos)
+
+    wCounts = csv.writer(open(outputPrefix + "countKnownGene.csv", "w"))
+    wCounts.writerow(["MeanRank", "TotalRank", "PercentageRank", "pvalue", "genelist"])
+
+    wPos = csv.writer(open(outputPrefix + "posKnownGene.csv", "w"))
+    wPos.writerow(["MeanRank", "TotalRank", "PercentageRank", "pvalue", "genelist"])
     
 
     for x in filenames:
@@ -487,11 +493,17 @@ def knownGeneComparison(geneCountData, genePositionData, filenames):
 
         if len(ranks[0]) != 0:
             countMean = np.mean(ranks[0])
-        if len(ranks[1] != 0):
+        if len(ranks[1]) != 0:
             posMean = np.mean(ranks[1])
 
-        print("Average Rank of Known Genes for Count Data in", x, ":", countMean, "/", countSize, "=", countMean/countSize, "rank with pvalue", stats.binom_test(np.mean(ranks[0]), n=len(sortedCount), p=.50, alternative='less'))
-        print("Average Rank of Known Genes for Position Data in ", x, ":", posMean, "/", posSize, "=", posMean/posSize, "rank with pvalue", stats.binom_test(np.mean(ranks[1]), n=len(sortedPos), p=.50, alternative='less'))
+        countPvalue = stats.binom_test(np.mean(ranks[0]), n=len(sortedCount), p=.50, alternative='less')
+        posPvalue = stats.binom_test(np.mean(ranks[1]), n=len(sortedPos), p=.50, alternative='less')
+
+        print("Average Rank of Known Genes for Count Data in", x, ":", countMean, "/", countSize, "=", countMean/countSize, "rank with pvalue", countPvalue)
+        print("Average Rank of Known Genes for Position Data in ", x, ":", posMean, "/", posSize, "=", posMean/posSize, "rank with pvalue", posPvalue)
+
+        wCounts.writerow([countMean, countSize, countMean/countSize, countPvalue, x.split("/")[-1]])
+        wPos.writerow([posMean, posSize, posMean/posSize, posPvalue, x.split("/")[-1]])
 
 
 
@@ -684,7 +696,7 @@ def main(argv):
     #geneCountStats(probandMegaBaseData, siblingMegaBaseData, outputPrefix)
 
     if len(knownGeneList) != 0:
-        knownGeneComparison(geneCountData, genePositionData, knownGeneList)
+        knownGeneComparison(geneCountData, genePositionData, knownGeneList, outputPrefix)
 
 
 
