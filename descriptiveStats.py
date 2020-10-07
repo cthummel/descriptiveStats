@@ -456,9 +456,12 @@ def knownGeneComparison(geneCountData, genePositionData, filenames):
     for x in geneCountData:
         if isinstance(x, list):
             "We have a list in this thing"
-    print(np.array(geneCountData))
-    sortedCount = np.array(geneCountData)[:,8].sort(key=float)
-    sortedPos = np.array(genePositionData)[:,8].sort(key=float)
+    print(np.array(geneCountData)[:,5])
+    sortedCount = np.array(geneCountData)
+    sortedPos = np.array(genePositionData)
+
+    sortedCount = sortedCount[sortedCount[:,5].argsort()]
+    sortedPos = sortedPos[sortedPos[:,5].argsort()]
     ranks = [[],[]]
 
     for x in filenames:
