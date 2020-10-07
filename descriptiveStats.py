@@ -456,15 +456,21 @@ def knownGeneComparison(geneCountData, genePositionData, filenames):
     for x in geneCountData:
         if isinstance(x, list):
             "We have a list in this thing"
-    print(np.array(geneCountData)[:,5])
+    #print(np.array(geneCountData)[:,5])
     sortedCount = np.array(geneCountData)
     sortedPos = np.array(genePositionData)
 
     sortedCount = sortedCount[sortedCount[:,5].argsort()]
     sortedPos = sortedPos[sortedPos[:,5].argsort()]
-    ranks = [[],[]]
+
+    countSize = len(sortedCount)
+    posSize = len(sortedPos)
+    
 
     for x in filenames:
+        countMean = 0
+        posMean = 0
+        ranks = [[],[]]
         compare = readKnownGeneList(x)
 
         for i in np.arange(0, len(compare)):
@@ -477,9 +483,15 @@ def knownGeneComparison(geneCountData, genePositionData, filenames):
                 if sortedPos[j][1] == compare[i]:
                     ranks[1].append(j)
                     break
+                    
 
-        print("Average Rank of Known Genes for Count Data in", x, ":", np.mean(ranks[0]), "out of", len(sortedCount), "ranks with pvalue", stats.binom_test(np.mean(ranks[0]), n=len(sortedCount), p=.50))
-        print("Average Rank of Known Genes for Position Data in ", x, ":", np.mean(ranks[1]), "out of", len(sortedPos), "ranks with pvalue", stats.binom_test(np.mean(ranks[1]), n=len(sortedPos), p=.50))
+        if len(ranks[0]) != 0:
+            countMean = np.mean(ranks[0])
+        if len(ranks[1] != 0):
+            posMean = np.mean(ranks[1])
+
+        print("Average Rank of Known Genes for Count Data in", x, ":", countMean, "/", countSize, "=", countMean/countSize, "rank with pvalue", stats.binom_test(np.mean(ranks[0]), n=len(sortedCount), p=.50, alternative='less'))
+        print("Average Rank of Known Genes for Position Data in ", x, ":", posMean, "/", posSize, "=", posMean/posSize, "rank with pvalue", stats.binom_test(np.mean(ranks[1]), n=len(sortedPos), p=.50, alternative='less'))
 
 
 
