@@ -147,7 +147,6 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
     #generate bins
     with gzip.open("gencode.v34.annotation.gff3.gz", mode='rt') as f:
         for line in f:
-            
             s = line.strip().split("\t")
             if s[0][0] == "#":
                 continue
@@ -218,11 +217,11 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
                                             maleCount += 1
                                         elif (x.probandGender == "male") and (x.siblingGender == "female"):
                                             currentDataSet = 1
-                                            maleCount += 1
-                                        elif (x.probandGender == "female") and (x.siblingGender == "male"):
-                                            currentDataSet = 2
                                             femaleCount += 1
                                             gender = 5
+                                        elif (x.probandGender == "female") and (x.siblingGender == "male"):
+                                            currentDataSet = 2
+                                            maleCount += 1                                           
                                         elif (x.probandGender == "female") and (x.siblingGender == "female"):
                                             currentDataSet = 3
                                             femaleCount += 1
