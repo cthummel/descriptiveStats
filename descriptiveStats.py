@@ -72,13 +72,18 @@ def resolveMismatch(i, j, probandData, siblingData, currentChrom, minimumVariant
 
 
 
-def binomialCounts(probandData, siblingData, outputPrefix):
+def binomialCounts(probandData, siblingData, knownGenes, outputPrefix):
     countResults = []
     countPvalues = []
+    knownGeneList = []
+    geneFilenames = knownGenes.strip().split(",")
     currentChrom = probandData[0].chrom
     minimumVariantCount = 5
     j = 0
     i = 0
+
+    for x in np.arange(0, len(geneFilenames)):
+        knownGeneList.append(readKnownGeneList(geneFilenames[x]))
 
     while i < len(probandData) and j < len(siblingData):
         i, j, currentChrom, done = resolveMismatch(i, j, probandData, siblingData, currentChrom, minimumVariantCount)
@@ -98,8 +103,23 @@ def binomialCounts(probandData, siblingData, outputPrefix):
 
                 chiSquare, chiPvalue, df, expected = stats.chi2_contingency(table)
                 #pvalue = stats.binom_test(probandData[i].count, probandWidth, siblingRatio)
+
+                found = False
+                knownGeneString = ""
+                for x in np.arange(0, len(knownGeneList)):
+                    if probandData[i].name in knownGeneList[x]:
+                        if knownGeneString == "":
+                            knownGeneString += geneFilenames[x].split("/")[-1]
+                            found = True
+                        else:
+                            knownGeneString += "|" + geneFilenames[x].split("/")[-1]
+                            found = True
+
+                if not found:
+                    knownGeneString = "No"
+
                 countPvalues.append(chiPvalue)
-                countResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, chiSquare, chiPvalue, probandData[i].count, siblingData[j].count])
+                countResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, chiSquare, chiPvalue, probandData[i].count, siblingData[j].count, knownGeneString])
 
         j += 1
         i += 1
@@ -112,9 +132,9 @@ def binomialCounts(probandData, siblingData, outputPrefix):
 
 
     fCounts = csv.writer(open(outputPrefix + "countStats.csv", "w"))
-    fCounts.writerow(["Chrom", "Gene", "Start", "End", "Length", "ProbandVariantCount", "SiblingVariantCount", "TestStat", "Pvalue", "BonPvalue", "SidakPvalue", "HolmPvalue", "FDRPvalue"])
+    fCounts.writerow(["Chrom", "Gene", "Start", "End", "Length", "ProbandVariantCount", "SiblingVariantCount", "TestStat", "Pvalue", "BonPvalue", "SidakPvalue", "HolmPvalue", "FDRPvalue", "KnownGene"])
     for row in np.arange(0, len(countResults)):
-        fCounts.writerow([countResults[row][0], countResults[row][1], countResults[row][2], countResults[row][3], int(float(countResults[row][3])) - int(float(countResults[row][2])), countResults[row][6], countResults[row][7], countResults[row][4], countResults[row][5], countBon[1][row], countSidak[1][row], countHolm[1][row], countFDR[1][row]])
+        fCounts.writerow([countResults[row][0], countResults[row][1], countResults[row][2], countResults[row][3], int(float(countResults[row][3])) - int(float(countResults[row][2])), countResults[row][6], countResults[row][7], countResults[row][4], countResults[row][5], countBon[1][row], countSidak[1][row], countHolm[1][row], countFDR[1][row], countResults[row][8]])
 
     return countResults
 
@@ -286,14 +306,20 @@ def ageVectorStats(probandAgeVector, siblingAgeVector, outputPrefix):
     return fatherResults, motherResults
 
 
-def geneCountStats(probandData, siblingData, outputPrefix):
+def geneCountStats(probandData, siblingData, knownGenes, outputPrefix):
     positionResults = []
     positionPvalues = []
     positionTestStats = []
+    geneFilenames = knownGenes.strip().split(",")
+    knownGeneList = []
     currentChrom = probandData[0].chrom
     minimumVariantCount = 5
     i = 0
     j = 0
+
+    for x in np.arange(0, len(geneFilenames)):
+        knownGeneList.append(readKnownGeneList(geneFilenames[x]))
+
 
     while i < len(probandData) and j < len(siblingData):
         i, j, currentChrom, done = resolveMismatch(i, j, probandData, siblingData, currentChrom, minimumVariantCount)
@@ -304,9 +330,23 @@ def geneCountStats(probandData, siblingData, outputPrefix):
                 skip = True
             else:
                 testStat, pvalue = stats.ks_2samp(probandData[i].variantPosition, siblingData[j].variantPosition)
+                found = False
+                knownGeneString = ""
+                for x in np.arange(0, len(knownGeneList)):
+                    if probandData[i].name in knownGeneList[x]:
+                        if knownGeneString == "":
+                            knownGeneString += geneFilenames[x].split("/")[-1]
+                            found = True
+                        else:
+                            knownGeneString += "|" + geneFilenames[x].split("/")[-1]
+                            found = True
+
+                if not found:
+                    knownGeneString = "No"
+
                 positionPvalues.append(pvalue)
                 positionTestStats.append(testStat)
-                positionResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, testStat, pvalue, probandData[i].count, siblingData[j].count])
+                positionResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, testStat, pvalue, probandData[i].count, siblingData[j].count, knownGeneString])
         
 
         j += 1
@@ -320,9 +360,9 @@ def geneCountStats(probandData, siblingData, outputPrefix):
 
 
     fCounts = csv.writer(open(outputPrefix + "positionStats.csv", "w"))
-    fCounts.writerow(["Chrom", "Gene", "Start", "End", "Length", "ProbandVariantCount", "SiblingVariantCount", "TestStat", "Pvalue", "BonPvalue", "SidakPvalue", "HolmPvalue", "FDRPvalue"])
+    fCounts.writerow(["Chrom", "Gene", "Start", "End", "Length", "ProbandVariantCount", "SiblingVariantCount", "TestStat", "Pvalue", "BonPvalue", "SidakPvalue", "HolmPvalue", "FDRPvalue", "KnownGene"]) 
     for row in np.arange(0, len(positionResults)):
-        fCounts.writerow([positionResults[row][0], positionResults[row][1], positionResults[row][2], positionResults[row][3], int(float(positionResults[row][3])) - int(float(positionResults[row][2])), positionResults[row][6], positionResults[row][7], positionResults[row][4], positionResults[row][5], positionBon[1][row], positionSidak[1][row], positionHolm[1][row], positionFDR[1][row]])
+        fCounts.writerow([positionResults[row][0], positionResults[row][1], positionResults[row][2], positionResults[row][3], int(float(positionResults[row][3])) - int(float(positionResults[row][2])), positionResults[row][6], positionResults[row][7], positionResults[row][4], positionResults[row][5], positionBon[1][row], positionSidak[1][row], positionHolm[1][row], positionFDR[1][row], positionResults[row][8]])
 
     return positionResults
 
@@ -637,53 +677,10 @@ def main(argv):
 
 
     ageVectorStats(probandVectorData, siblingVectorData, outputPrefix)
-    genePositionData = geneCountStats(probandVectorData, siblingVectorData, outputPrefix)
-    geneCountData = binomialCounts(probandVectorData, siblingVectorData, outputPrefix)
-
-    # probandChromDict = {}
-    # siblingChromDict = {}
-    # KStestResults = []
-    # pvalues = []
-    # uniqueChromList = set()
-
-    # for row in probandMegaBaseData:
-    #     if row[0] not in probandChromDict:
-    #         probandChromDict[row[0]] = [row[3]]
-    #         uniqueChromList.add(row[0])
-    #     else:
-    #         probandChromDict[row[0]].append(row[3])
-
-    # for row in siblingMegaBaseData:
-    #     if row[0] not in siblingChromDict:
-    #         siblingChromDict[row[0]] = [row[3]]
-    #         uniqueChromList.add(row[0])
-    #     else:
-    #         siblingChromDict[row[0]].append(row[3])
-
-    # for chrom in uniqueChromList:
-    #     # if (len(chrom) > 5):
-    #     #     continue
-    #     if (chrom in probandChromDict.keys()) and (chrom in siblingChromDict.keys()):
-    #         testStat, pvalue = stats.ks_2samp(probandChromDict[chrom], siblingChromDict[chrom])
-    #         print("---- KS Test using Megabase Bins in Chromosome (" + chrom + ")----")
-    #         print("Test Statistic:", testStat)
-    #         print("P-value", pvalue, "\n")
-    #         pvalues.append(pvalue)
-    #         KStestResults.append([chrom, testStat, pvalue])
-
-    # # binBinomialTestResults = []
-    # # for chrom in uniqueChromList:
-    # #     if (chrom in probandChromDict.keys()) and (chrom in siblingChromDict.keys()):
-
+    genePositionData = geneCountStats(probandVectorData, siblingVectorData, knownGeneList, outputPrefix)
+    geneCountData = binomialCounts(probandVectorData, siblingVectorData, knownGeneList, outputPrefix)
 
     
-    # resultsBon = statsmodels.stats.multitest.multipletests(pvalues, alpha=0.05, method='bonferroni', is_sorted=False, returnsorted=False)
-    # resultsSidak = statsmodels.stats.multitest.multipletests(pvalues, alpha=0.05, method='sidak', is_sorted=False, returnsorted=False)
-    # resultsHolm = statsmodels.stats.multitest.multipletests(pvalues, alpha=0.05, method='holm', is_sorted=False, returnsorted=False)  
-    # reject, adjPvalue = statsmodels.stats.multitest.fdrcorrection(pvalues, alpha=0.05, method='indep', is_sorted=False)
-
-    # #print(resultsBon, resultsHolm, resultsSidak)
-
     # wCounts = csv.writer(open(outputPrefix + "megaBaseKS.csv", "w"))
     # wCounts.writerow(["Chrom", "TestStat", "Pvalue", "BonPass", "BonCorrect", "SidakPass", "SidakCorrect", "HolmsPass", "HolmsCorrect", "FDRPass", "FDRCorrect"])
     # for row in np.arange(0, len(KStestResults) - 1):
