@@ -282,8 +282,8 @@ def ageVectorStats(probandAgeVector, siblingAgeVector, outputPrefix):
     motherFDR = statsmodels.stats.multitest.fdrcorrection(motherPvalues, alpha=0.05, method='indep', is_sorted=False)
 
     #print("Father Chisq Test Stat test:", stats.kstest(fatherTestStats, "chi2"))
-    normParam = { "scale": np.std(fatherTestStats), "loc": np.mean(fatherTestStats) }
-    exponParam = { "scale": 1.0 / np.mean(fatherTestStats) }
+    # normParam = { "scale": np.std(fatherTestStats), "loc": np.mean(fatherTestStats) }
+    # exponParam = { "scale": 1.0 / np.mean(fatherTestStats) }
     #print("Father Norm Test Stat test:", stats.kstest(fatherTestStats, "norm", args=stats.norm(**normParam)))
     #print("Father Expon Test Stat test:", stats.kstest(fatherTestStats, "expon", args=stats.expon(**exponParam)))
 
