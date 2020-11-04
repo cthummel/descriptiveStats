@@ -76,9 +76,9 @@ def binomialCounts(probandData, siblingData, knownGenes, outputPrefix):
     countResults = []
     countPvalues = []
     knownGeneList = []
-    geneFilenames = knownGenes.strip().split(",")
+    geneFilenames = knownGenes
     currentChrom = probandData[0].chrom
-    minimumVariantCount = 5
+    minimumVariantCount = 1
     j = 0
     i = 0
 
@@ -164,19 +164,6 @@ def readCount(filename):
                     if(x != ''):
                         results.append(int(x))
     return results
-
-
-def sidakProcedure(alpha, m):
-    return 1 - np.power(1 - alpha, 1.0 / m)
-
-def holmBonferroni(pvalues, alpha, m):
-    k = len(pvalues)
-    sortedData = np.sort(pvalues)
-    for x in np.arange(0, k - 1):
-        if (alpha / (m + 1 - x)) < sortedData[x]:
-            return np.max(x - 1, 0)
-    
-    return k
 
 def readVectorData(filename):
     results = []
@@ -310,7 +297,7 @@ def geneCountStats(probandData, siblingData, knownGenes, outputPrefix):
     positionResults = []
     positionPvalues = []
     positionTestStats = []
-    geneFilenames = knownGenes.strip().split(",")
+    geneFilenames = knownGenes
     knownGeneList = []
     currentChrom = probandData[0].chrom
     minimumVariantCount = 5
@@ -493,24 +480,30 @@ def binStatsGene(probandData, siblingData, outputPrefix):
     
 def knownGeneComparison(geneCountData, genePositionData, filenames, outputPrefix):
     #Sort the data sets
-    for x in geneCountData:
-        if isinstance(x, list):
-            "We have a list in this thing"
+    # for x in geneCountData:
+    #     if isinstance(x, list):
+    #         "We have a list in this thing"
     #print(np.array(geneCountData)[:,5])
     sortedCount = np.array(geneCountData)
     sortedPos = np.array(genePositionData)
+    #sortedDad = np.array(geneFatherData)
 
     sortedCount = sortedCount[sortedCount[:,5].argsort()]
     sortedPos = sortedPos[sortedPos[:,5].argsort()]
+    #sortedDad = sortedDad[sortedDad[:,5].argsort()]
 
     countSize = len(sortedCount)
     posSize = len(sortedPos)
+    #dadSize = len(sortedDad)
 
     wCounts = csv.writer(open(outputPrefix + "countKnownGene.csv", "w"))
-    wCounts.writerow(["MeanRank", "TotalRank", "PercentageRank", "pvalue", "genelist"])
+    wCounts.writerow(["MeanRank", "TotalRank", "PercentageRank", "pvalue", "genelist", "listlength"])
 
     wPos = csv.writer(open(outputPrefix + "posKnownGene.csv", "w"))
-    wPos.writerow(["MeanRank", "TotalRank", "PercentageRank", "pvalue", "genelist"])
+    wPos.writerow(["MeanRank", "TotalRank", "PercentageRank", "pvalue", "genelist", "listlength"])
+
+    # wDad = csv.writer(open(outputPrefix + "fatherKnownGene.csv", "w"))
+    # wDad.writerow(["MeanRank", "TotalRank", "PercentageRank", "pvalue", "genelist"])
     
 
     for x in filenames:
@@ -542,8 +535,8 @@ def knownGeneComparison(geneCountData, genePositionData, filenames, outputPrefix
         print("Average Rank of Known Genes for Count Data in", x, ":", countMean, "/", countSize, "=", countMean/countSize, "rank with pvalue", countPvalue)
         print("Average Rank of Known Genes for Position Data in ", x, ":", posMean, "/", posSize, "=", posMean/posSize, "rank with pvalue", posPvalue)
 
-        wCounts.writerow([countMean, countSize, countMean/countSize, countPvalue, x.split("/")[-1]])
-        wPos.writerow([posMean, posSize, posMean/posSize, posPvalue, x.split("/")[-1]])
+        wCounts.writerow([countMean, countSize, countMean/countSize, countPvalue, x.split("/")[-1], len(compare)])
+        wPos.writerow([posMean, posSize, posMean/posSize, posPvalue, x.split("/")[-1], len(compare)])
 
 
 
