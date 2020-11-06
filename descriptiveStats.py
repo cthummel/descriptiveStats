@@ -220,9 +220,9 @@ def readKnownGeneListWeights(filename):
     with open(filename, mode='rt') as f:
         #header = f.readline()
         for line in f:
-            s = line.strip().split("\t")
+            s = line.strip().split(",")
             results.append(s[1])
-            weights.append(s[7])
+            weights.append(1.0 / int(s[6]))
 
     return results, weights
             
@@ -553,23 +553,26 @@ def knownGeneComparison(geneCountData, genePositionData, filenames, weightedGene
         countMean = 0
         posMean = 0
         ranks = [[],[]]
-        compare, weights = readKnownGeneListWeights(x)
+        weights = [[], []]
+        compare, geneWeights = readKnownGeneListWeights(x)
 
         for i in np.arange(0, len(compare)):
             for j in np.arange(0, len(sortedCount)):
                 if sortedCount[j][1] == compare[i]:
                     ranks[0].append(j)
+                    weights[0].append(geneWeights[i])
                     break
 
             for j in np.arange(0, len(sortedPos)):
                 if sortedPos[j][1] == compare[i]:
                     ranks[1].append(j)
+                    weights[1].append(geneWeights[i])
                     break
 
         if len(ranks[0]) != 0:
-            countMean = np.average(ranks[0], None, weights)
+            countMean = np.average(ranks[0], None, weights[0])
         if len(ranks[1]) != 0:
-            posMean = np.average(ranks[1], None, weights)
+            posMean = np.average(ranks[1], None, weights[1])
 
         countPvalue = stats.binom_test(countMean, n=len(sortedCount), p=.50, alternative='less')
         posPvalue = stats.binom_test(posMean, n=len(sortedPos), p=.50, alternative='less')
