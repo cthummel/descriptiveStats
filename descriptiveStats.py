@@ -212,8 +212,23 @@ def readKnownGeneList(filename):
         for line in f:
             s = line.strip().split("\t")
             results.append(s[0])
-
     return results
+
+def readKnownGeneListWeights(filename):
+    results = []
+    weights = []
+    with open(filename, mode='rt') as f:
+        header = f.readline()
+        for line in f:
+            s = line.strip().split("\t")
+            if weights:
+                results.append(s[1])
+                weights.append(s[7])
+            else:
+                results.append(s[0])
+                weights.append(1)
+
+    return results, weights
             
 
 def ageVectorStats(probandAgeVector, siblingAgeVector, outputPrefix):
@@ -478,7 +493,7 @@ def binStatsGene(probandData, siblingData, outputPrefix):
     # print("Proband", geneNormTestStatsProband, geneNormTestPvaluesProband)
     # print("Sibling", geneNormTestStatsSibling, geneNormTestPvaluesSibling)
     
-def knownGeneComparison(geneCountData, genePositionData, filenames, outputPrefix):
+def knownGeneComparison(geneCountData, genePositionData, filenames, weightedGeneList, outputPrefix):
     #Sort the data sets
     # for x in geneCountData:
     #     if isinstance(x, list):
@@ -538,14 +553,46 @@ def knownGeneComparison(geneCountData, genePositionData, filenames, outputPrefix
         wCounts.writerow([countMean, countSize, countMean/countSize, countPvalue, x.split("/")[-1], len(compare)])
         wPos.writerow([posMean, posSize, posMean/posSize, posPvalue, x.split("/")[-1], len(compare)])
 
+    for x in weightedGeneList:
+        countMean = 0
+        posMean = 0
+        ranks = [[],[]]
+        compare, weights = readKnownGeneListWeights(x)
+
+        for i in np.arange(0, len(compare)):
+            for j in np.arange(0, len(sortedCount)):
+                if sortedCount[j][1] == compare[i]:
+                    ranks[0].append(j)
+                    break
+
+            for j in np.arange(0, len(sortedPos)):
+                if sortedPos[j][1] == compare[i]:
+                    ranks[1].append(j)
+                    break
+
+        if len(ranks[0]) != 0:
+            countMean = np.average(ranks[0], None, weights)
+        if len(ranks[1]) != 0:
+            posMean = np.average(ranks[1], None, weights)
+
+        countPvalue = stats.binom_test(countMean, n=len(sortedCount), p=.50, alternative='less')
+        posPvalue = stats.binom_test(posMean, n=len(sortedPos), p=.50, alternative='less')
+
+        print("Average Rank of Known Genes for Count Data in", x, ":", countMean, "/", countSize, "=", countMean/countSize, "rank with pvalue", countPvalue)
+        print("Average Rank of Known Genes for Position Data in ", x, ":", posMean, "/", posSize, "=", posMean/posSize, "rank with pvalue", posPvalue)
+
+        wCounts.writerow([countMean, countSize, countMean/countSize, countPvalue, "[W]" + x.split("/")[-1], len(compare)])
+        wPos.writerow([posMean, posSize, posMean/posSize, posPvalue, "[W]" + x.split("/")[-1], len(compare)])
+
 
 
 
 
 def main(argv):
-    opts, args = getopt.getopt(argv, "ho:", ['proHist=', 'proCount=', 'proMega=', 'proAge=', 'sibHist=', 'sibCount=', 'sibMega=', 'sibAge=', 'output=', 'knownGene='])
+    opts, args = getopt.getopt(argv, "ho:", ['proHist=', 'proCount=', 'proMega=', 'proAge=', 'sibHist=', 'sibCount=', 'sibMega=', 'sibAge=', 'output=', 'knownGene=', 'weightedList='])
     outputPrefix = ""
     knownGeneList = []
+    weightedGeneList = []
 
     for opt, arg in opts:
         if opt == '--proHist':
@@ -566,6 +613,8 @@ def main(argv):
             siblingAgeFilename = arg
         elif opt == '--knownGene':
             knownGeneList = arg.strip().split(",")
+        elif opt == '--weightedList':
+            weightedGeneList = arg.strip().split(",")
         elif opt in ('-h'):
             print("Use", ['--proHist', '--proCount', '--sibHist', '--sibCount'], "to input filenames")
             print("-o for output file.")
@@ -686,7 +735,7 @@ def main(argv):
     #geneCountStats(probandMegaBaseData, siblingMegaBaseData, outputPrefix)
 
     if len(knownGeneList) != 0:
-        knownGeneComparison(geneCountData, genePositionData, knownGeneList, outputPrefix)
+        knownGeneComparison(geneCountData, genePositionData, knownGeneList, weightedGeneList, outputPrefix)
 
 
 
