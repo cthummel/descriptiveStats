@@ -218,15 +218,11 @@ def readKnownGeneListWeights(filename):
     results = []
     weights = []
     with open(filename, mode='rt') as f:
-        header = f.readline()
+        #header = f.readline()
         for line in f:
             s = line.strip().split("\t")
-            if weights:
-                results.append(s[1])
-                weights.append(s[7])
-            else:
-                results.append(s[0])
-                weights.append(1)
+            results.append(s[1])
+            weights.append(s[7])
 
     return results, weights
             
