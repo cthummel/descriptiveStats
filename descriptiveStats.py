@@ -78,7 +78,7 @@ def binomialCounts(probandData, siblingData, knownGenes, outputPrefix):
     knownGeneList = []
     geneFilenames = knownGenes
     currentChrom = probandData[0].chrom
-    minimumVariantCount = 1
+    minimumVariantCount = 0
     j = 0
     i = 0
 
@@ -91,7 +91,9 @@ def binomialCounts(probandData, siblingData, knownGenes, outputPrefix):
         if done:
             break
         else:
-            if probandData[i].count < minimumVariantCount or siblingData[j].count < minimumVariantCount:
+            if probandData[i].count == minimumVariantCount:
+                skip = True
+            elif probandData[i].count == minimumVariantCount and siblingData[j].count == minimumVariantCount:
                 skip = True
                 #fatherResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, 99999, 1.0])
                 #fatherPvalues.append(1.0)
@@ -101,7 +103,7 @@ def binomialCounts(probandData, siblingData, knownGenes, outputPrefix):
                 #siblingRatio = siblingData[j].count * 1.0 / (float(siblingData[i].end) - float(siblingData[i].start))
                 table = np.array([[probandData[i].count, siblingData[i].count],[probandWidth - probandData[i].count, siblingWidth - siblingData[i].count]])
 
-                chiSquare, chiPvalue, df, expected = stats.chi2_contingency(table)
+                fisherOR, fisherPvalue = stats.fisher_exact(table)
                 #pvalue = stats.binom_test(probandData[i].count, probandWidth, siblingRatio)
 
                 found = False
@@ -118,8 +120,8 @@ def binomialCounts(probandData, siblingData, knownGenes, outputPrefix):
                 if not found:
                     knownGeneString = "No"
 
-                countPvalues.append(chiPvalue)
-                countResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, chiSquare, chiPvalue, probandData[i].count, siblingData[j].count, knownGeneString])
+                countPvalues.append(fisherPvalue)
+                countResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, fisherOR, fisherPvalue, probandData[i].count, siblingData[j].count, knownGeneString])
 
         j += 1
         i += 1
@@ -132,7 +134,7 @@ def binomialCounts(probandData, siblingData, knownGenes, outputPrefix):
 
 
     fCounts = csv.writer(open(outputPrefix + "countStats.csv", "w"))
-    fCounts.writerow(["Chrom", "Gene", "Start", "End", "Length", "ProbandVariantCount", "SiblingVariantCount", "TestStat", "Pvalue", "BonPvalue", "SidakPvalue", "HolmPvalue", "FDRPvalue", "KnownGene"])
+    fCounts.writerow(["Chrom", "Gene", "Start", "End", "Length", "ProbandVariantCount", "SiblingVariantCount", "OddsRatio", "Pvalue", "BonPvalue", "SidakPvalue", "HolmPvalue", "FDRPvalue", "KnownGene"])
     for row in np.arange(0, len(countResults)):
         fCounts.writerow([countResults[row][0], countResults[row][1], countResults[row][2], countResults[row][3], int(float(countResults[row][3])) - int(float(countResults[row][2])), countResults[row][6], countResults[row][7], countResults[row][4], countResults[row][5], countBon[1][row], countSidak[1][row], countHolm[1][row], countFDR[1][row], countResults[row][8]])
 
@@ -222,7 +224,7 @@ def readKnownGeneListWeights(filename):
         for line in f:
             s = line.strip().split(",")
             results.append(s[1])
-            weights.append(1.0 / int(s[6]))
+            weights.append(np.power(1.0 / int(s[6]), 2))
 
     return results, weights
             
