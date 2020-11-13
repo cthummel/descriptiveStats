@@ -141,8 +141,8 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
     # chromInfoDictMF = {}
     # chromInfoDictFM = {}
     # chromInfoDictFF = {}
-    #[MM, MF, FM, FF, male, female]
-    result = [{}, {}, {}, {}, {}, {}]
+    #[MM, MF, FM, FF, male, female, full]
+    result = [{}, {}, {}, {}, {}, {}, {}]
 
     #generate bins
     with gzip.open("gencode.v34.annotation.gff3.gz", mode='rt') as f:
@@ -177,6 +177,7 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
                     currentFatherAge = 0
                     currentMotherAge = 0
                     gender = 4
+                    full = 6
                     for line in f:
                         if len(line.strip()) == 0:
                             continue
@@ -296,12 +297,31 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
                                     gene.motherAge.append("NA")
                             elif gene.transcriptStart > int(s[1]):
                                 break
+
+                        #for full dataset
+                        for gene in result[full][currentChrom]:
+                            if gene.transcriptStart <= int(s[1]) and gene.transcriptEnd >= int(s[1]):
+                                gene.count += variantCount
+                                gene.insertion += insert
+                                gene.deletion += Del
+                                gene.snv += snv
+                                gene.variantPosition.append(int(s[1]))
+                                if currentFatherAge != "":
+                                    gene.fatherAge.append(int(currentFatherAge))
+                                else:
+                                    gene.fatherAge.append("NA")
+                                if currentMotherAge != "":
+                                    gene.motherAge.append(int(currentMotherAge))
+                                else:
+                                    gene.motherAge.append("NA")
+                            elif gene.transcriptStart > int(s[1]):
+                                break
                             
                         #updateChromInfoDict(result[currentDataSet], currentMegaBaseIndex, s[0], variantCount, insert, Del, snv, currentFatherAge, currentMotherAge, False)
                         
 
     outputIndex = 0
-    typePrefix = ["MM", "MF", "FM", "FF", "male", "female"]
+    typePrefix = ["MM", "MF", "FM", "FF", "male", "female", "full"]
 
     # maleCounts = csv.writer(open(outputPrefix + "male" + ".geneCounts.csv", "w"))
     # maleAgeCounts = csv.writer(open(outputPrefix + "male" + ".geneAgeVector.csv", "w"), delimiter="\t")
@@ -366,8 +386,8 @@ def megabaseCountMergeFamily(file, overlap, binsize, outputPrefix, familyData):
     chromInfoDictMF = {}
     chromInfoDictFM = {}
     chromInfoDictFF = {}
-    #[MM, MF, FM, FF, male, female]
-    result = [{}, {}, {}, {}, {}, {}]
+    #[MM, MF, FM, FF, male, female, full]
+    result = [{}, {}, {}, {}, {}, {}, {}]
 
     for root, dirs, files in os.walk(file):
         temproot = root.strip().split("/")
@@ -381,10 +401,12 @@ def megabaseCountMergeFamily(file, overlap, binsize, outputPrefix, familyData):
                     currentChrom = ""
                     currentMegaBaseIndex = 0
                     genderCurrentMegaBaseIndex = 0
+                    fullCurrentMegaBaseIndex = 0
                     currentDataSet = 0
                     currentFatherAge = 0
                     currentMotherAge = 0
                     gender = 4
+                    full = 6
                     for line in f:
                         if len(line.strip()) == 0:
                             continue
@@ -476,6 +498,10 @@ def megabaseCountMergeFamily(file, overlap, binsize, outputPrefix, familyData):
                                 result[gender][s[0]] = [megabaseInfo(0, 0 + megabaseSize, 0, 0, 0, 0, [], [], [])]    
                                 genderCurrentMegaBaseEnd = 0 + megabaseSize
                             
+                            if (s[0] not in result[full]):
+                                result[full][s[0]] = [megabaseInfo(0, 0 + megabaseSize, 0, 0, 0, 0, [], [], [])]    
+                                fullCurrentMegaBaseEnd = 0 + megabaseSize
+                            
                             currentMegaBaseIndex = 0
                             currentMegaBaseEnd = result[gender][s[0]][0].end
                             currentChrom = s[0]
@@ -483,6 +509,10 @@ def megabaseCountMergeFamily(file, overlap, binsize, outputPrefix, familyData):
                             genderCurrentMegaBaseIndex = 0
                             genderCurrentMegaBaseEnd = result[gender][s[0]][0].end
                             genderCurrentChrom = s[0]
+
+                            fullCurrentMegaBaseIndex = 0
+                            fullCurrentMegaBaseEnd = result[full][s[0]][0].end
+                            fullCurrentChrom = s[0]
 
                         while (int(s[1]) > currentMegaBaseEnd):
                             #If the megabase isnt initialized yet
@@ -521,7 +551,6 @@ def megabaseCountMergeFamily(file, overlap, binsize, outputPrefix, familyData):
                             else:
                                 genderCurrentMegaBaseIndex += 1
                                 genderCurrentMegaBaseEnd = result[gender][s[0]][genderCurrentMegaBaseIndex].end
-                                
 
                         #If we find a variant that falls in the overlap for two megabases.
                         if (int(s[1]) <= genderCurrentMegaBaseEnd and int(s[1]) > genderCurrentMegaBaseEnd - (megabaseSize * overlap)):
@@ -535,6 +564,32 @@ def megabaseCountMergeFamily(file, overlap, binsize, outputPrefix, familyData):
                         else:
                             updateChromInfoDict(result[gender], genderCurrentMegaBaseIndex, s[0], variantCount, insert, Del, snv, currentFatherAge, currentMotherAge, int(s[1]), False)
                             
+
+                        #Do it again to merge properly with whole data set   
+                        while (int(s[1]) > fullCurrentMegaBaseEnd):
+                            #If the megabase isnt initialized yet
+                            if (fullCurrentMegaBaseIndex + 1 == len(result[full][s[0]])):
+                                newMegaBaseStart = fullCurrentMegaBaseEnd - (overlap * megabaseSize)
+                                #chromInfoDict[s[0]].append(megabaseInfo(newMegaBaseStart, newMegaBaseStart + megabaseSize, 0, 0, 0, 0))
+                                appendChromInfoDict(result[full], newMegaBaseStart, megabaseSize, s[0], 0, 0, 0, 0, [], [], [])
+                                fullCurrentMegaBaseEnd = newMegaBaseStart + megabaseSize
+                                fullCurrentMegaBaseIndex += 1
+                            else:
+                                fullCurrentMegaBaseIndex += 1
+                                fullCurrentMegaBaseEnd = result[full][s[0]][fullCurrentMegaBaseIndex].end
+
+                        #If we find a variant that falls in the overlap for two megabases.
+                        if (int(s[1]) <= fullCurrentMegaBaseEnd and int(s[1]) > fullCurrentMegaBaseEnd - (megabaseSize * overlap)):
+                            if (fullCurrentMegaBaseIndex == len(result[full][s[0]]) - 1):
+                                newMegaBaseStart = fullCurrentMegaBaseEnd - (overlap * megabaseSize)
+                                appendChromInfoDict(result[full], newMegaBaseStart, megabaseSize, s[0], variantCount, insert, Del, snv, currentFatherAge, currentMotherAge, int(s[1]))
+                                #chromInfoDict[s[0]].append(megabaseInfo(newMegaBaseStart, newMegaBaseStart + megabaseSize, variantCount, insert, Del, snv))
+                                updateChromInfoDict(result[full], fullCurrentMegaBaseIndex, s[0], variantCount, insert, Del, snv, currentFatherAge, currentMotherAge, int(s[1]), False)
+                            else:
+                                updateChromInfoDict(result[full], fullCurrentMegaBaseIndex, s[0], variantCount, insert, Del, snv, currentFatherAge, currentMotherAge, int(s[1]), True)
+                        else:
+                            updateChromInfoDict(result[full], fullCurrentMegaBaseIndex, s[0], variantCount, insert, Del, snv, currentFatherAge, currentMotherAge, int(s[1]), False)
+                                
                         
                         #print(chrom, int(s[1]), chromInfoDict[chrom][currentMegaBaseIndex].end - megabaseSize, chromInfoDict[chrom][currentMegaBaseIndex].end, chromInfoDict[chrom][currentMegaBaseIndex].count)
 
