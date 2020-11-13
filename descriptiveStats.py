@@ -520,7 +520,7 @@ def knownGeneComparison(geneCountData, genePositionData, filenames, weightedGene
         posMean = 0
         ranks = [[],[]]
         weights = [[], []]
-        compare, geneWeights = readKnownGeneListWeights(x)
+        compare = readKnownGeneList(x)
 
         for i in np.arange(0, len(compare)):
             for j in np.arange(0, len(sortedCount)):
@@ -536,9 +536,9 @@ def knownGeneComparison(geneCountData, genePositionData, filenames, weightedGene
                     break
 
         if len(ranks[0]) != 0:
-            countMean = np.average(ranks[0], None, weights[0])
+            countMean = np.mean(ranks[0])
         if len(ranks[1]) != 0:
-            posMean = np.average(ranks[1], None, weights[1])
+            posMean = np.mean(ranks[1])
 
         countPvalue = stats.binom_test(countMean, n=len(sortedCount), p=.50, alternative='less')
         posPvalue = stats.binom_test(posMean, n=len(sortedPos), p=.50, alternative='less')
@@ -547,14 +547,14 @@ def knownGeneComparison(geneCountData, genePositionData, filenames, weightedGene
         print("Average Rank of Known Genes for Count Data in", x, ":", countMean, "/", countSize, "=", countMean/countSize, "rank with pvalue", countPvalue)
         print("Average Rank of Known Genes for Position Data in ", x, ":", posMean, "/", posSize, "=", posMean/posSize, "rank with pvalue", posPvalue)
 
-        unrelatedGeneCountPercent.append(countMean/countSize)
-        unrelatedGenePosPercent.append(posMean/posSize)
+        unrelatedGeneCountPercent.append(countMean / countSize)
+        unrelatedGenePosPercent.append(posMean / posSize)
 
         wCounts.writerow([countMean, countSize, countMean/countSize, countPvalue, "NA", x.split("/")[-1], len(compare)])
         wPos.writerow([posMean, posSize, posMean/posSize, posPvalue, "NA", x.split("/")[-1], len(compare)])
 
-    bestUnrelatedGeneCountPercent = np.min(unrelatedGeneCountPercent)
-    bestUnrelatedGenePosPercent = np.min(unrelatedGenePosPercent)
+    bestUnrelatedGeneCountPercent = min(unrelatedGeneCountPercent)
+    bestUnrelatedGenePosPercent = min(unrelatedGenePosPercent)
 
     for x in filenames:
         countMean = 0
