@@ -95,8 +95,8 @@ def binomialCounts(probandData, siblingData, knownGenes, outputPrefix):
                 skip = True
             elif probandData[i].count == minimumVariantCount and siblingData[j].count == minimumVariantCount:
                 skip = True
-                #fatherResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, 99999, 1.0])
-                #fatherPvalues.append(1.0)
+            elif probandData[i].count < siblingData[j].count:
+                skip = True
             else:
                 probandWidth = int(float(probandData[i].end)) - int(float(probandData[i].start))
                 siblingWidth = int(float(siblingData[i].end)) - int(float(siblingData[i].start))
