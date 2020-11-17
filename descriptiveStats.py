@@ -1,6 +1,6 @@
 import numpy as np
 from scipy import stats
-import sys, getopt, math, binFinder, csv, statsmodels.stats.multitest
+import sys, getopt, math, binFinder, random, csv, statsmodels.stats.multitest
 
 class vectorAnalysis():
     def __init__(self, chrom, name, start, end, fatherAge, motherAge, varPos, count):
@@ -69,6 +69,17 @@ def resolveMismatch(i, j, probandData, siblingData, currentChrom, minimumVariant
 
         return i, j, currentChrom, False
 
+def meanRank(geneList, currentList):
+    ranks = []
+    weights = []
+    for x in currentList:
+        for i in np.arange(0, len(geneList)):
+            if x == geneList[i][1]:
+                ranks.append(i + 1)
+                weights.append(np.power((1.0 / geneList[i][6]), 2))
+                break
+    
+    return np.average(ranks, weights=weights)
 
 
 
@@ -620,6 +631,9 @@ def knownGeneComparison(geneCountData, genePositionData, filenames, weightedGene
         adjCountPvalue = stats.binom_test(countMean, n=len(sortedCount), p=bestUnrelatedGeneCountPercent, alternative='less')
         adjPosPvalue = stats.binom_test(posMean, n=len(sortedPos), p=bestUnrelatedGenePosPercent, alternative='less')
 
+        if(x.split("/")[-1] == "gene_score_all.list"):
+            listLengthTest(sortedCount, compare, countMean, outputPrefix)
+
         print("Average Rank of Known Genes for Count Data in", x, ":", countMean, "/", countSize, "=", countMean/countSize, "rank with pvalue", countPvalue)
         print("Average Rank of Known Genes for Position Data in ", x, ":", posMean, "/", posSize, "=", posMean/posSize, "rank with pvalue", posPvalue)
 
@@ -627,6 +641,28 @@ def knownGeneComparison(geneCountData, genePositionData, filenames, weightedGene
         wPos.writerow([posMean, posSize, posMean/posSize, posPvalue, adjPosPvalue, "[W]" + x.split("/")[-1], len(compare)])
 
 
+def listLengthTest(geneInfo, geneList, testStat, outputPrefix):
+    listLengths = [50, 100, 200, 500]
+    resampleResults = [[],[],[],[]]
+    testStats = []
+    results = []
+    permutationCount = 1000
+
+    for i in listLengths:
+        for j in np.arange(0, permutationCount):
+            currentList = random.sample(geneList, i)
+            resampleResults[i].append(meanRank(geneInfo, currentList))
+
+    for x in resampleResults:
+        currentTestStat = (np.mean(x) - testStat) / (np.std(x) / permutationCount)
+        testStats.append(currentTestStat)
+        results.append(stats.norm.cdf(currentTestStat))
+
+    wCounts = csv.writer(open(outputPrefix + "listLengthTest.csv", "w"))
+    wCounts.writerow(["ResampleMeanRank", "ResampleTotalRank", "ResamplePercentageRank", "pvalue", "listlength"])
+
+    for x in np.arange(0, len(results)):
+        wCounts.writerow([testStats[x], len(geneInfo), testStats[x] / len(geneInfo), results[x], listLengths[x]])
 
 
 
