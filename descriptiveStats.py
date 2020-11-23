@@ -149,6 +149,7 @@ def binomialCounts(probandData, siblingData, knownGenes, outputPrefix):
     for row in np.arange(0, len(countResults)):
         fCounts.writerow([countResults[row][0], countResults[row][1], countResults[row][2], countResults[row][3], int(float(countResults[row][3])) - int(float(countResults[row][2])), countResults[row][6], countResults[row][7], countResults[row][4], countResults[row][5], countBon[1][row], countSidak[1][row], countHolm[1][row], countFDR[1][row], countResults[row][8]])
 
+
     return countResults
 
 def readMegaBase(filename):
@@ -598,6 +599,7 @@ def knownGeneComparison(geneCountData, genePositionData, filenames, weightedGene
         print("Average Rank of Known Genes for Count Data in", x, ":", countMean, "/", countSize, "=", countMean/countSize, "rank with pvalue", countPvalue)
         print("Average Rank of Known Genes for Position Data in ", x, ":", posMean, "/", posSize, "=", posMean/posSize, "rank with pvalue", posPvalue)
 
+
         wCounts.writerow([countMean, countSize, countMean/countSize, countPvalue, adjCountPvalue, x.split("/")[-1], len(compare)])
         wPos.writerow([posMean, posSize, posMean/posSize, posPvalue, adjPosPvalue, x.split("/")[-1], len(compare)])
 
@@ -640,6 +642,9 @@ def knownGeneComparison(geneCountData, genePositionData, filenames, weightedGene
         wCounts.writerow([countMean, countSize, countMean/countSize, countPvalue, adjCountPvalue, "[W]" + x.split("/")[-1], len(compare)])
         wPos.writerow([posMean, posSize, posMean/posSize, posPvalue, adjPosPvalue, "[W]" + x.split("/")[-1], len(compare)])
 
+        if x.split("/")[-1] == "gene_score_all.list":
+            listLengthTest(sortedCount, compare, countMean/countSize, outputPrefix)
+
 
 def listLengthTest(geneInfo, geneList, testStat, outputPrefix):
     listLengths = [50, 100, 200, 500]
@@ -654,7 +659,7 @@ def listLengthTest(geneInfo, geneList, testStat, outputPrefix):
             resampleResults[i].append(meanRank(geneInfo, currentList))
 
     for x in resampleResults:
-        currentTestStat = (np.mean(x) - testStat) / (np.std(x) / permutationCount)
+        currentTestStat = (np.mean(x) - testStat) / (np.std(x) / np.sqrt(permutationCount))
         testStats.append(currentTestStat)
         results.append(stats.norm.cdf(currentTestStat))
 
@@ -800,8 +805,8 @@ def main(argv):
 
 
     ageVectorStats(probandVectorData, siblingVectorData, outputPrefix)
-    genePositionData = geneCountStats(probandVectorData, siblingVectorData, knownGeneList, outputPrefix)
-    geneCountData = binomialCounts(probandVectorData, siblingVectorData, knownGeneList, outputPrefix)
+    genePositionData = geneCountStats(probandVectorData, siblingVectorData, knownGeneList + weightedGeneList, outputPrefix)
+    geneCountData = binomialCounts(probandVectorData, siblingVectorData, knownGeneList + weightedGeneList, outputPrefix)
 
     
     # wCounts = csv.writer(open(outputPrefix + "megaBaseKS.csv", "w"))
