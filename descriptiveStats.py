@@ -653,7 +653,7 @@ def listLengthTest(geneInfo, geneList, testStat, outputPrefix):
     results = []
     permutationCount = 1000
 
-    for i in listLengths:
+    for i in np.arange(0, len(listLengths)):
         for j in np.arange(0, permutationCount):
             currentList = random.sample(geneList, i)
             resampleResults[i].append(meanRank(geneInfo, currentList))
