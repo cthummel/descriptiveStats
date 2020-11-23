@@ -634,7 +634,7 @@ def knownGeneComparison(geneCountData, genePositionData, filenames, weightedGene
         adjPosPvalue = stats.binom_test(posMean, n=len(sortedPos), p=bestUnrelatedGenePosPercent, alternative='less')
 
         if(x.split("/")[-1] == "gene_score_all.list"):
-            listLengthTest(sortedCount, compare, geneWeights, countMean/countSize, outputPrefix)
+            listLengthTest(sortedCount, compare, geneWeights, countMean / countSize, outputPrefix)
 
         print("Average Rank of Known Genes for Count Data in", x, ":", countMean, "/", countSize, "=", countMean/countSize, "rank with pvalue", countPvalue)
         print("Average Rank of Known Genes for Position Data in ", x, ":", posMean, "/", posSize, "=", posMean/posSize, "rank with pvalue", posPvalue)
@@ -652,18 +652,21 @@ def listLengthTest(geneInfo, geneList, geneWeights, testStat, outputPrefix):
     weightedGeneList = []
     testStats = []
     results = []
-    permutationCount = 1000
+    permutationCount = 200
 
     for i in np.arange(0, len(geneList)):
         weightedGeneList.append([geneList[i], geneWeights[i]])
 
     for i in np.arange(0, len(listLengths)):
         for j in np.arange(0, permutationCount):
-            currentList = random.sample(weightedGeneList, listLengths[i])
-            resampleResults[i].append(meanRank(geneInfo, currentList))
+            currentList = random.sample(weightedGeneList, k=listLengths[i])
+            currentRank = meanRank(geneInfo, currentList)
+            print("Current rank for run", j, ":", currentRank)
+            resampleResults[i].append(currentRank)
 
     for x in resampleResults:
         currentTestStat = (np.mean(x) - testStat) / (np.std(x) / np.sqrt(permutationCount))
+        print("Current Test Stat at end:", currentTestStat)
         testStats.append(currentTestStat)
         results.append(stats.norm.cdf(currentTestStat))
 
@@ -671,7 +674,7 @@ def listLengthTest(geneInfo, geneList, geneWeights, testStat, outputPrefix):
     wCounts.writerow(["ResampleMeanRank", "ResampleTotalRank", "ResamplePercentageRank", "pvalue", "listlength"])
 
     for x in np.arange(0, len(results)):
-        wCounts.writerow([testStats[x], len(geneInfo), testStats[x] / len(geneInfo), results[x], listLengths[x]])
+        wCounts.writerow([testStats[x], len(geneInfo), np.mean(testStats[x]) / len(geneInfo), results[x], listLengths[x]])
 
 
 
