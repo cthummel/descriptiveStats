@@ -668,13 +668,13 @@ def listLengthTest(geneInfo, geneList, geneWeights, testStat, outputPrefix):
         currentTestStat = (np.mean(x) - testStat) / (np.std(x) / np.sqrt(permutationCount))
         print("Current Test Stat at end:", currentTestStat)
         testStats.append(currentTestStat)
-        results.append(stats.norm.cdf(currentTestStat))
+        results.append([np.mean(x), np.std(x), currentTestStat, stats.norm.cdf(currentTestStat)])
 
     wCounts = csv.writer(open(outputPrefix + "listLengthTest.csv", "w"))
-    wCounts.writerow(["ResampleMeanRank", "ResampleTotalRank", "ResamplePercentageRank", "pvalue", "listlength"])
+    wCounts.writerow(["ResampleMeanRank", "ResampleTotalRank", "ResamplePercentageRank", "sd", "lengthTestStat", "compareTestStat", "pvalue", "listlength"])
 
     for x in np.arange(0, len(results)):
-        wCounts.writerow([testStats[x], len(geneInfo), np.mean(testStats[x]) / len(geneInfo), results[x], listLengths[x]])
+        wCounts.writerow([results[x][0], len(geneInfo), results[x][0] / len(geneInfo), results[x][1], results[x][2], testStat, results[x][3], listLengths[x]])
 
 
 
