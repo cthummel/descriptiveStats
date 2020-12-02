@@ -634,7 +634,7 @@ def knownGeneComparison(geneCountData, genePositionData, filenames, weightedGene
         adjPosPvalue = stats.binom_test(posMean, n=len(sortedPos), p=bestUnrelatedGenePosPercent, alternative='less')
 
         if(x.split("/")[-1] == "gene_score_all.list"):
-            listLengthTest(sortedCount, compare, geneWeights, countMean / countSize, outputPrefix)
+            listLengthTest(sortedCount, compare, geneWeights, countMean, outputPrefix)
 
         print("Average Rank of Known Genes for Count Data in", x, ":", countMean, "/", countSize, "=", countMean/countSize, "rank with pvalue", countPvalue)
         print("Average Rank of Known Genes for Position Data in ", x, ":", posMean, "/", posSize, "=", posMean/posSize, "rank with pvalue", posPvalue)
@@ -642,8 +642,6 @@ def knownGeneComparison(geneCountData, genePositionData, filenames, weightedGene
         wCounts.writerow([countMean, countSize, countMean/countSize, countPvalue, adjCountPvalue, "[W]" + x.split("/")[-1], len(compare)])
         wPos.writerow([posMean, posSize, posMean/posSize, posPvalue, adjPosPvalue, "[W]" + x.split("/")[-1], len(compare)])
 
-        if x.split("/")[-1] == "gene_score_all.list":
-            listLengthTest(sortedCount, compare, geneWeights, countMean/countSize, outputPrefix)
 
 
 def listLengthTest(geneInfo, geneList, geneWeights, testStat, outputPrefix):
