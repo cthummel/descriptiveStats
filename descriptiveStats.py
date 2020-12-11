@@ -76,7 +76,7 @@ def meanRank(geneInfo, currentList):
         for i in np.arange(0, len(geneInfo)):
             if x[0] == geneInfo[i][1]:
                 ranks.append(i + 1)
-                weights.append(np.power((1.0 / x[1]), 2))
+                weights.append(np.power(1.0 / x[1], 2))
                 break
     
     return np.average(ranks, weights=weights)
@@ -634,7 +634,7 @@ def knownGeneComparison(geneCountData, genePositionData, filenames, weightedGene
         adjPosPvalue = stats.binom_test(posMean, n=len(sortedPos), p=bestUnrelatedGenePosPercent, alternative='less')
 
         if(x.split("/")[-1] == "gene_score_all.list"):
-            listLengthTest(sortedCount, compare, geneWeights, countMean, outputPrefix)
+            #listLengthTest(sortedCount, compare, geneWeights, countMean, outputPrefix)
 
         print("Average Rank of Known Genes for Count Data in", x, ":", countMean, "/", countSize, "=", countMean/countSize, "rank with pvalue", countPvalue)
         print("Average Rank of Known Genes for Position Data in ", x, ":", posMean, "/", posSize, "=", posMean/posSize, "rank with pvalue", posPvalue)
@@ -666,7 +666,10 @@ def listLengthTest(geneInfo, geneList, geneWeights, testStat, outputPrefix):
         currentTestStat = (np.mean(x) - testStat) / (np.std(x) / np.sqrt(permutationCount))
         print("Current Test Stat at end:", currentTestStat)
         testStats.append(currentTestStat)
-        results.append([np.mean(x), np.std(x), currentTestStat, stats.norm.cdf(currentTestStat)])
+        pvalue = stats.norm.cdf(currentTestStat)
+        if pvalue > .5:
+            pvalue = 1.0 - pvalue
+        results.append([np.mean(x), np.std(x), currentTestStat, 2 * pvalue])
 
     wCounts = csv.writer(open(outputPrefix + "listLengthTest.csv", "w"))
     wCounts.writerow(["ResampleMeanRank", "ResampleTotalRank", "ResamplePercentageRank", "sd", "lengthTestStat", "compareTestStat", "pvalue", "listlength"])
