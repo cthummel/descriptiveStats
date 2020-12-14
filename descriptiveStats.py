@@ -519,10 +519,10 @@ def knownGeneComparison(geneCountData, genePositionData, filenames, weightedGene
     #dadSize = len(sortedDad)
 
     wCounts = csv.writer(open(outputPrefix + "countKnownGene.csv", "w"))
-    wCounts.writerow(["MeanRank", "TotalRank", "PercentageRank", "pvalue", "adjustedPvalue", "genelist", "listlength"])
+    wCounts.writerow(["MeanRank", "TotalRank", "PercentageRank", "pvalue", "adjustedPvalue", "genelist", "listlength", "matchedPercentage"])
 
     wPos = csv.writer(open(outputPrefix + "posKnownGene.csv", "w"))
-    wPos.writerow(["MeanRank", "TotalRank", "PercentageRank", "pvalue", "adjustedPvalue", "genelist", "listlength"])
+    wPos.writerow(["MeanRank", "TotalRank", "PercentageRank", "pvalue", "adjustedPvalue", "genelist", "listlength", "matchedPercentage"])
 
     # wDad = csv.writer(open(outputPrefix + "fatherKnownGene.csv", "w"))
     # wDad.writerow(["MeanRank", "TotalRank", "PercentageRank", "pvalue", "genelist"])
@@ -530,6 +530,8 @@ def knownGeneComparison(geneCountData, genePositionData, filenames, weightedGene
     for x in unrelatedGeneList:
         countMean = 0
         posMean = 0
+        matchedCount = 0
+        matchedPos = 0
         ranks = [[],[]]
         weights = [[], []]
         compare = readKnownGeneList(x)
@@ -539,12 +541,14 @@ def knownGeneComparison(geneCountData, genePositionData, filenames, weightedGene
                 if sortedCount[j][1] == compare[i]:
                     ranks[0].append(j)
                     weights[0].append(1)
+                    matchedCount += 1
                     break
 
             for j in np.arange(0, len(sortedPos)):
                 if sortedPos[j][1] == compare[i]:
                     ranks[1].append(j)
                     weights[1].append(1)
+                    matchedPos += 1
                     break
 
         if len(ranks[0]) != 0:
@@ -562,8 +566,8 @@ def knownGeneComparison(geneCountData, genePositionData, filenames, weightedGene
         unrelatedGeneCountPercent.append(countMean / countSize)
         unrelatedGenePosPercent.append(posMean / posSize)
 
-        wCounts.writerow([countMean, countSize, countMean/countSize, countPvalue, "NA", x.split("/")[-1], len(compare)])
-        wPos.writerow([posMean, posSize, posMean/posSize, posPvalue, "NA", x.split("/")[-1], len(compare)])
+        wCounts.writerow([countMean, countSize, countMean/countSize, countPvalue, "NA", x.split("/")[-1], len(compare), matchedCount / len(compare)])
+        wPos.writerow([posMean, posSize, posMean/posSize, posPvalue, "NA", x.split("/")[-1], len(compare), matchedPos / len(compare)])
 
     bestUnrelatedGeneCountPercent = min(unrelatedGeneCountPercent)
     bestUnrelatedGenePosPercent = min(unrelatedGenePosPercent)
@@ -571,6 +575,8 @@ def knownGeneComparison(geneCountData, genePositionData, filenames, weightedGene
     for x in filenames:
         countMean = 0
         posMean = 0
+        matchedCount = 0
+        matchedPos = 0
         ranks = [[],[]]
         compare = readKnownGeneList(x)
 
@@ -578,11 +584,13 @@ def knownGeneComparison(geneCountData, genePositionData, filenames, weightedGene
             for j in np.arange(0, len(sortedCount)):
                 if sortedCount[j][1] == compare[i]:
                     ranks[0].append(j)
+                    matchedCount += 1
                     break
 
             for j in np.arange(0, len(sortedPos)):
                 if sortedPos[j][1] == compare[i]:
                     ranks[1].append(j)
+                    matchedPos += 1
                     break
                     
 
@@ -600,12 +608,14 @@ def knownGeneComparison(geneCountData, genePositionData, filenames, weightedGene
         print("Average Rank of Known Genes for Position Data in ", x, ":", posMean, "/", posSize, "=", posMean/posSize, "rank with pvalue", posPvalue)
 
 
-        wCounts.writerow([countMean, countSize, countMean/countSize, countPvalue, adjCountPvalue, x.split("/")[-1], len(compare)])
-        wPos.writerow([posMean, posSize, posMean/posSize, posPvalue, adjPosPvalue, x.split("/")[-1], len(compare)])
+        wCounts.writerow([countMean, countSize, countMean/countSize, countPvalue, adjCountPvalue, x.split("/")[-1], len(compare), matchedCount / len(compare)])
+        wPos.writerow([posMean, posSize, posMean/posSize, posPvalue, adjPosPvalue, x.split("/")[-1], len(compare), matchedPos / len(compare)])
 
     for x in weightedGeneList:
         countMean = 0
         posMean = 0
+        matchedCount = 0
+        matchedPos = 0
         ranks = [[],[]]
         weights = [[], []]
         compare, geneWeights = readKnownGeneListWeights(x)
@@ -615,12 +625,14 @@ def knownGeneComparison(geneCountData, genePositionData, filenames, weightedGene
                 if sortedCount[j][1] == compare[i]:
                     ranks[0].append(j)
                     weights[0].append(geneWeights[i])
+                    matchedCount += 1
                     break
 
             for j in np.arange(0, len(sortedPos)):
                 if sortedPos[j][1] == compare[i]:
                     ranks[1].append(j)
                     weights[1].append(geneWeights[i])
+                    matchedPos += 1
                     break
 
         if len(ranks[0]) != 0:
@@ -639,8 +651,8 @@ def knownGeneComparison(geneCountData, genePositionData, filenames, weightedGene
         print("Average Rank of Known Genes for Count Data in", x, ":", countMean, "/", countSize, "=", countMean/countSize, "rank with pvalue", countPvalue)
         print("Average Rank of Known Genes for Position Data in ", x, ":", posMean, "/", posSize, "=", posMean/posSize, "rank with pvalue", posPvalue)
 
-        wCounts.writerow([countMean, countSize, countMean/countSize, countPvalue, adjCountPvalue, "[W]" + x.split("/")[-1], len(compare)])
-        wPos.writerow([posMean, posSize, posMean/posSize, posPvalue, adjPosPvalue, "[W]" + x.split("/")[-1], len(compare)])
+        wCounts.writerow([countMean, countSize, countMean/countSize, countPvalue, adjCountPvalue, "[W]" + x.split("/")[-1], len(compare), matchedCount / len(compare)])
+        wPos.writerow([posMean, posSize, posMean/posSize, posPvalue, adjPosPvalue, "[W]" + x.split("/")[-1], len(compare), matchedPos / len(compare)])
 
 
 
