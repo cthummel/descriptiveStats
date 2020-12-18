@@ -213,7 +213,7 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
 
                                         peopleCount[currentDataSet] += 1
                                         peopleCount[gender] += 1
-                                        peopleCount[6] += 1
+                                        peopleCount[full] += 1
                                         break            
                             else:
                                 for x in familyData:
@@ -237,7 +237,7 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
 
                                         peopleCount[currentDataSet] += 1
                                         peopleCount[gender] += 1
-                                        peopleCount[6] += 1
+                                        peopleCount[full] += 1
                                         break    
                             continue
 
@@ -355,9 +355,9 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
                 val.count = val.count * femaleCount / maleCount
 
 
-    bCounts = csv.writer(open(outputPrefix + typePrefix[outputIndex] + ".basicData.csv", "w"), delimiter="\t")
-    bCounts.writerow(["MMCount", "FMCount", "MFCount", "FFCount", "MCount", "FCount", "FullCount"])
-    bCounts.writerow([peopleCount[0], peopleCount[1], peopleCount[2], peopleCount[3], peopleCount[4], peopleCount[5], peopleCount[6]])
+    bCounts = csv.writer(open(outputPrefix + ".basicData.csv", "w"), delimiter="\t")
+    bCounts.writerow(["MMCount", "MFCount", "FMCount", "FFCount", "MCount", "FCount", "FullCount", "maleCount", "femaleCount", "ratio"])
+    bCounts.writerow([peopleCount[0], peopleCount[1], peopleCount[2], peopleCount[3], peopleCount[4], peopleCount[5], peopleCount[6], maleCount, femaleCount, maleCount / femaleCount])
 
     for x in result:
         wCounts = csv.writer(open(outputPrefix + typePrefix[outputIndex] + ".geneCounts.csv", "w"))
