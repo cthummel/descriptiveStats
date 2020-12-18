@@ -685,10 +685,35 @@ def main(argv):
 
     familyData = pairSiblings(famFile, sampleFile)
 
+    outputIndex = 0
+    outputType = ["MM", "MF", "FM", "FF", "probandMale", "probandFemale", "siblingMale", "siblingFemale", "full"]
+    splitFamData = [[],[],[],[],[],[],[],[],[]]
     famAge = csv.writer(open(outputPrefix + "famAge.csv", "w"))
-    famAge.writerow(["famID", "probandGender", "siblingGender", "fatherAge"])
+    famAge.writerow(["famID", "probandGender", "siblingGender", "siblingMotherAge", "siblingFatherAge", "probandMotherAge", "probandFatherAge", "type"])
     for val in familyData:
-        famAge.writerow([val.familyID, val.probandGender, val.siblingGender, val.siblingMotherAge, val.siblingFatherAge, val.probandMotherAge, val.probandFatherAge])
+        if val.probandGender == "male" and val.siblingGender == "male":
+            splitFamData[0].append(val)
+            splitFamData[4].append(val)
+            splitFamData[6].append(val)
+        elif val.probandGender == "male" and val.siblingGender == "female":
+            splitFamData[1].append(val)
+            splitFamData[4].append(val)
+            splitFamData[7].append(val)
+        elif val.probandGender == "female" and val.siblingGender == "male":
+            splitFamData[2].append(val)
+            splitFamData[5].append(val)
+            splitFamData[6].append(val)
+        elif val.probandGender == "female" and val.siblingGender == "female":
+            splitFamData[3].append(val)
+            splitFamData[5].append(val)
+            splitFamData[7].append(val)
+
+        splitFamData[8].append(val)
+
+    for x in splitFamData:
+        for val in x:
+            famAge.writerow([val.familyID, val.probandGender, val.siblingGender, val.siblingMotherAge, val.siblingFatherAge, val.probandMotherAge, val.probandFatherAge, outputType[outputIndex]])
+        outputIndex += 1
 
     if (merge):
         if famFile == "":
