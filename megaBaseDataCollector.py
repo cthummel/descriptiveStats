@@ -136,6 +136,7 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
     probandDataSet = True
     maleCount = 0
     femaleCount = 0
+    fileCount = 0
     # chromInfoDict = {}
     # chromInfoDictMM = {}
     # chromInfoDictMF = {}
@@ -166,6 +167,7 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
 
     for root, dirs, files in os.walk(file):
         temproot = root.strip().split("/")
+        fileCount = len(files)
         #print("root", temproot)
         if temproot[len(temproot) - 2] == "s1":
             probandDataSet = False
@@ -356,8 +358,8 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
 
 
     bCounts = csv.writer(open(outputPrefix + ".basicData.csv", "w"), delimiter="\t")
-    bCounts.writerow(["MMCount", "MFCount", "FMCount", "FFCount", "MCount", "FCount", "FullCount", "maleCount", "femaleCount", "ratio"])
-    bCounts.writerow([peopleCount[0], peopleCount[1], peopleCount[2], peopleCount[3], peopleCount[4], peopleCount[5], peopleCount[6], maleCount, femaleCount, maleCount / femaleCount])
+    bCounts.writerow(["MMCount", "MFCount", "FMCount", "FFCount", "MCount", "FCount", "FullCount", "maleCount", "femaleCount", "ratio", "numberOfFiles"])
+    bCounts.writerow([peopleCount[0], peopleCount[1], peopleCount[2], peopleCount[3], peopleCount[4], peopleCount[5], peopleCount[6], maleCount, femaleCount, maleCount / femaleCount, fileCount])
 
     for x in result:
         wCounts = csv.writer(open(outputPrefix + typePrefix[outputIndex] + ".geneCounts.csv", "w"))
