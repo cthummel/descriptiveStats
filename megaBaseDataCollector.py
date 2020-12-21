@@ -145,7 +145,8 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
     #[MM, MF, FM, FF, male, female, full]
     result = [{}, {}, {}, {}, {}, {}, {}]
     #[MM, MF, FM, FF, male, female, full]
-    peopleCount = [0, 0, 0, 0, 0, 0, 0]
+    probandPeopleCount = [0, 0, 0, 0, 0, 0, 0]
+    siblingPeopleCount = [0, 0, 0, 0, 0, 0, 0]
 
     #generate bins
     with gzip.open("gencode.v34.annotation.gff3.gz", mode='rt') as f:
@@ -211,9 +212,9 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
                                             femaleCount += 1
                                             gender = 5
 
-                                        peopleCount[currentDataSet] += 1
-                                        peopleCount[gender] += 1
-                                        peopleCount[full] += 1
+                                        probandPeopleCount[currentDataSet] += 1
+                                        probandPeopleCount[gender] += 1
+                                        probandPeopleCount[full] += 1
                                         break            
                             else:
                                 for x in familyData:
@@ -235,9 +236,9 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
                                             femaleCount += 1
                                             gender = 5
 
-                                        peopleCount[currentDataSet] += 1
-                                        peopleCount[gender] += 1
-                                        peopleCount[full] += 1
+                                        siblingPeopleCount[currentDataSet] += 1
+                                        siblingPeopleCount[gender] += 1
+                                        siblingPeopleCount[full] += 1
                                         break    
                             continue
 
@@ -355,9 +356,10 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
                 val.count = val.count * femaleCount / maleCount
 
 
-    bCounts = csv.writer(open(outputPrefix + ".basicData.csv", "w"), delimiter="\t")
+    bCounts = csv.writer(open(outputPrefix + "basicData.csv", "w"), delimiter="\t")
     bCounts.writerow(["MMCount", "MFCount", "FMCount", "FFCount", "MCount", "FCount", "FullCount", "maleCount", "femaleCount", "ratio", "numberOfFiles"])
-    bCounts.writerow([peopleCount[0], peopleCount[1], peopleCount[2], peopleCount[3], peopleCount[4], peopleCount[5], peopleCount[6], maleCount, femaleCount, maleCount / femaleCount, fileCount])
+    bCounts.writerow([probandPeopleCount[0], probandPeopleCount[1], probandPeopleCount[2], probandPeopleCount[3], probandPeopleCount[4], probandPeopleCount[5], probandPeopleCount[6], maleCount, femaleCount, maleCount / femaleCount, fileCount])
+    bCounts.writerow([siblingPeopleCount[0], siblingPeopleCount[1], siblingPeopleCount[2], siblingPeopleCount[3], siblingPeopleCount[4], siblingPeopleCount[5], siblingPeopleCount[6], maleCount, femaleCount, maleCount / femaleCount, fileCount])
 
     for x in result:
         wCounts = csv.writer(open(outputPrefix + typePrefix[outputIndex] + ".geneCounts.csv", "w"))
