@@ -241,7 +241,7 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
                                             femaleCount += 1
                                             gender = 5
                                         else:
-                                            print("Extra Sibling Count Watch OUT", x.probandGender, x.siblingGender)
+                                            #print("Extra Sibling Count Watch OUT", x.probandGender, x.siblingGender)
                                             siblingsPaired = False
                                             break
 
@@ -369,10 +369,10 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
                 val.count = val.count * femaleCount / maleCount
 
 
-    bCounts = csv.writer(open(outputPrefix + "genebasicData.csv", "w"), delimiter="\t")
-    bCounts.writerow(["MMCount", "MFCount", "FMCount", "FFCount", "MCount", "FCount", "FullCount", "maleCount", "femaleCount", "ratio", "numberOfFiles"])
-    bCounts.writerow([probandPeopleCount[0], probandPeopleCount[1], probandPeopleCount[2], probandPeopleCount[3], probandPeopleCount[4], probandPeopleCount[5], probandPeopleCount[6], maleCount, femaleCount, maleCount / femaleCount, fileCount])
-    bCounts.writerow([siblingPeopleCount[0], siblingPeopleCount[1], siblingPeopleCount[2], siblingPeopleCount[3], siblingPeopleCount[4], siblingPeopleCount[5], siblingPeopleCount[6], maleCount, femaleCount, maleCount / femaleCount, fileCount])
+    bCounts = csv.writer(open(outputPrefix + "geneBasicData.csv", "w"), delimiter="\t")
+    bCounts.writerow(["DataSet", "MMCount", "MFCount", "FMCount", "FFCount", "MaleCount", "FemaleCount", "ratio", "FullCount", "numberOfFiles"])
+    bCounts.writerow(["Proband", probandPeopleCount[0], probandPeopleCount[1], probandPeopleCount[2], probandPeopleCount[3], probandPeopleCount[4], probandPeopleCount[5], probandPeopleCount[4] / probandPeopleCount[5], probandPeopleCount[6], fileCount])
+    bCounts.writerow(["Sibling", siblingPeopleCount[0], siblingPeopleCount[1], siblingPeopleCount[2], siblingPeopleCount[3], siblingPeopleCount[4], siblingPeopleCount[5], probandPeopleCount[4] / probandPeopleCount[5], siblingPeopleCount[6], fileCount])
 
     for x in result:
         wCounts = csv.writer(open(outputPrefix + typePrefix[outputIndex] + ".geneCounts.csv", "w"))
