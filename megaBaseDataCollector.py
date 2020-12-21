@@ -174,6 +174,7 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
         for filename in files:
             if(filename[-13:] == ".FINAL.vcf.gz"):
                 fileCount += 1
+                siblingsPaired = True
                 with gzip.open(root + filename, mode='rt') as f:
                     print("Scanning variants from file:", filename)
                     currentChrom = ""
@@ -211,6 +212,11 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
                                             currentDataSet = 3
                                             femaleCount += 1
                                             gender = 5
+                                        else:
+                                            print("Extra Proband Count Watch OUT", x.probandGender, x.siblingGender)
+                                            siblingsPaired = False
+                                            break
+
 
                                         probandPeopleCount[currentDataSet] += 1
                                         probandPeopleCount[gender] += 1
@@ -235,12 +241,19 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
                                             currentDataSet = 3
                                             femaleCount += 1
                                             gender = 5
+                                        else:
+                                            print("Extra Proband Count Watch OUT", x.probandGender, x.siblingGender)
+                                            siblingsPaired = False
+                                            break
 
                                         siblingPeopleCount[currentDataSet] += 1
                                         siblingPeopleCount[gender] += 1
                                         siblingPeopleCount[full] += 1
                                         break    
                             continue
+
+                        if not siblingsPaired:
+                            break
 
                         s = line.strip().split('\t')
                         IDField = s[2].split('-')[0]
@@ -356,7 +369,7 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
                 val.count = val.count * femaleCount / maleCount
 
 
-    bCounts = csv.writer(open(outputPrefix + "basicData.csv", "w"), delimiter="\t")
+    bCounts = csv.writer(open(outputPrefix + "genebasicData.csv", "w"), delimiter="\t")
     bCounts.writerow(["MMCount", "MFCount", "FMCount", "FFCount", "MCount", "FCount", "FullCount", "maleCount", "femaleCount", "ratio", "numberOfFiles"])
     bCounts.writerow([probandPeopleCount[0], probandPeopleCount[1], probandPeopleCount[2], probandPeopleCount[3], probandPeopleCount[4], probandPeopleCount[5], probandPeopleCount[6], maleCount, femaleCount, maleCount / femaleCount, fileCount])
     bCounts.writerow([siblingPeopleCount[0], siblingPeopleCount[1], siblingPeopleCount[2], siblingPeopleCount[3], siblingPeopleCount[4], siblingPeopleCount[5], siblingPeopleCount[6], maleCount, femaleCount, maleCount / femaleCount, fileCount])
