@@ -371,8 +371,8 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
 
     bCounts = csv.writer(open(outputPrefix + "geneBasicData.csv", "w"), delimiter="\t")
     bCounts.writerow(["DataSet", "MMCount", "MFCount", "FMCount", "FFCount", "MaleCount", "FemaleCount", "ratio", "FullCount", "numberOfFiles"])
-    bCounts.writerow(["Proband", probandPeopleCount[0], probandPeopleCount[1], probandPeopleCount[2], probandPeopleCount[3], probandPeopleCount[4], probandPeopleCount[5], probandPeopleCount[4] / probandPeopleCount[5], probandPeopleCount[6], fileCount])
-    bCounts.writerow(["Sibling", siblingPeopleCount[0], siblingPeopleCount[1], siblingPeopleCount[2], siblingPeopleCount[3], siblingPeopleCount[4], siblingPeopleCount[5], probandPeopleCount[4] / probandPeopleCount[5], siblingPeopleCount[6], fileCount])
+    bCounts.writerow(["Proband", probandPeopleCount[0], probandPeopleCount[1], probandPeopleCount[2], probandPeopleCount[3], probandPeopleCount[4], probandPeopleCount[5], maleCount / femaleCount, probandPeopleCount[6], fileCount])
+    bCounts.writerow(["Sibling", siblingPeopleCount[0], siblingPeopleCount[1], siblingPeopleCount[2], siblingPeopleCount[3], siblingPeopleCount[4], siblingPeopleCount[5], maleCount / femaleCount, siblingPeopleCount[6], fileCount])
 
     for x in result:
         wCounts = csv.writer(open(outputPrefix + typePrefix[outputIndex] + ".geneCounts.csv", "w"))
