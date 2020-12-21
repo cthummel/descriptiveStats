@@ -167,12 +167,12 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
 
     for root, dirs, files in os.walk(file):
         temproot = root.strip().split("/")
-        fileCount = len(files)
         #print("root", temproot)
         if temproot[len(temproot) - 2] == "s1":
             probandDataSet = False
         for filename in files:
             if(filename[-13:] == ".FINAL.vcf.gz"):
+                fileCount += 1
                 with gzip.open(root + filename, mode='rt') as f:
                     print("Scanning variants from file:", filename)
                     currentChrom = ""
@@ -199,8 +199,6 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
                                         if (x.probandGender == "male") and (x.siblingGender == "male"):
                                             currentDataSet = 0
                                             maleCount += 1
-                                            peopleCount[currentDataSet] += 1
-                                            peopleCount[gender] += 1
                                         elif (x.probandGender == "male") and (x.siblingGender == "female"):
                                             currentDataSet = 1
                                             maleCount += 1
