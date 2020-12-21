@@ -58,7 +58,6 @@ def ageMean(data):
 
 def pairSiblings(famFile, sampleFile):
     families = []
-
     with open(sampleFile, mode='rt') as f:
         header = f.readline()
         for line in f:
@@ -242,7 +241,7 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
                                             femaleCount += 1
                                             gender = 5
                                         else:
-                                            print("Extra Proband Count Watch OUT", x.probandGender, x.siblingGender)
+                                            print("Extra Sibling Count Watch OUT", x.probandGender, x.siblingGender)
                                             siblingsPaired = False
                                             break
 
@@ -253,6 +252,7 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
                             continue
 
                         if not siblingsPaired:
+                            print("Skipping data for unmatched proband and sibling")
                             break
 
                         s = line.strip().split('\t')
