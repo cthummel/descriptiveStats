@@ -81,6 +81,13 @@ def meanRank(geneInfo, currentList):
     
     return np.average(ranks, weights=weights)
 
+def basicStats(outputPrefix):
+
+    
+    fCounts = csv.writer(open(outputPrefix + "basicStats.csv", "w"))
+    fCounts.writerow(["column title here"])
+
+
 
 
 def binomialCounts(probandData, siblingData, knownGenes, outputPrefix):
@@ -102,6 +109,8 @@ def binomialCounts(probandData, siblingData, knownGenes, outputPrefix):
         if done:
             break
         else:
+            if currentChrom[-1] == "X" or currentChrom[-1] == "Y":
+                skip = True
             if probandData[i].count == minimumVariantCount:
                 skip = True
             elif probandData[i].count == minimumVariantCount and siblingData[j].count == minimumVariantCount:
