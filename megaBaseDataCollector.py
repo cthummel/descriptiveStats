@@ -14,7 +14,7 @@ class megabaseInfo:
         self.variantPosition = varPos
 
 class geneInfo:
-    def __init__(self, name, transcriptStart, transcriptEnd, count, insertion, deletion, snv, fatherAge, motherAge, varPos):
+    def __init__(self, name, transcriptStart, transcriptEnd, count, insertion, deletion, snv, fatherAge, motherAge, varPos, genderList, dataset, ID):
         self.name = name
         self.transcriptStart = transcriptStart
         self.transcriptEnd = transcriptEnd
@@ -27,6 +27,9 @@ class geneInfo:
         self.fatherAge = fatherAge
         self.motherAge = motherAge
         self.variantPosition = varPos
+        self.genderList = genderList
+        self.dataset = dataset
+        self.ID = ID
 
 
 class familyInfo:
@@ -160,9 +163,9 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
                 geneName = infoField[3][10:]
                 for i in np.arange(0, len(result)):
                     if (s[0] not in result[i].keys()):
-                        result[i][s[0]] = [geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, [], [], [])]
+                        result[i][s[0]] = [geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, [], [], [], [], [], [])]
                     else:
-                        result[i][s[0]].append(geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, [], [], []))
+                        result[i][s[0]].append(geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, [], [], [], [], [], []))
 
 
     for root, dirs, files in os.walk(file):
@@ -293,6 +296,7 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
                                 gene.deletion += Del
                                 gene.snv += snv
                                 gene.variantPosition.append(int(s[1]))
+                                gene.ID.append(fileCount)
                                 if currentFatherAge != "":
                                     gene.fatherAge.append(int(currentFatherAge))
                                 else:
@@ -301,6 +305,15 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
                                     gene.motherAge.append(int(currentMotherAge))
                                 else:
                                     gene.motherAge.append("NA")
+                                if gender == 4:
+                                    gene.genderList.append("M")
+                                else:
+                                    gene.genderList.append("F")
+                                if probandDataSet:
+                                    gene.dataset.append("P")
+                                else:
+                                    gene.dataset.append("S")
+
                             elif gene.transcriptStart > int(s[1]):
                                 break
                         
@@ -378,7 +391,7 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
         wCounts = csv.writer(open(outputPrefix + typePrefix[outputIndex] + ".geneCounts.csv", "w"))
         fAgeCounts = csv.writer(open(outputPrefix + typePrefix[outputIndex] + ".geneAgeVector.csv", "w"), delimiter="\t")
         fAgeCounts.writerow(["Chrom", "Gene", "Start", "End", "FatherAge", "MotherAge", "VariantPosition", "AdjustCount"])
-        wCounts.writerow(["Chrom", "Start", "End", "Count", "Insertions", "Deletions", "SNV", "MeanFatherAge", "MeanMotherAge", "Gene"])
+        wCounts.writerow(["Chrom", "Start", "End", "Count", "Insertions", "Deletions", "SNV", "MeanFatherAge", "MeanMotherAge", "Gene", "Gender", "DataSet", "ID"])
         for key in sorted(x.keys()):
             for val in x[key]:
                 fAgeCounts.writerow([key, val.name, val.transcriptStart, val.transcriptEnd, val.fatherAge, val.motherAge, val.variantPosition, val.count])
@@ -388,13 +401,13 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
                 #     femaleAgeCounts.writerow([key, val.name, val.transcriptStart, val.transcriptEnd, val.fatherAge, val.motherAge, val.variantPosition])
 
                 if val.fatherAge == [] or val.motherAge == []:
-                    wCounts.writerow([key, val.transcriptStart, val.transcriptEnd, val.count, val.insertion, val.deletion, val.snv, "NA", "NA", val.name])
+                    wCounts.writerow([key, val.transcriptStart, val.transcriptEnd, val.count, val.insertion, val.deletion, val.snv, "NA", "NA", val.name, val.genderList, val.dataset, val.ID])
                     # if outputIndex < 2:
                     #     maleCounts.writerow([key, val.transcriptStart, val.transcriptEnd, val.count, val.insertion, val.deletion, val.snv, "NA", "NA", val.name])
                     # else:
                     #     femaleCounts.writerow([key, val.transcriptStart, val.transcriptEnd, val.count, val.insertion, val.deletion, val.snv, "NA", "NA", val.name])
                 else:
-                    wCounts.writerow([key, val.transcriptStart, val.transcriptEnd, val.count, val.insertion, val.deletion, val.snv, ageMean(val.fatherAge), ageMean(val.motherAge), val.name])
+                    wCounts.writerow([key, val.transcriptStart, val.transcriptEnd, val.count, val.insertion, val.deletion, val.snv, ageMean(val.fatherAge), ageMean(val.motherAge), val.name, val.genderList, val.dataset, val.ID])
                     # if outputIndex < 2:
                     #     maleCounts.writerow([key, val.transcriptStart, val.transcriptEnd, val.count, val.insertion, val.deletion, val.snv, ageMean(val.fatherAge), ageMean(val.motherAge), val.name])
                     # else:
