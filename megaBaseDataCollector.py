@@ -149,6 +149,7 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
     #[MM, MF, FM, FF, male, female, full]
     probandPeopleCount = [0, 0, 0, 0, 0, 0, 0]
     siblingPeopleCount = [0, 0, 0, 0, 0, 0, 0]
+    variantsPerPerson = [[], [], [], [], [], [], []]
 
     #generate bins
     with gzip.open("gencode.v34.annotation.gff3.gz", mode='rt') as f:
@@ -177,6 +178,8 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
             if(filename[-13:] == ".FINAL.vcf.gz"):
                 fileCount += 1
                 siblingsPaired = True
+                variantDataSets = [0,0,0]
+                totalVariantCount = 0
                 with gzip.open(root + filename, mode='rt') as f:
                     print("Scanning variants from file:", filename)
                     currentChrom = ""
@@ -258,6 +261,8 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
                             print("Skipping data for unmatched proband and sibling")
                             break
 
+                        variantDataSets = [currentDataSet, gender, full]
+
                         s = line.strip().split('\t')
                         IDField = s[2].split('-')[0]
 
@@ -279,6 +284,7 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
                                 snv += 1
 
                         variantCount = insert + Del + snv
+                        totalVariantCount += variantCount
 
                         #Place the variant in the right megabase bin
                         #New chromosome means we add a new key to the dictionary and append a new megabase counter.
@@ -325,6 +331,7 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
                                 gene.deletion += Del
                                 gene.snv += snv
                                 gene.variantPosition.append(int(s[1]))
+                                gene.ID.append(fileCount)
                                 if currentFatherAge != "":
                                     gene.fatherAge.append(int(currentFatherAge))
                                 else:
@@ -333,6 +340,14 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
                                     gene.motherAge.append(int(currentMotherAge))
                                 else:
                                     gene.motherAge.append("NA")
+                                if gender == 4:
+                                    gene.genderList.append("M")
+                                else:
+                                    gene.genderList.append("F")
+                                if probandDataSet:
+                                    gene.dataset.append("P")
+                                else:
+                                    gene.dataset.append("S")
                             elif gene.transcriptStart > int(s[1]):
                                 break
 
@@ -344,6 +359,7 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
                                 gene.deletion += Del
                                 gene.snv += snv
                                 gene.variantPosition.append(int(s[1]))
+                                gene.ID.append(fileCount)
                                 if currentFatherAge != "":
                                     gene.fatherAge.append(int(currentFatherAge))
                                 else:
@@ -352,11 +368,24 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
                                     gene.motherAge.append(int(currentMotherAge))
                                 else:
                                     gene.motherAge.append("NA")
+                                if gender == 4:
+                                    gene.genderList.append("M")
+                                else:
+                                    gene.genderList.append("F")
+                                if probandDataSet:
+                                    gene.dataset.append("P")
+                                else:
+                                    gene.dataset.append("S")
                             elif gene.transcriptStart > int(s[1]):
                                 break
                             
                         #updateChromInfoDict(result[currentDataSet], currentMegaBaseIndex, s[0], variantCount, insert, Del, snv, currentFatherAge, currentMotherAge, False)
-                        
+                for dataset in np.arange(0, variantsPerPerson):
+                    if dataset in variantDataSets:
+                        variantsPerPerson[dataset].append(totalVariantCount)
+                    else:
+                        variantsPerPerson[dataset].append("NA")
+
 
     outputIndex = 0
     typePrefix = ["MM", "MF", "FM", "FF", "male", "female", "full"]
@@ -386,6 +415,11 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
     bCounts.writerow(["DataSet", "MMCount", "MFCount", "FMCount", "FFCount", "MaleCount", "FemaleCount", "ratio", "FullCount", "numberOfFiles"])
     bCounts.writerow(["Proband", probandPeopleCount[0], probandPeopleCount[1], probandPeopleCount[2], probandPeopleCount[3], probandPeopleCount[4], probandPeopleCount[5], maleCount / femaleCount, probandPeopleCount[6], fileCount])
     bCounts.writerow(["Sibling", siblingPeopleCount[0], siblingPeopleCount[1], siblingPeopleCount[2], siblingPeopleCount[3], siblingPeopleCount[4], siblingPeopleCount[5], maleCount / femaleCount, siblingPeopleCount[6], fileCount])
+
+    vCounts = csv.writer(open(outputPrefix + "variantData.csv", "w"), delimiter="\t")
+    vCounts.writerow(["MMCount", "MFCount", "FMCount", "FFCount", "MaleCount", "FemaleCount", "FullCount"])
+    for i in np.arange(0, probandPeopleCount[6]):
+        vCounts.writerow([variantsPerPerson[0][i], variantsPerPerson[1][i], variantsPerPerson[2][i], variantsPerPerson[3][i], variantsPerPerson[4][i], variantsPerPerson[5][i], variantsPerPerson[6][i]])
 
     for x in result:
         wCounts = csv.writer(open(outputPrefix + typePrefix[outputIndex] + ".geneCounts.csv", "w"))
