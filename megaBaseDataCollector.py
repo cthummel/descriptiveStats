@@ -380,7 +380,7 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
                                 break
                             
                         #updateChromInfoDict(result[currentDataSet], currentMegaBaseIndex, s[0], variantCount, insert, Del, snv, currentFatherAge, currentMotherAge, False)
-                for dataset in np.arange(0, variantsPerPerson):
+                for dataset in np.arange(0, len(variantsPerPerson)):
                     if dataset in variantDataSets:
                         variantsPerPerson[dataset].append(totalVariantCount)
                     else:
