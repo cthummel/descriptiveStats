@@ -21,7 +21,7 @@ class geneInfo:
         # self.exonStart = exonStart
         # self.exonEnd = exonEnd
         self.count = count
-        self.adjustedCount = adjCount
+        self.adjCount = adjCount
         self.insertion = insertion
         self.deletion = deletion
         self.snv = snv
@@ -407,11 +407,11 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
     if maleCount > femaleCount:
         for key in result[5].keys():
             for val in result[5][key]:
-                val.adjustedCount = val.count * maleCount / femaleCount
+                val.adjCount = val.count * maleCount / femaleCount
     elif femaleCount > maleCount:
         for key in result[4].keys():
             for val in result[4][key]:
-                val.adjustedCount = val.count * femaleCount / maleCount
+                val.adjCount = val.count * femaleCount / maleCount
 
 
     bCounts = csv.writer(open(outputPrefix + "geneBasicData.csv", "w"), delimiter="\t")
