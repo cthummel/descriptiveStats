@@ -3,7 +3,7 @@ from scipy import stats
 import sys, getopt, math, binFinder, random, csv, statsmodels.stats.multitest
 
 class vectorAnalysis():
-    def __init__(self, chrom, name, start, end, fatherAge, motherAge, varPos, count):
+    def __init__(self, chrom, name, start, end, fatherAge, motherAge, varPos, count, adjCount, gender, dataset, ID):
         self.start = start
         self.end = end
         self.chrom = chrom
@@ -12,6 +12,10 @@ class vectorAnalysis():
         self.motherAge = motherAge
         self.variantPosition = varPos
         self.count = count
+        self.adjCount = adjCount
+        self.gender = gender
+        self.dataset = dataset
+        self.ID = ID
 
 def resolveMismatch(i, j, probandData, siblingData, currentChrom, minimumVariantCount):
     chromList = ["chr1", "chr10", "chr11", "chr12", "chr13", "chr14", "chr15", "chr16", "chr17", "chr18", "chr19", "chr2", "chr20", "chr21", "chr22", "chr23", "chr3", "chr4", "chr5", "chr6", "chr7", "chr8", "chr9", "chrX", "chrY"]
@@ -94,6 +98,8 @@ def binomialCounts(probandData, siblingData, knownGenes, outputPrefix):
     countResults = []
     countPvalues = []
     knownGeneList = []
+    probandID = set()
+    siblingID = set()
     geneFilenames = knownGenes
     currentChrom = probandData[0].chrom
     minimumVariantCount = 0
@@ -109,8 +115,8 @@ def binomialCounts(probandData, siblingData, knownGenes, outputPrefix):
         if done:
             break
         else:
-            if currentChrom[-1] == "X" or currentChrom[-1] == "Y":
-                skip = True
+            #if currentChrom[-1] in {"X", "Y"}:
+                #skip = True
             if probandData[i].count == minimumVariantCount:
                 skip = True
             elif probandData[i].count == minimumVariantCount and siblingData[j].count == minimumVariantCount:
@@ -118,6 +124,9 @@ def binomialCounts(probandData, siblingData, knownGenes, outputPrefix):
             elif probandData[i].count < siblingData[j].count:
                 skip = True
             else:
+                probandID.add(probandData[i].ID)
+                siblingID.add(siblingData[j].ID)
+
                 probandWidth = int(float(probandData[i].end)) - int(float(probandData[i].start))
                 siblingWidth = int(float(siblingData[i].end)) - int(float(siblingData[i].start))
                 #siblingRatio = siblingData[j].count * 1.0 / (float(siblingData[i].end) - float(siblingData[i].start))
@@ -152,6 +161,9 @@ def binomialCounts(probandData, siblingData, knownGenes, outputPrefix):
     countHolm = statsmodels.stats.multitest.multipletests(countPvalues, alpha=0.05, method='holm', is_sorted=False, returnsorted=False)  
     countFDR = statsmodels.stats.multitest.fdrcorrection(countPvalues, alpha=0.05, method='indep', is_sorted=False)
 
+    cCounts = csv.writer(open(outputPrefix + "peopleStats.csv", "w"))
+    cCounts.writerow(["ProbandPeople", "SiblingPeople"])
+    cCounts.writerow([len(probandID), len(siblingID)])
 
     fCounts = csv.writer(open(outputPrefix + "countStats.csv", "w"))
     fCounts.writerow(["Chrom", "Gene", "Start", "End", "Length", "ProbandVariantCount", "SiblingVariantCount", "OddsRatio", "Pvalue", "BonPvalue", "SidakPvalue", "HolmPvalue", "FDRPvalue", "KnownGene"])
@@ -199,7 +211,11 @@ def readVectorData(filename):
                 fatherAge = []
                 motherAge = []
                 varPos = []
+                gender = []
+                dataset = []
+                ID = []
                 count = int(float(s[7]))
+                adjCount = int(float(s[8]))
                 for x in s[4][1:-1].split(","):
                     if x.find("NA") != -1:
                         continue
@@ -221,11 +237,27 @@ def readVectorData(filename):
                         varPos.append(float(x[1:]))
                     else:
                         varPos.append(float(x))
+                for x in s[9][1:-1].split(","):
+                    if x == "":
+                        continue
+                    else:
+                        gender.append(x)
+                for x in s[10][1:-1].split(","):
+                    if x == "":
+                        continue
+                    else:
+                        dataset.append(x)
+                for x in s[11][1:-1].split(","):
+                    if x == "":
+                        continue
+                    else:
+                        gender.append(int(x))
+                    
                 #print([s[0], s[1], s[2], s[3], fatherAge, motherAge])
-                results.append(vectorAnalysis(s[0], s[1], s[2], s[3], fatherAge, motherAge, varPos, count))
+                results.append(vectorAnalysis(s[0], s[1], s[2], s[3], fatherAge, motherAge, varPos, count, adjCount, gender, dataset, ID))
             else:
                 #print(s)
-                results.append(vectorAnalysis(s[0], s[1], s[2], s[3], [], [], [], 0))
+                results.append(vectorAnalysis(s[0], s[1], s[2], s[3], [], [], [], 0, 0, gender, dataset, ID))
     return results
 
 def readKnownGeneList(filename):
