@@ -124,7 +124,9 @@ def binomialCounts(probandData, siblingData, knownGenes, outputPrefix):
             elif probandData[i].count < siblingData[j].count:
                 skip = True
             else:
+                print(probandData[i].ID)
                 for y in probandData[i].ID:
+
                     probandID.add(y)
                 for z in siblingData[j].ID:
                     siblingID.add(z)
@@ -244,18 +246,24 @@ def readVectorData(filename):
                 for x in s[9][1:-1].split(","):
                     if x == "":
                         continue
+                    if x[0] == " ":
+                        gender.append(x[1:])
                     else:
                         gender.append(x)
                 for x in s[10][1:-1].split(","):
                     if x == "":
                         continue
+                    if x[0] == " ":
+                        dataset.append(x[1:])
                     else:
                         dataset.append(x)
                 for x in s[11][1:-1].split(","):
                     if x == "":
                         continue
+                    if x[0] == " ":
+                        ID.append(int(x[1:]))
                     else:
-                        gender.append(int(x))
+                        ID.append(int(x))
                     
                 #print([s[0], s[1], s[2], s[3], fatherAge, motherAge])
                 results.append(vectorAnalysis(s[0], s[1], s[2], s[3], fatherAge, motherAge, varPos, count, adjCount, gender, dataset, ID))
