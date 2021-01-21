@@ -206,14 +206,16 @@ def readVectorData(filename):
         header = f.readline()
         for line in f:
             s = line.strip().split("\t")
+            
+            gender = []
+            dataset = []
+            ID = []
             if s[4] != '[]' and s[5] != '[]':
                 #print(s, s[4][1:-1], s[4][1:-1].split(","))
                 fatherAge = []
                 motherAge = []
                 varPos = []
-                gender = []
-                dataset = []
-                ID = []
+                
                 count = int(float(s[7]))
                 adjCount = int(float(s[8]))
                 for x in s[4][1:-1].split(","):
