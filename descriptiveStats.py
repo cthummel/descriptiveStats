@@ -100,6 +100,8 @@ def binomialCounts(probandData, siblingData, knownGenes, outputPrefix):
     knownGeneList = []
     probandID = set()
     siblingID = set()
+    probandMatch = dict()
+    siblingMatch = dict()
     geneFilenames = knownGenes
     currentChrom = probandData[0].chrom
     minimumVariantCount = 0
@@ -124,11 +126,19 @@ def binomialCounts(probandData, siblingData, knownGenes, outputPrefix):
             elif probandData[i].count < siblingData[j].count:
                 skip = True
             else:
-                print(probandData[i].ID)
                 for y in probandData[i].ID:
-
+                    if y in probandMatch.keys():
+                        if not probandData[i].name in probandMatch[y]:
+                            probandMatch[y].append(probandData[i].name)
+                    else:
+                        probandMatch[y] = [probandData[i].name]
                     probandID.add(y)
                 for z in siblingData[j].ID:
+                    if z in siblingMatch.keys():
+                        if not siblingData[j].name in siblingMatch[z]:
+                            siblingMatch[z].append(siblingData[j].name)
+                    else:
+                        siblingMatch[z] = [siblingData[j].name]
                     siblingID.add(z)
 
                 probandWidth = int(float(probandData[i].end)) - int(float(probandData[i].start))
@@ -168,6 +178,15 @@ def binomialCounts(probandData, siblingData, knownGenes, outputPrefix):
     cCounts = csv.writer(open(outputPrefix + "peopleStats.csv", "w"))
     cCounts.writerow(["ProbandPeople", "SiblingPeople"])
     cCounts.writerow([len(probandID), len(siblingID)])
+
+    gCounts = csv.writer(open(outputPrefix + "peopleGeneStats.csv", "w"), delimiter="\t")
+    gCounts.writerow(["DataSet", "ID", "UniqueGeneCount", "Genes"])
+    for x in sorted(probandMatch.keys()):
+        gCounts.writerow(["proband", x, len(probandMatch[x]), probandMatch[x]])
+    for x in sorted(siblingMatch.keys()):
+        gCounts.writerow(["sibling", x, len(siblingMatch[x]), siblingMatch[x]])
+
+    gCounts.writerow([len(probandID), len(siblingID)])
 
     fCounts = csv.writer(open(outputPrefix + "countStats.csv", "w"))
     fCounts.writerow(["Chrom", "Gene", "Start", "End", "Length", "ProbandVariantCount", "SiblingVariantCount", "OddsRatio", "Pvalue", "BonPvalue", "SidakPvalue", "HolmPvalue", "FDRPvalue", "KnownGene"])
