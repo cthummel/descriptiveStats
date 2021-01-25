@@ -421,8 +421,12 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
 
     vCounts = csv.writer(open(outputPrefix + "variantData.csv", "w"), delimiter="\t")
     vCounts.writerow(["MMCount", "MFCount", "FMCount", "FFCount", "MaleCount", "FemaleCount", "FullCount"])
-    for i in np.arange(0, probandPeopleCount[6]):
-        vCounts.writerow([variantsPerPerson[0][i], variantsPerPerson[1][i], variantsPerPerson[2][i], variantsPerPerson[3][i], variantsPerPerson[4][i], variantsPerPerson[5][i], variantsPerPerson[6][i]])
+    if probandDataSet:
+        for i in np.arange(0, probandPeopleCount[6]):
+            vCounts.writerow([variantsPerPerson[0][i], variantsPerPerson[1][i], variantsPerPerson[2][i], variantsPerPerson[3][i], variantsPerPerson[4][i], variantsPerPerson[5][i], variantsPerPerson[6][i]])
+    else:
+        for i in np.arange(0, siblingPeopleCount[6]):
+            vCounts.writerow([variantsPerPerson[0][i], variantsPerPerson[1][i], variantsPerPerson[2][i], variantsPerPerson[3][i], variantsPerPerson[4][i], variantsPerPerson[5][i], variantsPerPerson[6][i]])
 
     for x in result:
         wCounts = csv.writer(open(outputPrefix + typePrefix[outputIndex] + ".geneCounts.csv", "w"))
