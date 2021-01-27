@@ -135,22 +135,16 @@ def updateChromInfoDict(data, index, chrom, variantCount, insert, Del, snv, fath
             data[chrom][index + 1].motherAge.append("NA")
 
 
-def geneCountMergeFamily(file, outputPrefix, familyData):
-    probandDataSet = True
-    maleCount = 0
-    femaleCount = 0
-    fileCount = 0
-    # chromInfoDict = {}
-    # chromInfoDictMM = {}
-    # chromInfoDictMF = {}
-    # chromInfoDictFM = {}
-    # chromInfoDictFF = {}
-    #[MM, MF, FM, FF, male, female, full]
-    result = [{}, {}, {}, {}, {}, {}, {}]
-    #[MM, MF, FM, FF, male, female, full]
-    probandPeopleCount = [0, 0, 0, 0, 0, 0, 0]
-    siblingPeopleCount = [0, 0, 0, 0, 0, 0, 0]
-    variantsPerPerson = [[], [], [], [], [], [], []]
+def generateGeneFileCategories():
+
+    geneResult = [{}, {}, {}, {}, {}, {}, {}]
+    cdsResult = [{}, {}, {}, {}, {}, {}, {}]
+    exonResult = [{}, {}, {}, {}, {}, {}, {}]
+    transResult = [{}, {}, {}, {}, {}, {}, {}]
+    threeUTRResult = [{}, {}, {}, {}, {}, {}, {}]
+    fiveUTRResult = [{}, {}, {}, {}, {}, {}, {}]
+    stopResult = [{}, {}, {}, {}, {}, {}, {}]
+
 
     #generate bins
     with gzip.open("gencode.v34.annotation.gff3.gz", mode='rt') as f:
@@ -161,14 +155,78 @@ def geneCountMergeFamily(file, outputPrefix, familyData):
 
             infoField = s[8].strip().split(";")
              
-            if s[2] == "gene" and infoField[2][10:] == "protein_coding": #gene_type=
+            if s[2] == "gene" and infoField[2][10:] == "protein_coding": #10: -> gene_type=
                 geneName = infoField[3][10:]
-                for i in np.arange(0, len(result)):
-                    if (s[0] not in result[i].keys()):
-                        result[i][s[0]] = [geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, 0, [], [], [], [], [], [])]
+                for i in np.arange(0, len(geneResult)):
+                    if (s[0] not in geneResult[i].keys()):
+                        geneResult[i][s[0]] = [geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, 0, [], [], [], [], [], [])]
                     else:
-                        result[i][s[0]].append(geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, 0, [], [], [], [], [], []))
+                        geneResult[i][s[0]].append(geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, 0, [], [], [], [], [], []))
 
+            #elif s[2][:4] in ["exo", "CDS", "tra", "thr", "fiv", "sto"] and infoField[4][10:] == "protein_coding":
+
+            elif s[2][:4] == "exo" and infoField[4][10:] == "protein_coding":   #exon
+                geneName = infoField[5][10:]
+                for i in np.arange(0, len(exonResult)):
+                    if (s[0] not in exonResult[i].keys()):
+                        exonResult[i][s[0]] = [geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, 0, [], [], [], [], [], [])]
+                    else:
+                        exonResult[i][s[0]].append(geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, 0, [], [], [], [], [], []))
+
+            elif s[2] == "CDS" and infoField[4][10:] == "protein_coding":       #CDS
+                geneName = infoField[5][10:]
+                for i in np.arange(0, len(cdsResult)):
+                    if (s[0] not in cdsResult[i].keys()):
+                        cdsResult[i][s[0]] = [geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, 0, [], [], [], [], [], [])]
+                    else:
+                        cdsResult[i][s[0]].append(geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, 0, [], [], [], [], [], []))
+
+            elif s[2][:4] == "tra" and infoField[4][10:] == "protein_coding":   #transcript
+                geneName = infoField[5][10:]
+                for i in np.arange(0, len(transResult)):
+                    if (s[0] not in transResult[i].keys()):
+                        transResult[i][s[0]] = [geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, 0, [], [], [], [], [], [])]
+                    else:
+                        transResult[i][s[0]].append(geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, 0, [], [], [], [], [], []))
+
+            elif s[2][:4] == "thr" and infoField[4][10:] == "protein_coding":   #3_prime_UTR
+                geneName = infoField[5][10:]
+                for i in np.arange(0, len(threeUTRResult)):
+                    if (s[0] not in threeUTRResult[i].keys()):
+                        threeUTRResult[i][s[0]] = [geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, 0, [], [], [], [], [], [])]
+                    else:
+                        threeUTRResult[i][s[0]].append(geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, 0, [], [], [], [], [], []))
+            
+            elif s[2][:4] == "fiv" and infoField[4][10:] == "protein_coding":   #five_prime_UTR
+                geneName = infoField[5][10:]
+                for i in np.arange(0, len(fiveUTRResult)):
+                    if (s[0] not in fiveUTRResult[i].keys()):
+                        fiveUTRResult[i][s[0]] = [geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, 0, [], [], [], [], [], [])]
+                    else:
+                        fiveUTRResult[i][s[0]].append(geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, 0, [], [], [], [], [], []))
+
+            elif s[2][:4] == "sto" and infoField[4][10:] == "protein_coding":   #stop_codon
+                geneName = infoField[5][10:]
+                for i in np.arange(0, len(stopResult)):
+                    if (s[0] not in stopResult[i].keys()):
+                        stopResult[i][s[0]] = [geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, 0, [], [], [], [], [], [])]
+                    else:
+                        stopResult[i][s[0]].append(geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, 0, [], [], [], [], [], []))
+
+    return [geneResult, cdsResult, exonResult, transResult, threeUTRResult, fiveUTRResult, stopResult], ["gene.", "cds.", "exon.", "trans.", "3UTR.", "5UTR.", "stop."]
+
+def geneCountMergeFamily(file, outputPrefix, familyData, geneCategory):
+    probandDataSet = True
+    maleCount = 0
+    femaleCount = 0
+    fileCount = 0
+    result = geneCategory
+    #[MM, MF, FM, FF, male, female, full]
+    probandPeopleCount = [0, 0, 0, 0, 0, 0, 0]
+    siblingPeopleCount = [0, 0, 0, 0, 0, 0, 0]
+    variantsPerPerson = [[], [], [], [], [], [], []]
+
+    
 
     for root, dirs, files in os.walk(file):
         temproot = root.strip().split("/")
@@ -787,7 +845,9 @@ def main(argv):
             #megabaseCountMerge(path, overlap, binsize, outputPrefix)
             skip = True
         elif geneMode:
-            geneCountMergeFamily(path, outputPrefix, familyData)
+            geneCategories, categoryOutputTag = generateGeneFileCategories()
+            for i in np.arange(0, len(geneCategories)):
+                geneCountMergeFamily(path, outputPrefix + categoryOutputTag[i], familyData, geneCategories[i])
         else:
             megabaseCountMergeFamily(path, overlap, binsize, outputPrefix, familyData)
     else:
