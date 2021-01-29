@@ -134,6 +134,139 @@ def updateChromInfoDict(data, index, chrom, variantCount, insert, Del, snv, fath
         else:
             data[chrom][index + 1].motherAge.append("NA")
 
+def generateGeneFileSingleCategory(category):
+    result = [{}, {}, {}, {}, {}, {}, {}]
+    outputName = ""
+
+    if category == "gene":
+        outputName = "gene."
+        with gzip.open("gencode.v34.annotation.gff3.gz", mode='rt') as f:
+            for line in f:
+                s = line.strip().split("\t")
+                if s[0][0] == "#":
+                    continue
+
+                infoField = s[8].strip().split(";")
+                
+                if s[2] == "gene" and infoField[2][10:] == "protein_coding": #10: -> gene_type=
+                    geneName = infoField[3][10:]
+                    for i in np.arange(0, len(result)):
+                        if (s[0] not in result[i].keys()):
+                            result[i][s[0]] = [geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, 0, [], [], [], [], [], [])]
+                        else:
+                            result[i][s[0]].append(geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, 0, [], [], [], [], [], []))
+
+    elif category == "exon":
+        outputName = "exon."
+        with gzip.open("gencode.v34.annotation.gff3.gz", mode='rt') as f:
+            for line in f:
+                s = line.strip().split("\t")
+                if s[0][0] == "#":
+                    continue
+
+                infoField = s[8].strip().split(";")
+
+                if s[2][:4] == "exo" and infoField[4][10:] == "protein_coding":   #exon
+                    geneName = infoField[5][10:]
+                    for i in np.arange(0, len(result)):
+                        if (s[0] not in result[i].keys()):
+                            result[i][s[0]] = [geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, 0, [], [], [], [], [], [])]
+                        else:
+                            result[i][s[0]].append(geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, 0, [], [], [], [], [], []))
+        
+    elif category == "CDS":
+        outputName = "cds."
+        with gzip.open("gencode.v34.annotation.gff3.gz", mode='rt') as f:
+            for line in f:
+                s = line.strip().split("\t")
+                if s[0][0] == "#":
+                    continue
+
+                infoField = s[8].strip().split(";")
+        
+                if s[2] == "CDS" and infoField[4][10:] == "protein_coding":   #cds
+                    geneName = infoField[5][10:]
+                    for i in np.arange(0, len(result)):
+                        if (s[0] not in result[i].keys()):
+                            result[i][s[0]] = [geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, 0, [], [], [], [], [], [])]
+                        else:
+                            result[i][s[0]].append(geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, 0, [], [], [], [], [], []))
+    
+    elif category == "transcript":
+        outputName = "trans."
+        with gzip.open("gencode.v34.annotation.gff3.gz", mode='rt') as f:
+            for line in f:
+                s = line.strip().split("\t")
+                if s[0][0] == "#":
+                    continue
+
+                infoField = s[8].strip().split(";")
+
+                if s[2][:4] == "tra" and infoField[4][10:] == "protein_coding":   #transcript
+                    geneName = infoField[5][10:]
+                    for i in np.arange(0, len(result)):
+                        if (s[0] not in result[i].keys()):
+                            result[i][s[0]] = [geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, 0, [], [], [], [], [], [])]
+                        else:
+                            result[i][s[0]].append(geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, 0, [], [], [], [], [], []))
+
+    elif category == "3_prime_UTR":
+        outputName = "3UTR."
+        with gzip.open("gencode.v34.annotation.gff3.gz", mode='rt') as f:
+            for line in f:
+                s = line.strip().split("\t")
+                if s[0][0] == "#":
+                    continue
+
+                infoField = s[8].strip().split(";")
+
+                if s[2][:4] == "thr" and infoField[4][10:] == "protein_coding":   #three_prime_UTR
+                    geneName = infoField[5][10:]
+                    for i in np.arange(0, len(result)):
+                        if (s[0] not in result[i].keys()):
+                            result[i][s[0]] = [geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, 0, [], [], [], [], [], [])]
+                        else:
+                            result[i][s[0]].append(geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, 0, [], [], [], [], [], []))
+
+    elif category == "5_prime_UTR":
+        outputName = "5UTR."
+        with gzip.open("gencode.v34.annotation.gff3.gz", mode='rt') as f:
+            for line in f:
+                s = line.strip().split("\t")
+                if s[0][0] == "#":
+                    continue
+
+                infoField = s[8].strip().split(";")
+
+                if s[2][:4] == "fiv" and infoField[4][10:] == "protein_coding":   #five_prime_UTR
+                    geneName = infoField[5][10:]
+                    for i in np.arange(0, len(result)):
+                        if (s[0] not in result[i].keys()):
+                            result[i][s[0]] = [geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, 0, [], [], [], [], [], [])]
+                        else:
+                            result[i][s[0]].append(geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, 0, [], [], [], [], [], []))
+
+    elif category == "stop_codon":
+        outputName = "stop."
+        with gzip.open("gencode.v34.annotation.gff3.gz", mode='rt') as f:
+            for line in f:
+                s = line.strip().split("\t")
+                if s[0][0] == "#":
+                    continue
+
+                infoField = s[8].strip().split(";")
+
+                if s[2][:4] == "sto" and infoField[4][10:] == "protein_coding":   #stop_codon
+                    geneName = infoField[5][10:]
+                    for i in np.arange(0, len(result)):
+                        if (s[0] not in result[i].keys()):
+                            result[i][s[0]] = [geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, 0, [], [], [], [], [], [])]
+                        else:
+                            result[i][s[0]].append(geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, 0, [], [], [], [], [], []))
+
+    return result, outputName
+
+
 
 def generateGeneFileCategories():
 
@@ -213,7 +346,9 @@ def generateGeneFileCategories():
                     else:
                         stopResult[i][s[0]].append(geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, 0, [], [], [], [], [], []))
 
-    return [geneResult, cdsResult, exonResult, transResult, threeUTRResult, fiveUTRResult, stopResult], ["gene.", "cds.", "exon.", "trans.", "3UTR.", "5UTR.", "stop."]
+    outputNames = ["gene.", "cds.", "exon.", "trans.", "3UTR.", "5UTR.", "stop."]
+
+    return [geneResult, cdsResult, exonResult, transResult, threeUTRResult, fiveUTRResult, stopResult], outputNames 
 
 def geneCountMergeFamily(file, outputPrefix, familyData, geneCategory):
     probandDataSet = True
@@ -225,8 +360,6 @@ def geneCountMergeFamily(file, outputPrefix, familyData, geneCategory):
     probandPeopleCount = [0, 0, 0, 0, 0, 0, 0]
     siblingPeopleCount = [0, 0, 0, 0, 0, 0, 0]
     variantsPerPerson = [[], [], [], [], [], [], []]
-
-    
 
     for root, dirs, files in os.walk(file):
         temproot = root.strip().split("/")
@@ -783,6 +916,7 @@ def main(argv):
     path = '-'
     merge = False
     geneMode = False
+    geneType = ""
     binsize = 1000000
     famFile = ""
 
@@ -796,10 +930,11 @@ def main(argv):
         elif opt == '--overlap':
             overlap = float(arg)
         elif opt == '--binsize':
-            if arg == "gene":
-                geneMode = True
-            else:
+            if arg.isnumeric():
                 binsize = int(arg)
+            else:
+                geneMode = True
+                geneType = arg
         elif opt == '--famFile':
             famFile = arg
         elif opt == '--sampleFile':
@@ -845,9 +980,13 @@ def main(argv):
             #megabaseCountMerge(path, overlap, binsize, outputPrefix)
             skip = True
         elif geneMode:
-            geneCategories, categoryOutputTag = generateGeneFileCategories()
-            for i in np.arange(0, len(geneCategories)):
-                geneCountMergeFamily(path, outputPrefix + categoryOutputTag[i], familyData, geneCategories[i])
+            if geneType == "all":
+                geneCategories, categoryOutputTag = generateGeneFileCategories()
+                for i in np.arange(0, len(geneCategories)):
+                    geneCountMergeFamily(path, outputPrefix + categoryOutputTag[i], familyData, geneCategories[i])
+            else:
+                geneInfo, categoryOutputTag = generateGeneFileSingleCategory(geneType)
+                geneCountMergeFamily(path, outputPrefix + categoryOutputTag, familyData, geneInfo)
         else:
             megabaseCountMergeFamily(path, overlap, binsize, outputPrefix, familyData)
     else:
