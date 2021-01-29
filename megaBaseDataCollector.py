@@ -166,7 +166,7 @@ def generateGeneFileSingleCategory(category):
 
                 infoField = s[8].strip().split(";")
 
-                if s[2][:4] == "exo" and infoField[4][10:] == "protein_coding":   #exon
+                if s[2][:3] == "exo" and infoField[4][10:] == "protein_coding":   #exon
                     geneName = infoField[5][10:]
                     for i in np.arange(0, len(result)):
                         if (s[0] not in result[i].keys()):
@@ -202,7 +202,7 @@ def generateGeneFileSingleCategory(category):
 
                 infoField = s[8].strip().split(";")
 
-                if s[2][:4] == "tra" and infoField[4][10:] == "protein_coding":   #transcript
+                if s[2][:3] == "tra" and infoField[4][10:] == "protein_coding":   #transcript
                     geneName = infoField[5][10:]
                     for i in np.arange(0, len(result)):
                         if (s[0] not in result[i].keys()):
@@ -220,7 +220,7 @@ def generateGeneFileSingleCategory(category):
 
                 infoField = s[8].strip().split(";")
 
-                if s[2][:4] == "thr" and infoField[4][10:] == "protein_coding":   #three_prime_UTR
+                if s[2][:3] == "thr" and infoField[4][10:] == "protein_coding":   #three_prime_UTR
                     geneName = infoField[5][10:]
                     for i in np.arange(0, len(result)):
                         if (s[0] not in result[i].keys()):
@@ -238,7 +238,7 @@ def generateGeneFileSingleCategory(category):
 
                 infoField = s[8].strip().split(";")
 
-                if s[2][:4] == "fiv" and infoField[4][10:] == "protein_coding":   #five_prime_UTR
+                if s[2][:3] == "fiv" and infoField[4][10:] == "protein_coding":   #five_prime_UTR
                     geneName = infoField[5][10:]
                     for i in np.arange(0, len(result)):
                         if (s[0] not in result[i].keys()):
@@ -256,7 +256,7 @@ def generateGeneFileSingleCategory(category):
 
                 infoField = s[8].strip().split(";")
 
-                if s[2][:4] == "sto" and infoField[4][10:] == "protein_coding":   #stop_codon
+                if s[2][:3] == "sto" and infoField[4][10:] == "protein_coding":   #stop_codon
                     geneName = infoField[5][10:]
                     for i in np.arange(0, len(result)):
                         if (s[0] not in result[i].keys()):
