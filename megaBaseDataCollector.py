@@ -152,9 +152,19 @@ def generateGeneFileSingleCategory(category):
                     geneName = infoField[3][10:]
                     for i in np.arange(0, len(result)):
                         if (s[0] not in result[i].keys()):
-                            result[i][s[0]] = [geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, 0, [], [], [], [], [], [])]
+                            result[i][s[0]] = [geneInfo(geneName, [int(s[3])], [int(s[4])], 0, 0, 0, 0, 0, [], [], [], [], [], [])]
                         else:
-                            result[i][s[0]].append(geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, 0, [], [], [], [], [], []))
+                            # index = -1
+                            # for k in np.arange(0, len(result[i][s[0]])):
+                            #     if result[i][s[0]][k].name == geneName:
+                            #         index = k
+                            #         break
+                            # if index < 0:
+                            result[i][s[0]].append(geneInfo(geneName, [int(s[3])], [int(s[4])], 0, 0, 0, 0, 0, [], [], [], [], [], []))
+                            # else:
+                            #     result[i][s[0]][index].transcriptStart.append(int(s[3]))
+                            #     result[i][s[0]][index].transcriptEnd.append(int(s[4]))
+                                
 
     elif category == "exon":
         outputName = "exon."
@@ -172,7 +182,16 @@ def generateGeneFileSingleCategory(category):
                         if (s[0] not in result[i].keys()):
                             result[i][s[0]] = [geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, 0, [], [], [], [], [], [])]
                         else:
-                            result[i][s[0]].append(geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, 0, [], [], [], [], [], []))
+                            index = -1
+                            for k in np.arange(0, len(result[i][s[0]])):
+                                if result[i][s[0]][k].name == geneName:
+                                    index = k
+                                    break
+                            if index < 0:
+                                result[i][s[0]].append(geneInfo(geneName, [int(s[3])], [int(s[4])], 0, 0, 0, 0, 0, [], [], [], [], [], []))
+                            else:
+                                result[i][s[0]][index].transcriptStart.append(int(s[3]))
+                                result[i][s[0]][index].transcriptEnd.append(int(s[4]))
         
     elif category == "CDS":
         outputName = "cds."
@@ -190,7 +209,16 @@ def generateGeneFileSingleCategory(category):
                         if (s[0] not in result[i].keys()):
                             result[i][s[0]] = [geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, 0, [], [], [], [], [], [])]
                         else:
-                            result[i][s[0]].append(geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, 0, [], [], [], [], [], []))
+                            index = -1
+                            for k in np.arange(0, len(result[i][s[0]])):
+                                if result[i][s[0]][k].name == geneName:
+                                    index = k
+                                    break
+                            if index < 0:
+                                result[i][s[0]].append(geneInfo(geneName, [int(s[3])], [int(s[4])], 0, 0, 0, 0, 0, [], [], [], [], [], []))
+                            else:
+                                result[i][s[0]][index].transcriptStart.append(int(s[3]))
+                                result[i][s[0]][index].transcriptEnd.append(int(s[4]))
     
     elif category == "transcript":
         outputName = "trans."
@@ -208,7 +236,16 @@ def generateGeneFileSingleCategory(category):
                         if (s[0] not in result[i].keys()):
                             result[i][s[0]] = [geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, 0, [], [], [], [], [], [])]
                         else:
-                            result[i][s[0]].append(geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, 0, [], [], [], [], [], []))
+                            index = -1
+                            for k in np.arange(0, len(result[i][s[0]])):
+                                if result[i][s[0]][k].name == geneName:
+                                    index = k
+                                    break
+                            if index < 0:
+                                result[i][s[0]].append(geneInfo(geneName, [int(s[3])], [int(s[4])], 0, 0, 0, 0, 0, [], [], [], [], [], []))
+                            else:
+                                result[i][s[0]][index].transcriptStart.append(int(s[3]))
+                                result[i][s[0]][index].transcriptEnd.append(int(s[4]))
 
     elif category == "3_prime_UTR":
         outputName = "3UTR."
@@ -226,7 +263,16 @@ def generateGeneFileSingleCategory(category):
                         if (s[0] not in result[i].keys()):
                             result[i][s[0]] = [geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, 0, [], [], [], [], [], [])]
                         else:
-                            result[i][s[0]].append(geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, 0, [], [], [], [], [], []))
+                            index = -1
+                            for k in np.arange(0, len(result[i][s[0]])):
+                                if result[i][s[0]][k].name == geneName:
+                                    index = k
+                                    break
+                            if index < 0:
+                                result[i][s[0]].append(geneInfo(geneName, [int(s[3])], [int(s[4])], 0, 0, 0, 0, 0, [], [], [], [], [], []))
+                            else:
+                                result[i][s[0]][index].transcriptStart.append(int(s[3]))
+                                result[i][s[0]][index].transcriptEnd.append(int(s[4]))
 
     elif category == "5_prime_UTR":
         outputName = "5UTR."
@@ -244,7 +290,16 @@ def generateGeneFileSingleCategory(category):
                         if (s[0] not in result[i].keys()):
                             result[i][s[0]] = [geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, 0, [], [], [], [], [], [])]
                         else:
-                            result[i][s[0]].append(geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, 0, [], [], [], [], [], []))
+                            index = -1
+                            for k in np.arange(0, len(result[i][s[0]])):
+                                if result[i][s[0]][k].name == geneName:
+                                    index = k
+                                    break
+                            if index < 0:
+                                result[i][s[0]].append(geneInfo(geneName, [int(s[3])], [int(s[4])], 0, 0, 0, 0, 0, [], [], [], [], [], []))
+                            else:
+                                result[i][s[0]][index].transcriptStart.append(int(s[3]))
+                                result[i][s[0]][index].transcriptEnd.append(int(s[4]))
 
     elif category == "stop_codon":
         outputName = "stop."
@@ -262,7 +317,16 @@ def generateGeneFileSingleCategory(category):
                         if (s[0] not in result[i].keys()):
                             result[i][s[0]] = [geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, 0, [], [], [], [], [], [])]
                         else:
-                            result[i][s[0]].append(geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, 0, [], [], [], [], [], []))
+                            index = -1
+                            for k in np.arange(0, len(result[i][s[0]])):
+                                if result[i][s[0]][k].name == geneName:
+                                    index = k
+                                    break
+                            if index < 0:
+                                result[i][s[0]].append(geneInfo(geneName, [int(s[3])], [int(s[4])], 0, 0, 0, 0, 0, [], [], [], [], [], []))
+                            else:
+                                result[i][s[0]][index].transcriptStart.append(int(s[3]))
+                                result[i][s[0]][index].transcriptEnd.append(int(s[4]))
 
     return result, outputName
 
@@ -484,93 +548,99 @@ def geneCountMergeFamily(file, outputPrefix, familyData, geneCategory):
                         if (len(s[0]) > 5):
                             continue
                         if (s[0] != currentChrom):
-                            currentMegaBaseEnd = result[currentDataSet][s[0]][0].transcriptEnd
+                            #currentMegaBaseEnd = result[currentDataSet][s[0]][0].transcriptEnd
                             currentChrom = s[0]
 
                         for gene in result[currentDataSet][currentChrom]:
-                            if gene.transcriptStart <= int(s[1]) and gene.transcriptEnd >= int(s[1]):
-                                gene.count += variantCount
-                                gene.adjCount += variantCount
-                                gene.insertion += insert
-                                gene.deletion += Del
-                                gene.snv += snv
-                                gene.variantPosition.append(int(s[1]))
-                                gene.ID.append(fileCount)
-                                if currentFatherAge != "":
-                                    gene.fatherAge.append(int(currentFatherAge))
-                                else:
-                                    gene.fatherAge.append("NA")
-                                if currentMotherAge != "":
-                                    gene.motherAge.append(int(currentMotherAge))
-                                else:
-                                    gene.motherAge.append("NA")
-                                if gender == 4:
-                                    gene.genderList.append("M")
-                                else:
-                                    gene.genderList.append("F")
-                                if probandDataSet:
-                                    gene.dataset.append("P")
-                                else:
-                                    gene.dataset.append("S")
+                            for index in np.arange(0, len(gene.transcriptStart)):
+                                if gene.transcriptStart[index] <= int(s[1]) and gene.transcriptEnd[index] >= int(s[1]):
+                                    gene.count += variantCount
+                                    gene.adjCount += variantCount
+                                    gene.insertion += insert
+                                    gene.deletion += Del
+                                    gene.snv += snv
+                                    gene.variantPosition.append(int(s[1]))
+                                    gene.ID.append(fileCount)
+                                    if currentFatherAge != "":
+                                        gene.fatherAge.append(int(currentFatherAge))
+                                    else:
+                                        gene.fatherAge.append("NA")
+                                    if currentMotherAge != "":
+                                        gene.motherAge.append(int(currentMotherAge))
+                                    else:
+                                        gene.motherAge.append("NA")
+                                    if gender == 4:
+                                        gene.genderList.append("M")
+                                    else:
+                                        gene.genderList.append("F")
+                                    if probandDataSet:
+                                        gene.dataset.append("P")
+                                    else:
+                                        gene.dataset.append("S")
+                                    break
 
-                            elif gene.transcriptStart > int(s[1]):
+                            if gene.transcriptStart[0] > int(s[1]):
                                 break
                         
                         #for gender combined dataset
                         for gene in result[gender][currentChrom]:
-                            if gene.transcriptStart <= int(s[1]) and gene.transcriptEnd >= int(s[1]):
-                                gene.count += variantCount
-                                gene.insertion += insert
-                                gene.deletion += Del
-                                gene.snv += snv
-                                gene.variantPosition.append(int(s[1]))
-                                gene.ID.append(fileCount)
-                                if currentFatherAge != "":
-                                    gene.fatherAge.append(int(currentFatherAge))
-                                else:
-                                    gene.fatherAge.append("NA")
-                                if currentMotherAge != "":
-                                    gene.motherAge.append(int(currentMotherAge))
-                                else:
-                                    gene.motherAge.append("NA")
-                                if gender == 4:
-                                    gene.genderList.append("M")
-                                else:
-                                    gene.genderList.append("F")
-                                if probandDataSet:
-                                    gene.dataset.append("P")
-                                else:
-                                    gene.dataset.append("S")
-                            elif gene.transcriptStart > int(s[1]):
+                            for index in np.arange(0, len(gene.transcriptStart)):
+                                if gene.transcriptStart[index] <= int(s[1]) and gene.transcriptEnd[index] >= int(s[1]):
+                                    gene.count += variantCount
+                                    gene.insertion += insert
+                                    gene.deletion += Del
+                                    gene.snv += snv
+                                    gene.variantPosition.append(int(s[1]))
+                                    gene.ID.append(fileCount)
+                                    if currentFatherAge != "":
+                                        gene.fatherAge.append(int(currentFatherAge))
+                                    else:
+                                        gene.fatherAge.append("NA")
+                                    if currentMotherAge != "":
+                                        gene.motherAge.append(int(currentMotherAge))
+                                    else:
+                                        gene.motherAge.append("NA")
+                                    if gender == 4:
+                                        gene.genderList.append("M")
+                                    else:
+                                        gene.genderList.append("F")
+                                    if probandDataSet:
+                                        gene.dataset.append("P")
+                                    else:
+                                        gene.dataset.append("S")
+                                    break
+                            if gene.transcriptStart[0] > int(s[1]):
                                 break
 
                         #for full dataset
                         for gene in result[full][currentChrom]:
-                            if gene.transcriptStart <= int(s[1]) and gene.transcriptEnd >= int(s[1]):
-                                gene.count += variantCount
-                                gene.adjCount += variantCount
-                                gene.insertion += insert
-                                gene.deletion += Del
-                                gene.snv += snv
-                                gene.variantPosition.append(int(s[1]))
-                                gene.ID.append(fileCount)
-                                if currentFatherAge != "":
-                                    gene.fatherAge.append(int(currentFatherAge))
-                                else:
-                                    gene.fatherAge.append("NA")
-                                if currentMotherAge != "":
-                                    gene.motherAge.append(int(currentMotherAge))
-                                else:
-                                    gene.motherAge.append("NA")
-                                if gender == 4:
-                                    gene.genderList.append("M")
-                                else:
-                                    gene.genderList.append("F")
-                                if probandDataSet:
-                                    gene.dataset.append("P")
-                                else:
-                                    gene.dataset.append("S")
-                            elif gene.transcriptStart > int(s[1]):
+                            for index in np.arange(0, len(gene.transcriptStart)):
+                                if gene.transcriptStart[index] <= int(s[1]) and gene.transcriptEnd[index] >= int(s[1]):
+                                    gene.count += variantCount
+                                    gene.adjCount += variantCount
+                                    gene.insertion += insert
+                                    gene.deletion += Del
+                                    gene.snv += snv
+                                    gene.variantPosition.append(int(s[1]))
+                                    gene.ID.append(fileCount)
+                                    if currentFatherAge != "":
+                                        gene.fatherAge.append(int(currentFatherAge))
+                                    else:
+                                        gene.fatherAge.append("NA")
+                                    if currentMotherAge != "":
+                                        gene.motherAge.append(int(currentMotherAge))
+                                    else:
+                                        gene.motherAge.append("NA")
+                                    if gender == 4:
+                                        gene.genderList.append("M")
+                                    else:
+                                        gene.genderList.append("F")
+                                    if probandDataSet:
+                                        gene.dataset.append("P")
+                                    else:
+                                        gene.dataset.append("S")
+                                    break
+                            if gene.transcriptStart[0] > int(s[1]):
                                 break
                             
                         #updateChromInfoDict(result[currentDataSet], currentMegaBaseIndex, s[0], variantCount, insert, Del, snv, currentFatherAge, currentMotherAge, False)
