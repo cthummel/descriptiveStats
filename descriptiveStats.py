@@ -119,9 +119,9 @@ def binomialCounts(probandData, siblingData, knownGenes, outputPrefix):
         else:
             #if currentChrom[-1] in {"X", "Y"}:
                 #skip = True
-            if probandData[i].count == minimumVariantCount:
-                skip = True
-            elif probandData[i].count == minimumVariantCount and siblingData[j].count == minimumVariantCount:
+            #if probandData[i].count == minimumVariantCount:
+                #skip = True
+            if probandData[i].count == minimumVariantCount and siblingData[j].count == minimumVariantCount:
                 skip = True
             elif probandData[i].count < siblingData[j].count:
                 skip = True
@@ -169,30 +169,31 @@ def binomialCounts(probandData, siblingData, knownGenes, outputPrefix):
         j += 1
         i += 1
             
+    if len(countPvalues) > 0:
+        countBon = statsmodels.stats.multitest.multipletests(countPvalues, alpha=0.05, method='bonferroni', is_sorted=False, returnsorted=False)
+        countSidak = statsmodels.stats.multitest.multipletests(countPvalues, alpha=0.05, method='sidak', is_sorted=False, returnsorted=False)
+        countHolm = statsmodels.stats.multitest.multipletests(countPvalues, alpha=0.05, method='holm', is_sorted=False, returnsorted=False)  
+        countFDR = statsmodels.stats.multitest.fdrcorrection(countPvalues, alpha=0.05, method='indep', is_sorted=False)
 
-    countBon = statsmodels.stats.multitest.multipletests(countPvalues, alpha=0.05, method='bonferroni', is_sorted=False, returnsorted=False)
-    countSidak = statsmodels.stats.multitest.multipletests(countPvalues, alpha=0.05, method='sidak', is_sorted=False, returnsorted=False)
-    countHolm = statsmodels.stats.multitest.multipletests(countPvalues, alpha=0.05, method='holm', is_sorted=False, returnsorted=False)  
-    countFDR = statsmodels.stats.multitest.fdrcorrection(countPvalues, alpha=0.05, method='indep', is_sorted=False)
+        cCounts = csv.writer(open(outputPrefix + "peopleStats.csv", "w"))
+        cCounts.writerow(["ProbandPeople", "SiblingPeople"])
+        cCounts.writerow([len(probandID), len(siblingID)])
 
-    cCounts = csv.writer(open(outputPrefix + "peopleStats.csv", "w"))
-    cCounts.writerow(["ProbandPeople", "SiblingPeople"])
-    cCounts.writerow([len(probandID), len(siblingID)])
+        gCounts = csv.writer(open(outputPrefix + "peopleGeneStats.csv", "w"), delimiter="\t")
+        gCounts.writerow(["DataSet", "ID", "UniqueGeneCount", "Genes"])
+        for x in sorted(probandMatch.keys()):
+            gCounts.writerow(["proband", x, len(probandMatch[x]), probandMatch[x]])
+        for x in sorted(siblingMatch.keys()):
+            gCounts.writerow(["sibling", x, len(siblingMatch[x]), siblingMatch[x]])
 
-    gCounts = csv.writer(open(outputPrefix + "peopleGeneStats.csv", "w"), delimiter="\t")
-    gCounts.writerow(["DataSet", "ID", "UniqueGeneCount", "Genes"])
-    for x in sorted(probandMatch.keys()):
-        gCounts.writerow(["proband", x, len(probandMatch[x]), probandMatch[x]])
-    for x in sorted(siblingMatch.keys()):
-        gCounts.writerow(["sibling", x, len(siblingMatch[x]), siblingMatch[x]])
+        gCounts.writerow([len(probandID), len(siblingID)])
 
-    gCounts.writerow([len(probandID), len(siblingID)])
-
-    fCounts = csv.writer(open(outputPrefix + "countStats.csv", "w"))
-    fCounts.writerow(["Chrom", "Gene", "Start", "End", "Length", "ProbandVariantCount", "SiblingVariantCount", "OddsRatio", "Pvalue", "BonPvalue", "SidakPvalue", "HolmPvalue", "FDRPvalue", "KnownGene"])
-    for row in np.arange(0, len(countResults)):
-        fCounts.writerow([countResults[row][0], countResults[row][1], countResults[row][2], countResults[row][3], int(float(countResults[row][3])) - int(float(countResults[row][2])), countResults[row][6], countResults[row][7], countResults[row][4], countResults[row][5], countBon[1][row], countSidak[1][row], countHolm[1][row], countFDR[1][row], countResults[row][8]])
-
+        fCounts = csv.writer(open(outputPrefix + "countStats.csv", "w"))
+        fCounts.writerow(["Chrom", "Gene", "Start", "End", "Length", "ProbandVariantCount", "SiblingVariantCount", "OddsRatio", "Pvalue", "BonPvalue", "SidakPvalue", "HolmPvalue", "FDRPvalue", "KnownGene"])
+        for row in np.arange(0, len(countResults)):
+            fCounts.writerow([countResults[row][0], countResults[row][1], countResults[row][2], countResults[row][3], int(float(countResults[row][3])) - int(float(countResults[row][2])), countResults[row][6], countResults[row][7], countResults[row][4], countResults[row][5], countBon[1][row], countSidak[1][row], countHolm[1][row], countFDR[1][row], countResults[row][8]])
+    else:
+        print("Error: No Pvalues Generated.", file=sys.stderr)
 
     return countResults
 
@@ -436,17 +437,17 @@ def geneCountStats(probandData, siblingData, knownGenes, outputPrefix):
         j += 1
         i += 1
             
+    if len(positionPvalues) > 0:
+        positionBon = statsmodels.stats.multitest.multipletests(positionPvalues, alpha=0.05, method='bonferroni', is_sorted=False, returnsorted=False)
+        positionSidak = statsmodels.stats.multitest.multipletests(positionPvalues, alpha=0.05, method='sidak', is_sorted=False, returnsorted=False)
+        positionHolm = statsmodels.stats.multitest.multipletests(positionPvalues, alpha=0.05, method='holm', is_sorted=False, returnsorted=False)  
+        positionFDR = statsmodels.stats.multitest.fdrcorrection(positionPvalues, alpha=0.05, method='indep', is_sorted=False)
 
-    positionBon = statsmodels.stats.multitest.multipletests(positionPvalues, alpha=0.05, method='bonferroni', is_sorted=False, returnsorted=False)
-    positionSidak = statsmodels.stats.multitest.multipletests(positionPvalues, alpha=0.05, method='sidak', is_sorted=False, returnsorted=False)
-    positionHolm = statsmodels.stats.multitest.multipletests(positionPvalues, alpha=0.05, method='holm', is_sorted=False, returnsorted=False)  
-    positionFDR = statsmodels.stats.multitest.fdrcorrection(positionPvalues, alpha=0.05, method='indep', is_sorted=False)
 
-
-    fCounts = csv.writer(open(outputPrefix + "positionStats.csv", "w"))
-    fCounts.writerow(["Chrom", "Gene", "Start", "End", "Length", "ProbandVariantCount", "SiblingVariantCount", "TestStat", "Pvalue", "BonPvalue", "SidakPvalue", "HolmPvalue", "FDRPvalue", "KnownGene"]) 
-    for row in np.arange(0, len(positionResults)):
-        fCounts.writerow([positionResults[row][0], positionResults[row][1], positionResults[row][2], positionResults[row][3], int(float(positionResults[row][3])) - int(float(positionResults[row][2])), positionResults[row][6], positionResults[row][7], positionResults[row][4], positionResults[row][5], positionBon[1][row], positionSidak[1][row], positionHolm[1][row], positionFDR[1][row], positionResults[row][8]])
+        fCounts = csv.writer(open(outputPrefix + "positionStats.csv", "w"))
+        fCounts.writerow(["Chrom", "Gene", "Start", "End", "Length", "ProbandVariantCount", "SiblingVariantCount", "TestStat", "Pvalue", "BonPvalue", "SidakPvalue", "HolmPvalue", "FDRPvalue", "KnownGene"]) 
+        for row in np.arange(0, len(positionResults)):
+            fCounts.writerow([positionResults[row][0], positionResults[row][1], positionResults[row][2], positionResults[row][3], int(float(positionResults[row][3])) - int(float(positionResults[row][2])), positionResults[row][6], positionResults[row][7], positionResults[row][4], positionResults[row][5], positionBon[1][row], positionSidak[1][row], positionHolm[1][row], positionFDR[1][row], positionResults[row][8]])
 
     return positionResults
 
@@ -896,7 +897,7 @@ def main(argv):
     siblingVectorData = readVectorData(siblingAgeFilename)
 
 
-    ageVectorStats(probandVectorData, siblingVectorData, outputPrefix)
+    #ageVectorStats(probandVectorData, siblingVectorData, outputPrefix)
     genePositionData = geneCountStats(probandVectorData, siblingVectorData, knownGeneList + weightedGeneList, outputPrefix)
     geneCountData = binomialCounts(probandVectorData, siblingVectorData, knownGeneList + weightedGeneList, outputPrefix)
 
