@@ -180,7 +180,7 @@ def generateGeneFileSingleCategory(category):
                     geneName = infoField[5][10:]
                     for i in np.arange(0, len(result)):
                         if (s[0] not in result[i].keys()):
-                            result[i][s[0]] = [geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, 0, [], [], [], [], [], [])]
+                            result[i][s[0]] = [geneInfo(geneName, [int(s[3])], [int(s[4])], 0, 0, 0, 0, 0, [], [], [], [], [], [])]
                         else:
                             index = -1
                             for k in np.arange(0, len(result[i][s[0]])):
@@ -207,7 +207,7 @@ def generateGeneFileSingleCategory(category):
                     geneName = infoField[5][10:]
                     for i in np.arange(0, len(result)):
                         if (s[0] not in result[i].keys()):
-                            result[i][s[0]] = [geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, 0, [], [], [], [], [], [])]
+                            result[i][s[0]] = [geneInfo(geneName, [int(s[3])], [int(s[4])], 0, 0, 0, 0, 0, [], [], [], [], [], [])]
                         else:
                             index = -1
                             for k in np.arange(0, len(result[i][s[0]])):
@@ -234,7 +234,7 @@ def generateGeneFileSingleCategory(category):
                     geneName = infoField[5][10:]
                     for i in np.arange(0, len(result)):
                         if (s[0] not in result[i].keys()):
-                            result[i][s[0]] = [geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, 0, [], [], [], [], [], [])]
+                            result[i][s[0]] = [geneInfo(geneName, [int(s[3])], [int(s[4])], 0, 0, 0, 0, 0, [], [], [], [], [], [])]
                         else:
                             index = -1
                             for k in np.arange(0, len(result[i][s[0]])):
@@ -261,7 +261,7 @@ def generateGeneFileSingleCategory(category):
                     geneName = infoField[5][10:]
                     for i in np.arange(0, len(result)):
                         if (s[0] not in result[i].keys()):
-                            result[i][s[0]] = [geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, 0, [], [], [], [], [], [])]
+                            result[i][s[0]] = [geneInfo(geneName, [int(s[3])], [int(s[4])], 0, 0, 0, 0, 0, [], [], [], [], [], [])]
                         else:
                             index = -1
                             for k in np.arange(0, len(result[i][s[0]])):
@@ -288,7 +288,7 @@ def generateGeneFileSingleCategory(category):
                     geneName = infoField[5][10:]
                     for i in np.arange(0, len(result)):
                         if (s[0] not in result[i].keys()):
-                            result[i][s[0]] = [geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, 0, [], [], [], [], [], [])]
+                            result[i][s[0]] = [geneInfo(geneName, [int(s[3])], [int(s[4])], 0, 0, 0, 0, 0, [], [], [], [], [], [])]
                         else:
                             index = -1
                             for k in np.arange(0, len(result[i][s[0]])):
@@ -315,7 +315,7 @@ def generateGeneFileSingleCategory(category):
                     geneName = infoField[5][10:]
                     for i in np.arange(0, len(result)):
                         if (s[0] not in result[i].keys()):
-                            result[i][s[0]] = [geneInfo(geneName, int(s[3]), int(s[4]), 0, 0, 0, 0, 0, [], [], [], [], [], [])]
+                            result[i][s[0]] = [geneInfo(geneName, [int(s[3])], [int(s[4])], 0, 0, 0, 0, 0, [], [], [], [], [], [])]
                         else:
                             index = -1
                             for k in np.arange(0, len(result[i][s[0]])):
