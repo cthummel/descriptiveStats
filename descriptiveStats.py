@@ -16,6 +16,7 @@ class vectorAnalysis():
         self.gender = gender
         self.dataset = dataset
         self.ID = ID
+        self.width = 0
 
 def resolveMismatch(i, j, probandData, siblingData, currentChrom, minimumVariantCount):
     chromList = ["chr1", "chr10", "chr11", "chr12", "chr13", "chr14", "chr15", "chr16", "chr17", "chr18", "chr19", "chr2", "chr20", "chr21", "chr22", "chr23", "chr3", "chr4", "chr5", "chr6", "chr7", "chr8", "chr9", "chrX", "chrY"]
@@ -141,13 +142,13 @@ def binomialCounts(probandData, siblingData, knownGenes, outputPrefix):
                         siblingMatch[z] = [siblingData[j].name]
                     siblingID.add(z)
 
-                probandWidth = int(float(probandData[i].end)) - int(float(probandData[i].start))
-                siblingWidth = int(float(siblingData[i].end)) - int(float(siblingData[i].start))
+                #probandWidth = int(float(probandData[i].end)) - int(float(probandData[i].start))
+                #siblingWidth = int(float(siblingData[i].end)) - int(float(siblingData[i].start))
                 #siblingRatio = siblingData[j].count * 1.0 / (float(siblingData[i].end) - float(siblingData[i].start))
-                table = np.array([[probandData[i].count, siblingData[i].count],[probandWidth - probandData[i].count, siblingWidth - siblingData[i].count]])
+                table = np.array([[probandData[i].count, siblingData[i].count],[probandData[i].width - probandData[i].count, siblingData[i].width - siblingData[i].count]])
 
                 fisherOR, fisherPvalue = stats.fisher_exact(table)
-                #pvalue = stats.binom_test(probandData[i].count, probandWidth, siblingRatio)
+                #pvalue = stats.binom_test(probandData[i].count, probandData[i].width, siblingRatio)
 
                 found = False
                 knownGeneString = ""
@@ -239,9 +240,22 @@ def readVectorData(filename):
                 fatherAge = []
                 motherAge = []
                 varPos = []
+                starts = []
+                ends = []
+                width = 0
                 
                 count = int(float(s[7]))
                 adjCount = int(float(s[8]))
+                for x in s[2][1:-1].split(","):
+                    if x[0] == " ":
+                        starts.append(int(x[1:]))
+                    else:
+                        starts.append(int(x))
+                for x in s[3][1:-1].split(","):
+                    if x[0] == " ":
+                        ends.append(int(x[1:]))
+                    else:
+                        ends.append(int(x))
                 for x in s[4][1:-1].split(","):
                     if x.find("NA") != -1:
                         continue
@@ -286,10 +300,24 @@ def readVectorData(filename):
                         ID.append(int(x))
                     
                 #print([s[0], s[1], s[2], s[3], fatherAge, motherAge])
-                results.append(vectorAnalysis(s[0], s[1], s[2], s[3], fatherAge, motherAge, varPos, count, adjCount, gender, dataset, ID))
+                results.append(vectorAnalysis(s[0], s[1], starts, ends, fatherAge, motherAge, varPos, count, adjCount, gender, dataset, ID))
             else:
                 #print(s)
-                results.append(vectorAnalysis(s[0], s[1], s[2], s[3], [], [], [], 0, 0, gender, dataset, ID))
+                results.append(vectorAnalysis(s[0], s[1], [s[2]], [s[3]], [], [], [], 0, 0, gender, dataset, ID))
+
+
+    #Resolve Gene Widths
+    for i in results:
+        if len(i.start) == 1 and len(i.end) == 1:
+            i.width = i.end[0] - i.start[0]
+        else:
+            combined = set(range(i.start[0], i.end[0] + 1))
+            for j in np.arange(1, len(i.start)):
+                combined.update(range(i.start[j], i.end[j] + 1))
+            i.width = len(combined)
+
+
+
     return results
 
 def readKnownGeneList(filename):
@@ -801,17 +829,17 @@ def main(argv):
         elif opt in ('-o', '--output'):
             outputPrefix = arg
 
-    probandHistogramData, probandSpecialData = readHistogram(probandHistogramFilename)
-    siblingHistogramData, siblingSpecialData = readHistogram(siblingHistogramFilename)
+    #probandHistogramData, probandSpecialData = readHistogram(probandHistogramFilename)
+    #siblingHistogramData, siblingSpecialData = readHistogram(siblingHistogramFilename)
     
-    probandCountData = readCount(probandCountFilename)
-    siblingCountData = readCount(siblingCountFilename)
+    #probandCountData = readCount(probandCountFilename)
+    #siblingCountData = readCount(siblingCountFilename)
 
     #print(histogramData)
     #print(countsData)
 
-    probandCountData = [x for x in probandCountData if x not in [2000000, 1000000]]
-    siblingCountData = [x for x in siblingCountData if x not in [2000000, 1000000]]
+    #probandCountData = [x for x in probandCountData if x not in [2000000, 1000000]]
+    #siblingCountData = [x for x in siblingCountData if x not in [2000000, 1000000]]
 
     #probandRemovedCount = 0
     # for x in probandCountData:
@@ -888,8 +916,8 @@ def main(argv):
 
     
     #KS Test for Megabase Paired data
-    probandMegaBaseData = readMegaBase(probandMegaFilename)
-    siblingMegaBaseData = readMegaBase(siblingMegaFilename)
+    #probandMegaBaseData = readMegaBase(probandMegaFilename)
+    #siblingMegaBaseData = readMegaBase(siblingMegaFilename)
 
     #probandVectorData = readVectorData(probandMegaFilename[0:-15] + ".geneAgeVector.csv")
     #siblingVectorData = readVectorData(siblingMegaFilename[0:-15] + ".geneAgeVector.csv")
@@ -909,8 +937,8 @@ def main(argv):
 
 
 
-    binStats(probandMegaBaseData, siblingMegaBaseData, outputPrefix)
-    binStatsGene(probandMegaBaseData, siblingMegaBaseData, outputPrefix)
+    #binStats(probandMegaBaseData, siblingMegaBaseData, outputPrefix)
+    #binStatsGene(probandMegaBaseData, siblingMegaBaseData, outputPrefix)
     #geneCountStats(probandMegaBaseData, siblingMegaBaseData, outputPrefix)
 
     if len(knownGeneList) != 0:
