@@ -247,57 +247,39 @@ def readVectorData(filename):
                 count = int(float(s[7]))
                 adjCount = int(float(s[8]))
                 for x in s[2][1:-1].split(","):
-                    if x[0] == " ":
-                        starts.append(int(x[1:]))
-                    else:
-                        starts.append(int(x))
+                    starts.append(int(x.strip()))
                 for x in s[3][1:-1].split(","):
-                    if x[0] == " ":
-                        ends.append(int(x[1:]))
-                    else:
-                        ends.append(int(x))
+                    ends.append(int(x.strip()))
                 for x in s[4][1:-1].split(","):
                     if x.find("NA") != -1:
                         continue
-                    if x[0] == " ":
-                        fatherAge.append(float(x[1:]))
                     else:
-                        fatherAge.append(float(x))
+                        fatherAge.append(float(x.strip()))
                 for x in s[5][1:-1].split(","):
                     if x.find("NA") != -1:
                         continue
-                    if x[0] == " ":
-                        motherAge.append(float(x[1:]))
                     else:
-                        motherAge.append(float(x))
+                        motherAge.append(float(x.strip()))
                 for x in s[6][1:-1].split(","):
                     if x.find("NA") != -1:
                         continue
-                    if x[0] == " ":
-                        varPos.append(float(x[1:]))
                     else:
-                        varPos.append(float(x))
+                        varPos.append(float(x.strip()))
                 for x in s[9][1:-1].split(","):
                     if x == "":
                         continue
-                    if x[0] == " ":
-                        gender.append(x[1:])
                     else:
-                        gender.append(x)
+                        gender.append(x.strip())
                 for x in s[10][1:-1].split(","):
                     if x == "":
                         continue
-                    if x[0] == " ":
-                        dataset.append(x[1:])
                     else:
-                        dataset.append(x)
+                        dataset.append(x.strip())
                 for x in s[11][1:-1].split(","):
                     if x == "":
                         continue
-                    if x[0] == " ":
-                        ID.append(int(x[1:]))
                     else:
-                        ID.append(int(x))
+                        ID.append(int(x.strip()))
                     
                 #print([s[0], s[1], s[2], s[3], fatherAge, motherAge])
                 results.append(vectorAnalysis(s[0], s[1], starts, ends, fatherAge, motherAge, varPos, count, adjCount, gender, dataset, ID))
