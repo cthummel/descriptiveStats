@@ -235,21 +235,23 @@ def readVectorData(filename):
             gender = []
             dataset = []
             ID = []
+            starts = []
+            ends = []
+            for x in s[2][1:-1].split(","):
+                starts.append(int(x.strip()))
+            for x in s[3][1:-1].split(","):
+                ends.append(int(x.strip()))
+
             if s[4] != '[]' and s[5] != '[]':
                 #print(s, s[4][1:-1], s[4][1:-1].split(","))
                 fatherAge = []
                 motherAge = []
                 varPos = []
-                starts = []
-                ends = []
+                
                 width = 0
                 
                 count = int(float(s[7]))
                 adjCount = int(float(s[8]))
-                for x in s[2][1:-1].split(","):
-                    starts.append(int(x.strip()))
-                for x in s[3][1:-1].split(","):
-                    ends.append(int(x.strip()))
                 for x in s[4][1:-1].split(","):
                     if x.find("NA") != -1:
                         continue
@@ -285,7 +287,7 @@ def readVectorData(filename):
                 results.append(vectorAnalysis(s[0], s[1], starts, ends, fatherAge, motherAge, varPos, count, adjCount, gender, dataset, ID))
             else:
                 #print(s)
-                results.append(vectorAnalysis(s[0], s[1], [s[2]], [s[3]], [], [], [], 0, 0, gender, dataset, ID))
+                results.append(vectorAnalysis(s[0], s[1], starts, ends, [], [], [], 0, 0, gender, dataset, ID))
 
 
     #Resolve Gene Widths
