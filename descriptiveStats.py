@@ -192,7 +192,7 @@ def binomialCounts(probandData, siblingData, knownGenes, outputPrefix):
         fCounts = csv.writer(open(outputPrefix + "countStats.csv", "w"))
         fCounts.writerow(["Chrom", "Gene", "Start", "End", "Length", "ProbandVariantCount", "SiblingVariantCount", "OddsRatio", "Pvalue", "BonPvalue", "SidakPvalue", "HolmPvalue", "FDRPvalue", "KnownGene"])
         for row in np.arange(0, len(countResults)):
-            fCounts.writerow([countResults[row][0], countResults[row][1], countResults[row][2], countResults[row][3], countResults[row][4], countResults[row][7], countResults[row][8], countResults[row][5], countResults[row][6], countBon[1][row], countSidak[1][row], countHolm[1][row], countFDR[1][row], countResults[row][9]])
+            fCounts.writerow([countResults[row][0], countResults[row][1], "|".join(countResults[row][2]), "|".join(countResults[row][3]), countResults[row][4], countResults[row][7], countResults[row][8], countResults[row][5], countResults[row][6], countBon[1][row], countSidak[1][row], countHolm[1][row], countFDR[1][row], countResults[row][9]])
     else:
         print("Error: No Pvalues Generated.", file=sys.stderr)
 
@@ -459,7 +459,7 @@ def geneCountStats(probandData, siblingData, knownGenes, outputPrefix):
         fCounts = csv.writer(open(outputPrefix + "positionStats.csv", "w"))
         fCounts.writerow(["Chrom", "Gene", "Start", "End", "Length", "ProbandVariantCount", "SiblingVariantCount", "TestStat", "Pvalue", "BonPvalue", "SidakPvalue", "HolmPvalue", "FDRPvalue", "KnownGene"]) 
         for row in np.arange(0, len(positionResults)):
-            fCounts.writerow([positionResults[row][0], positionResults[row][1], positionResults[row][2], positionResults[row][3], positionResults[row][4], positionResults[row][7], positionResults[row][8], positionResults[row][5], positionResults[row][6], positionBon[1][row], positionSidak[1][row], positionHolm[1][row], positionFDR[1][row], positionResults[row][9]])
+            fCounts.writerow([positionResults[row][0], positionResults[row][1], "|".join(positionResults[row][2]), "|".join(positionResults[row][3]), positionResults[row][4], positionResults[row][7], positionResults[row][8], positionResults[row][5], positionResults[row][6], positionBon[1][row], positionSidak[1][row], positionHolm[1][row], positionFDR[1][row], positionResults[row][9]])
 
     return positionResults
 
