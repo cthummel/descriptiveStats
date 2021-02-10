@@ -609,20 +609,24 @@ def binStatsGene(probandData, siblingData, outputPrefix):
     # print("Sibling", geneNormTestStatsSibling, geneNormTestPvaluesSibling)
     
 def knownGeneComparison(geneCountData, genePositionData, filenames, weightedGeneList, unrelatedGeneList, outputPrefix):
+    countSize = 0
+    posSize = 0
     unrelatedGeneCountPercent = []
     unrelatedGenePosPercent = []
+    sortedCount = []
+    sortedPos = []
+    
     if len(geneCountData) > 0:
         sortedCount = np.array(geneCountData)
         sortedCount = sortedCount[sortedCount[:,5].argsort()]
+        countSize = len(sortedCount)
     if len(genePositionData) > 0:
         sortedPos = np.array(genePositionData)
         sortedPos = sortedPos[sortedPos[:,5].argsort()]
+        posSize = len(sortedPos)
 
     #sortedDad = np.array(geneFatherData)
-    #sortedDad = sortedDad[sortedDad[:,5].argsort()]
-
-    countSize = len(sortedCount)
-    posSize = len(sortedPos)
+    #sortedDad = sortedDad[sortedDad[:,5].argsort()]  
     #dadSize = len(sortedDad)
 
     wCounts = csv.writer(open(outputPrefix + "countKnownGene.csv", "w"))
@@ -633,7 +637,7 @@ def knownGeneComparison(geneCountData, genePositionData, filenames, weightedGene
 
     # wDad = csv.writer(open(outputPrefix + "fatherKnownGene.csv", "w"))
     # wDad.writerow(["MeanRank", "TotalRank", "PercentageRank", "pvalue", "genelist"])
-    if len(geneCountData) == 0 and len(genePositionData) == 0:
+    if countSize == 0 and posSize == 0:
         return
 
     for x in unrelatedGeneList:
