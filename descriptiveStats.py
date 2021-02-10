@@ -86,11 +86,11 @@ def meanRank(geneInfo, currentList):
     
     return np.average(ranks, weights=weights)
 
-def basicStats(outputPrefix):
+# def basicStats(outputPrefix):
 
     
-    fCounts = csv.writer(open(outputPrefix + "basicStats.csv", "w"))
-    fCounts.writerow(["column title here"])
+#     fCounts = csv.writer(open(outputPrefix + "basicStats.csv", "w"))
+#     fCounts.writerow(["column title here"])
 
 
 
@@ -407,6 +407,10 @@ def geneCountStats(probandData, siblingData, knownGenes, outputPrefix):
     positionResults = []
     positionPvalues = []
     positionTestStats = []
+    probandID = set()
+    siblingID = set()
+    probandMatch = dict()
+    siblingMatch = dict()
     geneFilenames = knownGenes
     knownGeneList = []
     currentChrom = probandData[0].chrom
@@ -426,6 +430,22 @@ def geneCountStats(probandData, siblingData, knownGenes, outputPrefix):
             if probandData[i].count < minimumVariantCount or siblingData[j].count < minimumVariantCount:
                 skip = True
             else:
+                #Matching IDs to keep track of people subsetted out of the data set
+                for y in probandData[i].ID:
+                    if y in probandMatch.keys():
+                        if not probandData[i].name in probandMatch[y]:
+                            probandMatch[y].append(probandData[i].name)
+                    else:
+                        probandMatch[y] = [probandData[i].name]
+                    probandID.add(y)
+                for z in siblingData[j].ID:
+                    if z in siblingMatch.keys():
+                        if not siblingData[j].name in siblingMatch[z]:
+                            siblingMatch[z].append(siblingData[j].name)
+                    else:
+                        siblingMatch[z] = [siblingData[j].name]
+                    siblingID.add(z)
+
                 testStat, pvalue = stats.ks_2samp(probandData[i].variantPosition, siblingData[j].variantPosition)
                 found = False
                 knownGeneString = ""
@@ -591,12 +611,14 @@ def binStatsGene(probandData, siblingData, outputPrefix):
 def knownGeneComparison(geneCountData, genePositionData, filenames, weightedGeneList, unrelatedGeneList, outputPrefix):
     unrelatedGeneCountPercent = []
     unrelatedGenePosPercent = []
-    sortedCount = np.array(geneCountData)
-    sortedPos = np.array(genePositionData)
-    #sortedDad = np.array(geneFatherData)
+    if len(geneCountData) > 0:
+        sortedCount = np.array(geneCountData)
+        sortedCount = sortedCount[sortedCount[:,5].argsort()]
+    if len(genePositionData) > 0:
+        sortedPos = np.array(genePositionData)
+        sortedPos = sortedPos[sortedPos[:,5].argsort()]
 
-    sortedCount = sortedCount[sortedCount[:,5].argsort()]
-    sortedPos = sortedPos[sortedPos[:,5].argsort()]
+    #sortedDad = np.array(geneFatherData)
     #sortedDad = sortedDad[sortedDad[:,5].argsort()]
 
     countSize = len(sortedCount)
@@ -611,7 +633,9 @@ def knownGeneComparison(geneCountData, genePositionData, filenames, weightedGene
 
     # wDad = csv.writer(open(outputPrefix + "fatherKnownGene.csv", "w"))
     # wDad.writerow(["MeanRank", "TotalRank", "PercentageRank", "pvalue", "genelist"])
-    
+    if len(geneCountData) == 0 and len(genePositionData) == 0:
+        return
+
     for x in unrelatedGeneList:
         countMean = 0
         posMean = 0
@@ -622,40 +646,42 @@ def knownGeneComparison(geneCountData, genePositionData, filenames, weightedGene
         compare = readKnownGeneList(x)
 
         for i in np.arange(0, len(compare)):
-            for j in np.arange(0, len(sortedCount)):
-                if sortedCount[j][1] == compare[i]:
-                    ranks[0].append(j)
-                    weights[0].append(1)
-                    matchedCount += 1
-                    break
-
-            for j in np.arange(0, len(sortedPos)):
-                if sortedPos[j][1] == compare[i]:
-                    ranks[1].append(j)
-                    weights[1].append(1)
-                    matchedPos += 1
-                    break
+            if countSize > 0:
+                for j in np.arange(0, len(sortedCount)):
+                    if sortedCount[j][1] == compare[i]:
+                        ranks[0].append(j)
+                        weights[0].append(1)
+                        matchedCount += 1
+                        break
+            if posSize > 0:
+                for j in np.arange(0, len(sortedPos)):
+                    if sortedPos[j][1] == compare[i]:
+                        ranks[1].append(j)
+                        weights[1].append(1)
+                        matchedPos += 1
+                        break
 
         if len(ranks[0]) != 0:
             countMean = np.mean(ranks[0])
         if len(ranks[1]) != 0:
             posMean = np.mean(ranks[1])
 
-        countPvalue = stats.binom_test(countMean, n=len(sortedCount), p=.50, alternative='less')
-        posPvalue = stats.binom_test(posMean, n=len(sortedPos), p=.50, alternative='less')
-        
+        if countSize > 0:
+            countPvalue = stats.binom_test(countMean, n=len(sortedCount), p=.50, alternative='less')
+            print("Average Rank of Known Genes for Count Data in", x, ":", countMean, "/", countSize, "=", countMean/countSize, "rank with pvalue", countPvalue)
+            unrelatedGeneCountPercent.append(countMean / countSize)
+            wCounts.writerow([countMean, countSize, countMean/countSize, countPvalue, "NA", x.split("/")[-1], len(compare), matchedCount / len(compare)])
 
-        print("Average Rank of Known Genes for Count Data in", x, ":", countMean, "/", countSize, "=", countMean/countSize, "rank with pvalue", countPvalue)
-        print("Average Rank of Known Genes for Position Data in ", x, ":", posMean, "/", posSize, "=", posMean/posSize, "rank with pvalue", posPvalue)
+        if posSize > 0:
+            posPvalue = stats.binom_test(posMean, n=len(sortedPos), p=.50, alternative='less')
+            print("Average Rank of Known Genes for Position Data in ", x, ":", posMean, "/", posSize, "=", posMean/posSize, "rank with pvalue", posPvalue)
+            unrelatedGenePosPercent.append(posMean / posSize)
+            wPos.writerow([posMean, posSize, posMean/posSize, posPvalue, "NA", x.split("/")[-1], len(compare), matchedPos / len(compare)])
 
-        unrelatedGeneCountPercent.append(countMean / countSize)
-        unrelatedGenePosPercent.append(posMean / posSize)
-
-        wCounts.writerow([countMean, countSize, countMean/countSize, countPvalue, "NA", x.split("/")[-1], len(compare), matchedCount / len(compare)])
-        wPos.writerow([posMean, posSize, posMean/posSize, posPvalue, "NA", x.split("/")[-1], len(compare), matchedPos / len(compare)])
-
-    bestUnrelatedGeneCountPercent = min(unrelatedGeneCountPercent)
-    bestUnrelatedGenePosPercent = min(unrelatedGenePosPercent)
+    if len(geneCountData) > 0:
+        bestUnrelatedGeneCountPercent = min(unrelatedGeneCountPercent)
+    if len(genePositionData) > 0:
+        bestUnrelatedGenePosPercent = min(unrelatedGenePosPercent)
 
     for x in filenames:
         countMean = 0
@@ -666,17 +692,18 @@ def knownGeneComparison(geneCountData, genePositionData, filenames, weightedGene
         compare = readKnownGeneList(x)
 
         for i in np.arange(0, len(compare)):
-            for j in np.arange(0, len(sortedCount)):
-                if sortedCount[j][1] == compare[i]:
-                    ranks[0].append(j)
-                    matchedCount += 1
-                    break
-
-            for j in np.arange(0, len(sortedPos)):
-                if sortedPos[j][1] == compare[i]:
-                    ranks[1].append(j)
-                    matchedPos += 1
-                    break
+            if countSize > 0:
+                for j in np.arange(0, len(sortedCount)):
+                    if sortedCount[j][1] == compare[i]:
+                        ranks[0].append(j)
+                        matchedCount += 1
+                        break
+            if posSize > 0:
+                for j in np.arange(0, len(sortedPos)):
+                    if sortedPos[j][1] == compare[i]:
+                        ranks[1].append(j)
+                        matchedPos += 1
+                        break
                     
 
         if len(ranks[0]) != 0:
@@ -684,17 +711,18 @@ def knownGeneComparison(geneCountData, genePositionData, filenames, weightedGene
         if len(ranks[1]) != 0:
             posMean = np.mean(ranks[1])
 
-        countPvalue = stats.binom_test(countMean, n=len(sortedCount), p=.50, alternative='less')
-        posPvalue = stats.binom_test(posMean, n=len(sortedPos), p=.50, alternative='less')
-        adjCountPvalue = stats.binom_test(countMean, n=len(sortedCount), p=bestUnrelatedGeneCountPercent, alternative='less')
-        adjPosPvalue = stats.binom_test(posMean, n=len(sortedPos), p=bestUnrelatedGenePosPercent, alternative='less')
 
-        print("Average Rank of Known Genes for Count Data in", x, ":", countMean, "/", countSize, "=", countMean/countSize, "rank with pvalue", countPvalue)
-        print("Average Rank of Known Genes for Position Data in ", x, ":", posMean, "/", posSize, "=", posMean/posSize, "rank with pvalue", posPvalue)
-
-
-        wCounts.writerow([countMean, countSize, countMean/countSize, countPvalue, adjCountPvalue, x.split("/")[-1], len(compare), matchedCount / len(compare)])
-        wPos.writerow([posMean, posSize, posMean/posSize, posPvalue, adjPosPvalue, x.split("/")[-1], len(compare), matchedPos / len(compare)])
+        if countSize > 0:
+            countPvalue = stats.binom_test(countMean, n=len(sortedCount), p=.50, alternative='less')
+            adjCountPvalue = stats.binom_test(countMean, n=len(sortedCount), p=bestUnrelatedGeneCountPercent, alternative='less')
+            print("Average Rank of Known Genes for Count Data in", x, ":", countMean, "/", countSize, "=", countMean/countSize, "rank with pvalue", countPvalue)
+            wCounts.writerow([countMean, countSize, countMean/countSize, countPvalue, adjCountPvalue, x.split("/")[-1], len(compare), matchedCount / len(compare)])
+        
+        if posSize > 0:
+            posPvalue = stats.binom_test(posMean, n=len(sortedPos), p=.50, alternative='less')     
+            adjPosPvalue = stats.binom_test(posMean, n=len(sortedPos), p=bestUnrelatedGenePosPercent, alternative='less')  
+            print("Average Rank of Known Genes for Position Data in ", x, ":", posMean, "/", posSize, "=", posMean/posSize, "rank with pvalue", posPvalue)
+            wPos.writerow([posMean, posSize, posMean/posSize, posPvalue, adjPosPvalue, x.split("/")[-1], len(compare), matchedPos / len(compare)])
 
     for x in weightedGeneList:
         countMean = 0
@@ -706,38 +734,39 @@ def knownGeneComparison(geneCountData, genePositionData, filenames, weightedGene
         compare, geneWeights = readKnownGeneListWeights(x)
 
         for i in np.arange(0, len(compare)):
-            for j in np.arange(0, len(sortedCount)):
-                if sortedCount[j][1] == compare[i]:
-                    ranks[0].append(j)
-                    weights[0].append(geneWeights[i])
-                    matchedCount += 1
-                    break
+            if countSize > 0:
+                for j in np.arange(0, len(sortedCount)):
+                    if sortedCount[j][1] == compare[i]:
+                        ranks[0].append(j)
+                        weights[0].append(geneWeights[i])
+                        matchedCount += 1
+                        break
 
-            for j in np.arange(0, len(sortedPos)):
-                if sortedPos[j][1] == compare[i]:
-                    ranks[1].append(j)
-                    weights[1].append(geneWeights[i])
-                    matchedPos += 1
-                    break
+            if posSize > 0:
+                for j in np.arange(0, len(sortedPos)):
+                    if sortedPos[j][1] == compare[i]:
+                        ranks[1].append(j)
+                        weights[1].append(geneWeights[i])
+                        matchedPos += 1
+                        break
 
         if len(ranks[0]) != 0:
             countMean = np.average(ranks[0], None, weights[0])
         if len(ranks[1]) != 0:
             posMean = np.average(ranks[1], None, weights[1])
 
-        countPvalue = stats.binom_test(countMean, n=len(sortedCount), p=.50, alternative='less')
-        posPvalue = stats.binom_test(posMean, n=len(sortedPos), p=.50, alternative='less')
-        adjCountPvalue = stats.binom_test(countMean, n=len(sortedCount), p=bestUnrelatedGeneCountPercent, alternative='less')
-        adjPosPvalue = stats.binom_test(posMean, n=len(sortedPos), p=bestUnrelatedGenePosPercent, alternative='less')
 
-        #if(x.split("/")[-1] == "gene_score_all.list"):
-        #    listLengthTest(sortedCount, compare, geneWeights, countMean, outputPrefix)
-
-        print("Average Rank of Known Genes for Count Data in", x, ":", countMean, "/", countSize, "=", countMean/countSize, "rank with pvalue", countPvalue)
-        print("Average Rank of Known Genes for Position Data in ", x, ":", posMean, "/", posSize, "=", posMean/posSize, "rank with pvalue", posPvalue)
-
-        wCounts.writerow([countMean, countSize, countMean/countSize, countPvalue, adjCountPvalue, "[W]" + x.split("/")[-1], len(compare), matchedCount / len(compare)])
-        wPos.writerow([posMean, posSize, posMean/posSize, posPvalue, adjPosPvalue, "[W]" + x.split("/")[-1], len(compare), matchedPos / len(compare)])
+        if countSize > 0:
+            countPvalue = stats.binom_test(countMean, n=len(sortedCount), p=.50, alternative='less')
+            adjCountPvalue = stats.binom_test(countMean, n=len(sortedCount), p=bestUnrelatedGeneCountPercent, alternative='less')
+            print("Average Rank of Known Genes for Count Data in", x, ":", countMean, "/", countSize, "=", countMean/countSize, "rank with pvalue", countPvalue)
+            wCounts.writerow([countMean, countSize, countMean/countSize, countPvalue, adjCountPvalue, "[W]" + x.split("/")[-1], len(compare), matchedCount / len(compare)])
+        
+        if posSize > 0:
+            posPvalue = stats.binom_test(posMean, n=len(sortedPos), p=.50, alternative='less')
+            adjPosPvalue = stats.binom_test(posMean, n=len(sortedPos), p=bestUnrelatedGenePosPercent, alternative='less')
+            print("Average Rank of Known Genes for Position Data in ", x, ":", posMean, "/", posSize, "=", posMean/posSize, "rank with pvalue", posPvalue)
+            wPos.writerow([posMean, posSize, posMean/posSize, posPvalue, adjPosPvalue, "[W]" + x.split("/")[-1], len(compare), matchedPos / len(compare)])
 
 
 
