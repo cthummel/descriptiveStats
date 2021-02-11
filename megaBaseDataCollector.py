@@ -448,6 +448,7 @@ def geneCountMergeFamily(file, outputPrefix, familyData, geneCategory):
             if(filename[-13:] == ".FINAL.vcf.gz"):
                 fileCount += 1
                 siblingsPaired = True
+                variantMatched = False
                 variantDataSets = [0,0,0]
                 totalVariantCount = 0
                 with gzip.open(root + filename, mode='rt') as f:
@@ -457,7 +458,6 @@ def geneCountMergeFamily(file, outputPrefix, familyData, geneCategory):
                     currentDataSet = 0
                     currentFatherAge = 0
                     currentMotherAge = 0
-                    variantMatched = False
                     gender = 4
                     full = 6
                     for line in f:
@@ -562,25 +562,6 @@ def geneCountMergeFamily(file, outputPrefix, familyData, geneCategory):
                         for gene in result[currentDataSet][currentChrom]:
                             for index in np.arange(0, len(gene.transcriptStart)):
                                 if gene.transcriptStart[index] <= int(s[1]) and gene.transcriptEnd[index] >= int(s[1]):
-                                    if not variantMatched:
-                                        variantMatched = True
-                                        if probandDataSet:
-                                            if gender == 4:
-                                                maleCount += 1
-                                            else:
-                                                femaleCount += 1
-                                            probandPeopleCount[currentDataSet] += 1
-                                            probandPeopleCount[gender] += 1
-                                            probandPeopleCount[full] += 1
-                                        else:
-                                            if gender == 4:
-                                                maleCount += 1
-                                            else:
-                                                femaleCount += 1
-                                            siblingPeopleCount[currentDataSet] += 1
-                                            siblingPeopleCount[gender] += 1
-                                            siblingPeopleCount[full] += 1
-
                                     gene.count += variantCount
                                     gene.adjCount += variantCount
                                     gene.insertion += insert
@@ -613,25 +594,6 @@ def geneCountMergeFamily(file, outputPrefix, familyData, geneCategory):
                         for gene in result[gender][currentChrom]:
                             for index in np.arange(0, len(gene.transcriptStart)):
                                 if gene.transcriptStart[index] <= int(s[1]) and gene.transcriptEnd[index] >= int(s[1]):
-                                    if not variantMatched:
-                                        variantMatched = True
-                                        if probandDataSet:
-                                            if gender == 4:
-                                                maleCount += 1
-                                            else:
-                                                femaleCount += 1
-                                            probandPeopleCount[currentDataSet] += 1
-                                            probandPeopleCount[gender] += 1
-                                            probandPeopleCount[full] += 1
-                                        else:
-                                            if gender == 4:
-                                                maleCount += 1
-                                            else:
-                                                femaleCount += 1
-                                            siblingPeopleCount[currentDataSet] += 1
-                                            siblingPeopleCount[gender] += 1
-                                            siblingPeopleCount[full] += 1
-
                                     gene.count += variantCount
                                     gene.insertion += insert
                                     gene.deletion += Del
@@ -662,6 +624,7 @@ def geneCountMergeFamily(file, outputPrefix, familyData, geneCategory):
                         for gene in result[full][currentChrom]:
                             for index in np.arange(0, len(gene.transcriptStart)):
                                 if gene.transcriptStart[index] <= int(s[1]) and gene.transcriptEnd[index] >= int(s[1]):
+                                    print("Match", fileCount, gene.name)
                                     if not variantMatched:
                                         variantMatched = True
                                         if probandDataSet:
@@ -762,10 +725,6 @@ def geneCountMergeFamily(file, outputPrefix, familyData, geneCategory):
         for key in sorted(x.keys()):
             for val in x[key]:
                 fAgeCounts.writerow([key, val.name, val.transcriptStart, val.transcriptEnd, val.fatherAge, val.motherAge, val.variantPosition, val.count, val.adjCount, val.genderList, val.dataset, val.ID])
-                # if outputIndex < 2:
-                #     maleAgeCounts.writerow([key, val.name, val.transcriptStart, val.transcriptEnd, val.fatherAge, val.motherAge, val.variantPosition])
-                # else:
-                #     femaleAgeCounts.writerow([key, val.name, val.transcriptStart, val.transcriptEnd, val.fatherAge, val.motherAge, val.variantPosition])
 
                 if val.fatherAge == [] or val.motherAge == []:
                     wCounts.writerow([key, val.transcriptStart, val.transcriptEnd, val.count, val.insertion, val.deletion, val.snv, "NA", "NA", val.name, val.genderList, val.dataset, val.ID])
