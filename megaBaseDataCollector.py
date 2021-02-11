@@ -694,11 +694,11 @@ def geneCountMergeFamily(file, outputPrefix, familyData, geneCategory):
     # femaleAgeCounts.writerow(["Chrom", "Gene", "Start", "End", "FatherAge", "MotherAge", "VariantPosition"])
 
     #Fix lopsided sample count
-    if maleCount > femaleCount:
+    if maleCount > femaleCount and femaleCount > 0:
         for key in result[5].keys():
             for val in result[5][key]:
                 val.adjCount = val.count * 1.0 * maleCount / femaleCount
-    elif femaleCount > maleCount:
+    elif femaleCount > maleCount and maleCount > 0:
         for key in result[4].keys():
             for val in result[4][key]:
                 val.adjCount = val.count * 1.0 * femaleCount / maleCount
