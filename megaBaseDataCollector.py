@@ -333,14 +333,15 @@ def generateGeneFileSingleCategory(category):
     for dataset in result:
         for chrom in dataset.keys():
             for gene in dataset[chrom]:
-                for i in gene.transcriptStart:
-                    if len(i.start) == 1 and len(i.end) == 1:
-                        i.width = i.end[0] - i.start[0]
-                    else:
-                        combined = set(range(i.start[0], i.end[0] + 1))
-                        for j in np.arange(1, len(i.start)):
-                            combined.update(range(i.start[j], i.end[j] + 1))
-                        i.width = len(combined)
+                if len(gene.transcriptStart) == 1 and len(gene.transcriptEnd) == 1:
+                        gene.width = gene.transcriptEnd[0] - gene.transcriptStart[0]
+                else:
+                    combined = set(range(gene.transcriptStart[0], gene.transcriptEnd[0] + 1))
+                    for j in np.arange(1, len(gene.transcriptStart)):
+                        combined.update(range(gene.transcriptStart[j], gene.transcriptEnd[j] + 1))
+                    gene.width = len(combined)
+                #for i in gene.transcriptStart:
+                    
 
     return result, outputName
 
