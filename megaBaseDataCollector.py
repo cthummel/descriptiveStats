@@ -330,12 +330,14 @@ def generateGeneFileSingleCategory(category):
                                 result[i][s[0]][index].transcriptEnd.append(int(s[4]))
 
     #Resolve Gene Widths
+    print("about to adjust widths.")
     for dataset in result:
         for chrom in dataset.keys():
             for gene in dataset[chrom]:
                 if len(gene.transcriptStart) == 1 and len(gene.transcriptEnd) == 1:
                         gene.width = gene.transcriptEnd[0] - gene.transcriptStart[0]
                 else:
+                    print(gene.name, gene.transcriptStart, gene.transcriptEnd)
                     combined = set(range(gene.transcriptStart[0], gene.transcriptEnd[0] + 1))
                     for j in np.arange(1, len(gene.transcriptStart)):
                         combined.update(range(gene.transcriptStart[j], gene.transcriptEnd[j] + 1))
