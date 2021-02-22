@@ -3,7 +3,7 @@ from scipy import stats
 import sys, getopt, math, binFinder, random, csv, statsmodels.stats.multitest
 
 class vectorAnalysis():
-    def __init__(self, chrom, name, start, end, fatherAge, motherAge, varPos, count, adjCount, gender, dataset, ID):
+    def __init__(self, chrom, name, start, end, width, fatherAge, motherAge, varPos, count, adjCount, gender, dataset, ID):
         self.start = start
         self.end = end
         self.chrom = chrom
@@ -16,7 +16,7 @@ class vectorAnalysis():
         self.gender = gender
         self.dataset = dataset
         self.ID = ID
-        self.width = 0
+        self.width = width
 
 def resolveMismatch(i, j, probandData, siblingData, currentChrom, minimumVariantCount):
     chromList = ["chr1", "chr10", "chr11", "chr12", "chr13", "chr14", "chr15", "chr16", "chr17", "chr18", "chr19", "chr2", "chr20", "chr21", "chr22", "chr23", "chr3", "chr4", "chr5", "chr6", "chr7", "chr8", "chr9", "chrX", "chrY"]
@@ -232,6 +232,7 @@ def readVectorData(filename):
         for line in f:
             s = line.strip().split("\t")
 
+            width = int(s[4])
             gender = []
             dataset = []
             ID = []
@@ -242,63 +243,60 @@ def readVectorData(filename):
             for x in s[3][1:-1].split(","):
                 ends.append(int(x.strip()))
 
-            if s[4] != '[]' and s[5] != '[]':
+            if s[5] != '[]' and s[6] != '[]':
                 #print(s, s[4][1:-1], s[4][1:-1].split(","))
                 fatherAge = []
                 motherAge = []
                 varPos = []
-                
-                width = 0
-                
-                count = int(float(s[7]))
-                adjCount = int(float(s[8]))
-                for x in s[4][1:-1].split(","):
+                count = int(float(s[8]))
+                adjCount = int(float(s[9]))
+                for x in s[5].split("|"):
                     if x.find("NA") != -1:
                         continue
                     else:
                         fatherAge.append(float(x.strip()))
-                for x in s[5][1:-1].split(","):
+                for x in s[6].split("|"):
                     if x.find("NA") != -1:
                         continue
                     else:
                         motherAge.append(float(x.strip()))
-                for x in s[6][1:-1].split(","):
+                for x in s[7][1:-1].split(","):
                     if x.find("NA") != -1:
                         continue
                     else:
                         varPos.append(float(x.strip()))
-                for x in s[9][1:-1].split(","):
-                    if x == "":
-                        continue
-                    else:
-                        gender.append(x.strip())
                 for x in s[10][1:-1].split(","):
                     if x == "":
                         continue
                     else:
-                        dataset.append(x.strip())
+                        gender.append(x.strip())
                 for x in s[11][1:-1].split(","):
+                    if x == "":
+                        continue
+                    else:
+                        dataset.append(x.strip())
+                for x in s[12][1:-1].split(","):
                     if x == "":
                         continue
                     else:
                         ID.append(int(x.strip()))
                     
                 #print([s[0], s[1], s[2], s[3], fatherAge, motherAge])
-                results.append(vectorAnalysis(s[0], s[1], starts, ends, fatherAge, motherAge, varPos, count, adjCount, gender, dataset, ID))
+                results.append(vectorAnalysis(s[0], s[1], starts, ends, width, fatherAge, motherAge, varPos, count, adjCount, gender, dataset, ID))
             else:
                 #print(s)
-                results.append(vectorAnalysis(s[0], s[1], starts, ends, [], [], [], 0, 0, gender, dataset, ID))
+                results.append(vectorAnalysis(s[0], s[1], starts, ends, width, [], [], [], 0, 0, gender, dataset, ID))
 
 
-    #Resolve Gene Widths
-    for i in results:
-        if len(i.start) == 1 and len(i.end) == 1:
-            i.width = i.end[0] - i.start[0]
-        else:
-            combined = set(range(i.start[0], i.end[0] + 1))
-            for j in np.arange(1, len(i.start)):
-                combined.update(range(i.start[j], i.end[j] + 1))
-            i.width = len(combined)
+    # #Resolve Gene Widths
+    # for i in results:
+    #     if len(i.start) == 1 and len(i.end) == 1:
+    #         i.width = i.end[0] - i.start[0]
+    #     else:
+    #         combined = set(range(i.start[0], i.end[0] + 1))
+    #         for j in np.arange(1, len(i.start)):
+    #             combined.update(range(i.start[j], i.end[j] + 1))
+    #         i.width = len(combined)
 
 
 

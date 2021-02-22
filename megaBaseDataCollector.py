@@ -330,19 +330,20 @@ def generateGeneFileSingleCategory(category):
                                 result[i][s[0]][index].transcriptEnd.append(int(s[4]))
 
     #Resolve Gene Widths
-    print("about to adjust widths.")
     for dataset in result:
         for chrom in dataset.keys():
             for gene in dataset[chrom]:
                 if len(gene.transcriptStart) == 1 and len(gene.transcriptEnd) == 1:
                         gene.width = gene.transcriptEnd[0] - gene.transcriptStart[0]
                 else:
-                    print(gene.name, gene.transcriptStart, gene.transcriptEnd)
+                    
                     combined = set(range(gene.transcriptStart[0], gene.transcriptEnd[0] + 1))
                     for j in np.arange(1, len(gene.transcriptStart)):
                         combined.update(range(gene.transcriptStart[j], gene.transcriptEnd[j] + 1))
                     gene.width = len(combined)
                 #for i in gene.transcriptStart:
+                print(gene.name, gene.transcriptStart, gene.transcriptEnd, gene.width)
+
                     
 
     return result, outputName
@@ -722,11 +723,11 @@ def geneCountMergeFamily(file, outputPrefix, familyData, geneCategory):
     for x in result:
         wCounts = csv.writer(open(outputPrefix + typePrefix[outputIndex] + ".geneCounts.csv", "w"))
         fAgeCounts = csv.writer(open(outputPrefix + typePrefix[outputIndex] + ".geneAgeVector.csv", "w"), delimiter="\t")
-        fAgeCounts.writerow(["Chrom", "Gene", "Start", "End", "FatherAge", "MotherAge", "VariantPosition", "Count", "AdjustCount", "Gender", "DataSet", "ID"])
+        fAgeCounts.writerow(["Chrom", "Gene", "Start", "End", "Width", "FatherAge", "MotherAge", "VariantPosition", "Count", "AdjustCount", "Gender", "DataSet", "ID"])
         wCounts.writerow(["Chrom", "Start", "End", "Count", "Insertions", "Deletions", "SNV", "MeanFatherAge", "MeanMotherAge", "Gene", "Gender", "DataSet", "ID"])
         for key in sorted(x.keys()):
             for val in x[key]:
-                fAgeCounts.writerow([key, val.name, val.transcriptStart, val.transcriptEnd, val.fatherAge, val.motherAge, val.variantPosition, val.count, val.adjCount, val.genderList, val.dataset, val.ID])
+                fAgeCounts.writerow([key, val.name, "|".join(val.transcriptStart), "|".join(val.transcriptEnd), val.width, val.fatherAge, val.motherAge, val.variantPosition, val.count, val.adjCount, val.genderList, val.dataset, val.ID])
 
                 if val.fatherAge == [] or val.motherAge == []:
                     wCounts.writerow([key, val.transcriptStart, val.transcriptEnd, val.count, val.insertion, val.deletion, val.snv, "NA", "NA", val.name, val.genderList, val.dataset, val.ID])
