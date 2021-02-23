@@ -238,9 +238,9 @@ def readVectorData(filename):
             ID = []
             starts = []
             ends = []
-            for x in s[2][1:-1].split(","):
+            for x in s[2].split("|"):
                 starts.append(int(x.strip()))
-            for x in s[3][1:-1].split(","):
+            for x in s[3].split("|"):
                 ends.append(int(x.strip()))
 
             if s[5] != '[]' and s[6] != '[]':
@@ -250,12 +250,12 @@ def readVectorData(filename):
                 varPos = []
                 count = int(float(s[8]))
                 adjCount = int(float(s[9]))
-                for x in s[5].split("|"):
+                for x in s[5][1:-1].split(","):
                     if x.find("NA") != -1:
                         continue
                     else:
                         fatherAge.append(float(x.strip()))
-                for x in s[6].split("|"):
+                for x in s[6][1:-1].split(","):
                     if x.find("NA") != -1:
                         continue
                     else:
