@@ -122,9 +122,9 @@ def binomialCounts(probandData, siblingData, knownGenes, outputPrefix):
                 #skip = True
             #if probandData[i].count == minimumVariantCount:
                 #skip = True
-            if probandData[i].count == minimumVariantCount and siblingData[j].count == minimumVariantCount:
+            if probandData[i].adjCount == minimumVariantCount and siblingData[j].adjCount == minimumVariantCount:
                 skip = True
-            elif probandData[i].count < siblingData[j].count:
+            elif probandData[i].adjCount < siblingData[j].adjCount:
                 skip = True
             else:
                 for y in probandData[i].ID:
@@ -145,7 +145,7 @@ def binomialCounts(probandData, siblingData, knownGenes, outputPrefix):
                 #probandWidth = int(float(probandData[i].end)) - int(float(probandData[i].start))
                 #siblingWidth = int(float(siblingData[i].end)) - int(float(siblingData[i].start))
                 #siblingRatio = siblingData[j].count * 1.0 / (float(siblingData[i].end) - float(siblingData[i].start))
-                table = np.array([[probandData[i].count, siblingData[i].count],[probandData[i].width - probandData[i].count, siblingData[i].width - siblingData[i].count]])
+                table = np.array([[probandData[i].adjCount, siblingData[i].adjCount],[probandData[i].width - probandData[i].adjCount, siblingData[i].width - siblingData[i].adjCount]])
 
                 fisherOR, fisherPvalue = stats.fisher_exact(table)
                 #pvalue = stats.binom_test(probandData[i].count, probandData[i].width, siblingRatio)
