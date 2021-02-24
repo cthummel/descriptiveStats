@@ -165,7 +165,7 @@ def binomialCounts(probandData, siblingData, knownGenes, outputPrefix):
                     knownGeneString = "No"
 
                 countPvalues.append(fisherPvalue)
-                countResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, probandData[i].width, fisherOR, fisherPvalue, probandData[i].count, siblingData[j].count, knownGeneString])
+                countResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, probandData[i].width, fisherOR, fisherPvalue, probandData[i].adjCount, siblingData[j].adjCount, knownGeneString])
 
         j += 1
         i += 1
@@ -249,7 +249,7 @@ def readVectorData(filename):
                 motherAge = []
                 varPos = []
                 count = int(float(s[8]))
-                adjCount = int(float(s[9]))
+                adjCount = round(float(s[9]))
                 for x in s[5][1:-1].split(","):
                     if x.find("NA") != -1:
                         continue
