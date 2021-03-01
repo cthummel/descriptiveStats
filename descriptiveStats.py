@@ -170,27 +170,27 @@ def binomialCounts(probandData, siblingData, knownGenes, outputPrefix):
         j += 1
         i += 1
             
+    cCounts = csv.writer(open(outputPrefix + "peopleStats.csv", "w"))
+    cCounts.writerow(["ProbandPeople", "SiblingPeople"])
+    cCounts.writerow([len(probandID), len(siblingID)])
+
+    gCounts = csv.writer(open(outputPrefix + "peopleGeneStats.csv", "w"), delimiter="\t")
+    gCounts.writerow(["DataSet", "ID", "UniqueGeneCount", "Genes"])
+    for x in sorted(probandMatch.keys()):
+        gCounts.writerow(["proband", x, len(probandMatch[x]), probandMatch[x]])
+    for x in sorted(siblingMatch.keys()):
+        gCounts.writerow(["sibling", x, len(siblingMatch[x]), siblingMatch[x]])
+    gCounts.writerow([len(probandID), len(siblingID)])
+
+    fCounts = csv.writer(open(outputPrefix + "countStats.csv", "w"))
+    fCounts.writerow(["Chrom", "Gene", "Start", "End", "Length", "ProbandVariantCount", "SiblingVariantCount", "OddsRatio", "Pvalue", "BonPvalue", "SidakPvalue", "HolmPvalue", "FDRPvalue", "KnownGene"])
+
     if len(countPvalues) > 0:
         countBon = statsmodels.stats.multitest.multipletests(countPvalues, alpha=0.05, method='bonferroni', is_sorted=False, returnsorted=False)
         countSidak = statsmodels.stats.multitest.multipletests(countPvalues, alpha=0.05, method='sidak', is_sorted=False, returnsorted=False)
         countHolm = statsmodels.stats.multitest.multipletests(countPvalues, alpha=0.05, method='holm', is_sorted=False, returnsorted=False)  
         countFDR = statsmodels.stats.multitest.fdrcorrection(countPvalues, alpha=0.05, method='indep', is_sorted=False)
 
-        cCounts = csv.writer(open(outputPrefix + "peopleStats.csv", "w"))
-        cCounts.writerow(["ProbandPeople", "SiblingPeople"])
-        cCounts.writerow([len(probandID), len(siblingID)])
-
-        gCounts = csv.writer(open(outputPrefix + "peopleGeneStats.csv", "w"), delimiter="\t")
-        gCounts.writerow(["DataSet", "ID", "UniqueGeneCount", "Genes"])
-        for x in sorted(probandMatch.keys()):
-            gCounts.writerow(["proband", x, len(probandMatch[x]), probandMatch[x]])
-        for x in sorted(siblingMatch.keys()):
-            gCounts.writerow(["sibling", x, len(siblingMatch[x]), siblingMatch[x]])
-
-        gCounts.writerow([len(probandID), len(siblingID)])
-
-        fCounts = csv.writer(open(outputPrefix + "countStats.csv", "w"))
-        fCounts.writerow(["Chrom", "Gene", "Start", "End", "Length", "ProbandVariantCount", "SiblingVariantCount", "OddsRatio", "Pvalue", "BonPvalue", "SidakPvalue", "HolmPvalue", "FDRPvalue", "KnownGene"])
         for row in np.arange(0, len(countResults)):
             fCounts.writerow([countResults[row][0], countResults[row][1], "|".join(map(str, countResults[row][2])), "|".join(map(str, countResults[row][3])), countResults[row][4], countResults[row][7], countResults[row][8], countResults[row][5], countResults[row][6], countBon[1][row], countSidak[1][row], countHolm[1][row], countFDR[1][row], countResults[row][9]])
     else:
