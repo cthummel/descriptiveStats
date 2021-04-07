@@ -21,6 +21,8 @@ class geneInfo:
         # self.exonStart = exonStart
         # self.exonEnd = exonEnd
         self.count = count
+        self.maleVariantCount = 0
+        self.femaleVariantCount = 0
         self.adjCount = adjCount
         self.insertion = insertion
         self.deletion = deletion
@@ -434,22 +436,100 @@ def generateGeneFileCategories():
 
 def geneCountMergeFamily(file, outputPrefix, familyData, geneCategory):
     probandDataSet = True
+    downsampling = True
     maleCount = 0
     femaleCount = 0
     fileCount = 0
     result = geneCategory
+    sampledFiles = []
+    minorityFiles = []
+    downsamplingSize = []
     #[MM, MF, FM, FF, male, female, full]
     probandPeopleCount = [0, 0, 0, 0, 0, 0, 0]
     siblingPeopleCount = [0, 0, 0, 0, 0, 0, 0]
     variantsPerPerson = [[], [], [], [], [], [], []]
+
+    if ("gene" in outputPrefix):
+        downsamplingSize = [252, 909]
+    elif ("exon" in outputPrefix):
+        downsamplingSize = [242, 851]
+    elif ("cds" in outputPrefix):
+        downsamplingSize = [195, 594]
+    elif ("3UTR" in outputPrefix):
+        downsamplingSize = [190, 652]
+    elif ("5UTR" in outputPrefix):
+        downsamplingSize = [77, 261]
+    elif ("stop" in outputPrefix):
+        downsampling = False
+
+
+    if downsampling:
+        majorityFiles = []
+        for root, dirs, files in os.walk(file):
+            temproot = root.strip().split("/")
+
+            #check for sibling or proband data
+            if temproot[len(temproot) - 2] == "s1":
+                probandDataSet = False
+                for filename in files:
+                    if(filename[-13:] == ".FINAL.vcf.gz"):
+                        with gzip.open(root + filename, mode='rt') as f:
+                            for line in f:
+                                if len(line.strip()) == 0:
+                                    continue
+                                elif (line[:2] == "##"):
+                                    continue
+                                elif (line[:1] == "#"):
+                                    #parse which sample the current file has.
+                                    sample = line.strip().split('\t')[9][2:]
+                                    for x in familyData:
+                                        if x.siblingID == sample:
+                                            if x.siblingGender == "female" and x.probandGender in ["male", "female"]:
+                                                majorityFiles.append(filename)
+                                            elif x.siblingGender == "male" and x.probandGender in ["male", "female"]:
+                                                minorityFiles.append(filename)
+                                            break    
+            else:
+                for filename in files:
+                    if(filename[-13:] == ".FINAL.vcf.gz"):
+                        with gzip.open(root + filename, mode='rt') as f:
+                            for line in f:
+                                if len(line.strip()) == 0:
+                                    continue
+                                elif (line[:2] == "##"):
+                                    continue
+                                elif (line[:1] == "#"):
+                                    #parse which sample the current file has.
+                                    sample = line.strip().split('\t')[9][2:]
+                                    for x in familyData:
+                                        if x.probandID == sample:
+                                            if x.probandGender == "male" and x.siblingGender in ["male", "female"]:
+                                                majorityFiles.append(filename)
+                                            elif x.probandGender == "female" and x.siblingGender in ["male", "female"]:
+                                                minorityFiles.append(filename)
+                                            break  
+
+        if probandDataSet:
+            sampledFiles = np.random.shuffle(majorityFiles)[:downsamplingSize[0]]
+        else:
+            sampledFiles = np.random.shuffle(majorityFiles)[:downsamplingSize[1]]
+            
+        #This is the full set of files for the downsampled group.
+        sampledFiles = sampledFiles + minorityFiles
+
+        
+
+        
 
     for root, dirs, files in os.walk(file):
         temproot = root.strip().split("/")
         #print("root", temproot)
         if temproot[len(temproot) - 2] == "s1":
             probandDataSet = False
+        #For Downsampling use
         for filename in files:
-            if(filename[-13:] == ".FINAL.vcf.gz"):
+            #if(filename[-13:] == ".FINAL.vcf.gz"):
+            if(filename[-13:] == ".FINAL.vcf.gz") and filename in sampledFiles:
                 fileCount += 1
                 siblingsPaired = True
                 variantMatched = False
@@ -666,8 +746,10 @@ def geneCountMergeFamily(file, outputPrefix, familyData, geneCategory):
                                         gene.motherAge.append("NA")
                                     if gender == 4:
                                         gene.genderList.append("M")
+                                        gene.maleVariantCount += variantCount
                                     else:
                                         gene.genderList.append("F")
+                                        gene.femaleVariantCount += variantCount
                                     if probandDataSet:
                                         gene.dataset.append("P")
                                     else:
@@ -697,21 +779,34 @@ def geneCountMergeFamily(file, outputPrefix, familyData, geneCategory):
     # femaleCounts.writerow(["Chrom", "Start", "End", "Count", "Insertions", "Deletions", "SNV", "MeanFatherAge", "MeanMotherAge", "Gene"])
     # femaleAgeCounts.writerow(["Chrom", "Gene", "Start", "End", "FatherAge", "MotherAge", "VariantPosition"])
 
+    alternateFullCalculation = False
     #Fix lopsided sample count
-    if maleCount > femaleCount and femaleCount > 0:
-        for key in result[5].keys():
-            for val in result[5][key]:
-                val.adjCount = val.count * 1.0 * maleCount / femaleCount
-    elif femaleCount > maleCount and maleCount > 0:
-        for key in result[4].keys():
-            for val in result[4][key]:
-                val.adjCount = val.count * 1.0 * femaleCount / maleCount
-                #print(val.count, val.adjCount)
+    if not downsampling: 
+        if maleCount > femaleCount and femaleCount > 0:
+            for key in result[5].keys():
+                for val in result[5][key]:
+                    val.adjCount = val.count * 1.0 * maleCount / femaleCount
+            if alternateFullCalculation:
+                for key in result[full].keys():
+                    for val in result[full][key]:
+                        val.adjCount = val.maleVariantCount + (val.femaleVariantCount * 1.0 * maleCount / femaleCount)
+        elif femaleCount > maleCount and maleCount > 0:
+            for key in result[4].keys():
+                for val in result[4][key]:
+                    val.adjCount = val.count * 1.0 * femaleCount / maleCount
+                    #print(val.count, val.adjCount)
+            if alternateFullCalculation:
+                for key in result[full].keys():
+                    for val in result[full][key]:
+                        val.adjCount = val.femaleVariantCount + (val.maleVariantCount * 1.0 * femaleCount / maleCount)
+
+    
+
     
     bCounts = csv.writer(open(outputPrefix + "geneBasicData.csv", "w"), delimiter="\t")
-    bCounts.writerow(["DataSet", "MMCount", "MFCount", "FMCount", "FFCount", "MaleCount", "FemaleCount", "ratio", "FullCount", "numberOfFiles"])
-    bCounts.writerow(["Proband", probandPeopleCount[0], probandPeopleCount[1], probandPeopleCount[2], probandPeopleCount[3], probandPeopleCount[4], probandPeopleCount[5], "inf" if femaleCount == 0 else maleCount / femaleCount, probandPeopleCount[6], fileCount])
-    bCounts.writerow(["Sibling", siblingPeopleCount[0], siblingPeopleCount[1], siblingPeopleCount[2], siblingPeopleCount[3], siblingPeopleCount[4], siblingPeopleCount[5], "inf" if femaleCount == 0 else maleCount / femaleCount, siblingPeopleCount[6], fileCount])
+    bCounts.writerow(["DataSet", "MMCount", "MFCount", "FMCount", "FFCount", "MaleCount", "FemaleCount", "ratio", "FullCount", "numberOfFiles", "percentOfFiles"])
+    bCounts.writerow(["Proband", probandPeopleCount[0], probandPeopleCount[1], probandPeopleCount[2], probandPeopleCount[3], probandPeopleCount[4], probandPeopleCount[5], "inf" if femaleCount == 0 else maleCount / femaleCount, probandPeopleCount[full], fileCount, probandPeopleCount[full] / fileCount])
+    bCounts.writerow(["Sibling", siblingPeopleCount[0], siblingPeopleCount[1], siblingPeopleCount[2], siblingPeopleCount[3], siblingPeopleCount[4], siblingPeopleCount[5], "inf" if femaleCount == 0 else maleCount / femaleCount, siblingPeopleCount[full], fileCount, siblingPeopleCount[full] / fileCount])
 
     vCounts = csv.writer(open(outputPrefix + "variantData.csv", "w"), delimiter="\t")
     vCounts.writerow(["MMCount", "MFCount", "FMCount", "FFCount", "MaleCount", "FemaleCount", "FullCount"])
