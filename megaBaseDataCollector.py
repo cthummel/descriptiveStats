@@ -344,7 +344,7 @@ def generateGeneFileSingleCategory(category):
                         combined.update(range(gene.transcriptStart[j], gene.transcriptEnd[j] + 1))
                     gene.width = len(combined)
                 #for i in gene.transcriptStart:
-                print(gene.name, gene.transcriptStart, gene.transcriptEnd, gene.width)
+                #print(gene.name, gene.transcriptStart, gene.transcriptEnd, gene.width)
 
                     
 
@@ -509,13 +509,15 @@ def geneCountMergeFamily(file, outputPrefix, familyData, geneCategory):
                                                 minorityFiles.append(filename)
                                             break  
 
-        if probandDataSet:
-            sampledFiles = np.random.shuffle(majorityFiles)[:downsamplingSize[0]]
-        else:
-            sampledFiles = np.random.shuffle(majorityFiles)[:downsamplingSize[1]]
-            
+        np.random.shuffle(majorityFiles)
         #This is the full set of files for the downsampled group.
-        sampledFiles = sampledFiles + minorityFiles
+        if probandDataSet:
+            sampledFiles = majorityFiles[:downsamplingSize[0]] + minorityFiles
+        else:
+            sampledFiles = majorityFiles[:downsamplingSize[1]] + minorityFiles
+
+        
+        
 
         
 
