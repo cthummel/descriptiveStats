@@ -86,6 +86,41 @@ def meanRank(geneInfo, currentList):
     
     return np.average(ranks, weights=weights)
 
+def datasetSizeFinder(probandFilename, siblingFilename, outputPrefix):
+    result = []
+    proPieces = (probandFilename.split(".")[:4]).append("geneBasicData.csv")
+    sibPieces = (probandFilename.split(".")[:4]).append("geneBasicData.csv")
+    proFile = ".".join(proPieces)
+    sibFile = ".".join(sibPieces)
+    proBasicData = []
+    sibBasicData = []
+
+    with open(proFile, mode='rt') as f:
+        header = f.readline()
+        proBasicData = f.readline().split("\t")[1:]
+    with open(sibFile, mode='rt') as f:
+        header = f.readline()
+        emptyLine = f.readline()
+        sibBasicData = f.readline().split("\t")[1:]
+        
+
+    if "MM" in outputPrefix:
+        result = [proBasicData[0], sibBasicData[0]]
+    elif "MF" in outputPrefix:
+        result = [proBasicData[1], sibBasicData[1]]
+    elif "FM" in outputPrefix:
+        result = [proBasicData[2], sibBasicData[2]]
+    elif "FF" in outputPrefix:
+        result = [proBasicData[3], sibBasicData[3]]
+    elif "proband" in outputPrefix:
+        result = [proBasicData[4], proBasicData[5]]
+    elif "sibling" in outputPrefix:
+        result = [sibBasicData[4], sibBasicData[5]]
+    elif "full" in outputPrefix:
+        result = [proBasicData[7], sibBasicData[7]]
+
+    return result
+
 # def basicStats(outputPrefix):
 
     
@@ -95,7 +130,7 @@ def meanRank(geneInfo, currentList):
 
 
 
-def binomialCounts(probandData, siblingData, knownGenes, outputPrefix):
+def binomialCounts(probandData, siblingData, knownGenes, dataSize, MFadjustment, outputPrefix):
     countResults = []
     countPvalues = []
     knownGeneList = []
@@ -120,11 +155,10 @@ def binomialCounts(probandData, siblingData, knownGenes, outputPrefix):
         else:
             #if currentChrom[-1] in {"X", "Y"}:
                 #skip = True
-            #if probandData[i].count == minimumVariantCount:
-                #skip = True
             if probandData[i].adjCount == minimumVariantCount and siblingData[j].adjCount == minimumVariantCount:
                 skip = True
-            elif probandData[i].adjCount < siblingData[j].adjCount:
+            #elif probandData[i].adjCount < siblingData[j].adjCount:
+            elif probandData[i].count < siblingData[j].count:
                 skip = True
             else:
                 for y in probandData[i].ID:
@@ -142,10 +176,17 @@ def binomialCounts(probandData, siblingData, knownGenes, outputPrefix):
                         siblingMatch[z] = [siblingData[j].name]
                     siblingID.add(z)
 
-                #probandWidth = int(float(probandData[i].end)) - int(float(probandData[i].start))
-                #siblingWidth = int(float(siblingData[i].end)) - int(float(siblingData[i].start))
-                #siblingRatio = siblingData[j].count * 1.0 / (float(siblingData[i].end) - float(siblingData[i].start))
-                table = np.array([[probandData[i].adjCount, siblingData[i].adjCount],[probandData[i].width - probandData[i].adjCount, siblingData[i].width - siblingData[i].adjCount]])
+                #Old method of testing versus the width of the gene
+                #table = np.array([[probandData[i].adjCount, siblingData[i].adjCount],[probandData[i].width - probandData[i].adjCount, siblingData[i].width - siblingData[i].adjCount]])
+
+                #Population method
+                table = []
+                if MFadjustment[0] == False and MFadjustment[1] == False:
+                    table = np.array([[probandData[i].count, siblingData[i].count],[dataSize[0], dataSize[1]]])
+                elif MFadjustment[0] == True and MFadjustment[1] == False:
+                    table = np.array([[round(probandData[i].count / 2), siblingData[i].count],[dataSize[0], dataSize[1]]])
+                elif MFadjustment[0] == False and MFadjustment[1] == True:
+                    table = np.array([[probandData[i].count, round(siblingData[i].count / 2)],[dataSize[0], dataSize[1]]])
 
                 fisherOR, fisherPvalue = stats.fisher_exact(table)
                 #pvalue = stats.binom_test(probandData[i].count, probandData[i].width, siblingRatio)
@@ -165,7 +206,7 @@ def binomialCounts(probandData, siblingData, knownGenes, outputPrefix):
                     knownGeneString = "No"
 
                 countPvalues.append(fisherPvalue)
-                countResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, probandData[i].width, fisherOR, fisherPvalue, probandData[i].adjCount, siblingData[j].adjCount, knownGeneString])
+                countResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, probandData[i].width, fisherOR, fisherPvalue, probandData[i].count, siblingData[j].count, knownGeneString])
 
         j += 1
         i += 1
@@ -466,16 +507,16 @@ def geneCountStats(probandData, siblingData, knownGenes, outputPrefix):
 
         j += 1
         i += 1
+
+    fCounts = csv.writer(open(outputPrefix + "positionStats.csv", "w"))
+    fCounts.writerow(["Chrom", "Gene", "Start", "End", "Length", "ProbandVariantCount", "SiblingVariantCount", "TestStat", "Pvalue", "BonPvalue", "SidakPvalue", "HolmPvalue", "FDRPvalue", "KnownGene"]) 
             
     if len(positionPvalues) > 0:
         positionBon = statsmodels.stats.multitest.multipletests(positionPvalues, alpha=0.05, method='bonferroni', is_sorted=False, returnsorted=False)
         positionSidak = statsmodels.stats.multitest.multipletests(positionPvalues, alpha=0.05, method='sidak', is_sorted=False, returnsorted=False)
         positionHolm = statsmodels.stats.multitest.multipletests(positionPvalues, alpha=0.05, method='holm', is_sorted=False, returnsorted=False)  
         positionFDR = statsmodels.stats.multitest.fdrcorrection(positionPvalues, alpha=0.05, method='indep', is_sorted=False)
-
-
-        fCounts = csv.writer(open(outputPrefix + "positionStats.csv", "w"))
-        fCounts.writerow(["Chrom", "Gene", "Start", "End", "Length", "ProbandVariantCount", "SiblingVariantCount", "TestStat", "Pvalue", "BonPvalue", "SidakPvalue", "HolmPvalue", "FDRPvalue", "KnownGene"]) 
+        
         for row in np.arange(0, len(positionResults)):
             fCounts.writerow([positionResults[row][0], positionResults[row][1], "|".join(map(str, positionResults[row][2])), "|".join(map(str, positionResults[row][3])), positionResults[row][4], positionResults[row][7], positionResults[row][8], positionResults[row][5], positionResults[row][6], positionBon[1][row], positionSidak[1][row], positionHolm[1][row], positionFDR[1][row], positionResults[row][9]])
 
@@ -670,13 +711,13 @@ def knownGeneComparison(geneCountData, genePositionData, filenames, weightedGene
 
         if countSize > 0:
             countPvalue = stats.binom_test(countMean, n=len(sortedCount), p=.50, alternative='less')
-            print("Average Rank of Known Genes for Count Data in", x, ":", countMean, "/", countSize, "=", countMean/countSize, "rank with pvalue", countPvalue)
+            #print("Average Rank of Known Genes for Count Data in", x, ":", countMean, "/", countSize, "=", countMean/countSize, "rank with pvalue", countPvalue)
             unrelatedGeneCountPercent.append(countMean / countSize)
             wCounts.writerow([countMean, countSize, countMean/countSize, countPvalue, "NA", x.split("/")[-1], len(compare), matchedCount / len(compare)])
 
         if posSize > 0:
             posPvalue = stats.binom_test(posMean, n=len(sortedPos), p=.50, alternative='less')
-            print("Average Rank of Known Genes for Position Data in ", x, ":", posMean, "/", posSize, "=", posMean/posSize, "rank with pvalue", posPvalue)
+            #print("Average Rank of Known Genes for Position Data in ", x, ":", posMean, "/", posSize, "=", posMean/posSize, "rank with pvalue", posPvalue)
             unrelatedGenePosPercent.append(posMean / posSize)
             wPos.writerow([posMean, posSize, posMean/posSize, posPvalue, "NA", x.split("/")[-1], len(compare), matchedPos / len(compare)])
 
@@ -810,6 +851,7 @@ def listLengthTest(geneInfo, geneList, geneWeights, testStat, outputPrefix):
 def main(argv):
     opts, args = getopt.getopt(argv, "ho:", ['proHist=', 'proCount=', 'proMega=', 'proAge=', 'sibHist=', 'sibCount=', 'sibMega=', 'sibAge=', 'output=', 'knownGene=', 'weightedList=', 'unrelatedList='])
     outputPrefix = ""
+    maleFemaleComparison = [False, False]
     knownGeneList = []
     weightedGeneList = []
     unrelatedGeneList = []
@@ -843,6 +885,24 @@ def main(argv):
             sys.exit(0)
         elif opt in ('-o', '--output'):
             outputPrefix = arg
+
+
+    if "MF" in probandAgeFilename:
+        maleFemaleComparison = [False, True]
+    elif "FM" in probandAgeFilename:
+        maleFemaleComparison = [True, False]
+    elif not ("female" in probandAgeFilename and "female" in siblingAgeFilename):
+        if "male" in probandAgeFilename and "female" in siblingAgeFilename:
+            maleFemaleComparison = [False, True]
+        elif "female" in probandAgeFilename and "male" in siblingAgeFilename:
+            maleFemaleComparison = [True, False]
+
+
+    
+
+    dataSize = datasetSizeFinder(probandAgeFilename, siblingAgeFilename, outputPrefix)
+
+
 
     #probandHistogramData, probandSpecialData = readHistogram(probandHistogramFilename)
     #siblingHistogramData, siblingSpecialData = readHistogram(siblingHistogramFilename)
@@ -942,7 +1002,7 @@ def main(argv):
 
     #ageVectorStats(probandVectorData, siblingVectorData, outputPrefix)
     genePositionData = geneCountStats(probandVectorData, siblingVectorData, knownGeneList + weightedGeneList, outputPrefix)
-    geneCountData = binomialCounts(probandVectorData, siblingVectorData, knownGeneList + weightedGeneList, outputPrefix)
+    geneCountData = binomialCounts(probandVectorData, siblingVectorData, knownGeneList + weightedGeneList, dataSize, maleFemaleComparison, outputPrefix)
 
     
     # wCounts = csv.writer(open(outputPrefix + "megaBaseKS.csv", "w"))
