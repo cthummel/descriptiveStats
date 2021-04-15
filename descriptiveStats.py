@@ -88,8 +88,10 @@ def meanRank(geneInfo, currentList):
 
 def datasetSizeFinder(probandFilename, siblingFilename, outputPrefix):
     result = []
-    proPieces = (probandFilename.split(".")[:4]).append("geneBasicData.csv")
-    sibPieces = (probandFilename.split(".")[:4]).append("geneBasicData.csv")
+    proPieces = probandFilename.split(".")[:4]
+    proPieces.append("geneBasicData.csv")
+    sibPieces = probandFilename.split(".")[:4]
+    sibPieces.append("geneBasicData.csv")
     proFile = ".".join(proPieces)
     sibFile = ".".join(sibPieces)
     proBasicData = []
