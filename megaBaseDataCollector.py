@@ -451,6 +451,8 @@ def geneCountMergeFamily(file, outputPrefix, familyData, geneCategory):
 
     if ("gene" in outputPrefix):
         downsamplingSize = [252, 909]
+    elif ("trans" in outputPrefix):
+        downsamplingSize = [252, 909]
     elif ("exon" in outputPrefix):
         downsamplingSize = [242, 851]
     elif ("cds" in outputPrefix):
