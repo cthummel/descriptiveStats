@@ -437,6 +437,7 @@ def generateGeneFileCategories():
 def geneCountMergeFamily(file, outputPrefix, familyData, geneCategory):
     probandDataSet = True
     downsampling = True
+    addGenderData = True
     maleCount = 0
     femaleCount = 0
     fileCount = 0
@@ -463,6 +464,8 @@ def geneCountMergeFamily(file, outputPrefix, familyData, geneCategory):
         downsamplingSize = [77, 261]
     elif ("stop" in outputPrefix):
         downsampling = False
+
+    
 
 
     if downsampling:
@@ -532,8 +535,8 @@ def geneCountMergeFamily(file, outputPrefix, familyData, geneCategory):
             probandDataSet = False
         #For Downsampling use
         for filename in files:
-            #if(filename[-13:] == ".FINAL.vcf.gz"):
-            if(filename[-13:] == ".FINAL.vcf.gz") and filename in sampledFiles:
+            if(filename[-13:] == ".FINAL.vcf.gz"):
+            #if(filename[-13:] == ".FINAL.vcf.gz") and filename in sampledFiles:
                 fileCount += 1
                 siblingsPaired = True
                 variantMatched = False
@@ -679,35 +682,41 @@ def geneCountMergeFamily(file, outputPrefix, familyData, geneCategory):
                                 break
                         
                         #for gender combined dataset
-                        for gene in result[gender][currentChrom]:
-                            for index in np.arange(0, len(gene.transcriptStart)):
-                                if gene.transcriptStart[index] <= int(s[1]) and gene.transcriptEnd[index] >= int(s[1]):
-                                    gene.count += variantCount
-                                    gene.adjCount += variantCount
-                                    gene.insertion += insert
-                                    gene.deletion += Del
-                                    gene.snv += snv
-                                    gene.variantPosition.append(int(s[1]))
-                                    gene.ID.append(fileCount)
-                                    if currentFatherAge != "":
-                                        gene.fatherAge.append(int(currentFatherAge))
-                                    else:
-                                        gene.fatherAge.append("NA")
-                                    if currentMotherAge != "":
-                                        gene.motherAge.append(int(currentMotherAge))
-                                    else:
-                                        gene.motherAge.append("NA")
-                                    if gender == 4:
-                                        gene.genderList.append("M")
-                                    else:
-                                        gene.genderList.append("F")
-                                    if probandDataSet:
-                                        gene.dataset.append("P")
-                                    else:
-                                        gene.dataset.append("S")
+                        if downsampling:
+                            if filename in sampledFiles:
+                                addGenderData = True
+                            else:
+                                addGenderData = False
+                        if addGenderData:
+                            for gene in result[gender][currentChrom]:
+                                for index in np.arange(0, len(gene.transcriptStart)):
+                                    if gene.transcriptStart[index] <= int(s[1]) and gene.transcriptEnd[index] >= int(s[1]):
+                                        gene.count += variantCount
+                                        gene.adjCount += variantCount
+                                        gene.insertion += insert
+                                        gene.deletion += Del
+                                        gene.snv += snv
+                                        gene.variantPosition.append(int(s[1]))
+                                        gene.ID.append(fileCount)
+                                        if currentFatherAge != "":
+                                            gene.fatherAge.append(int(currentFatherAge))
+                                        else:
+                                            gene.fatherAge.append("NA")
+                                        if currentMotherAge != "":
+                                            gene.motherAge.append(int(currentMotherAge))
+                                        else:
+                                            gene.motherAge.append("NA")
+                                        if gender == 4:
+                                            gene.genderList.append("M")
+                                        else:
+                                            gene.genderList.append("F")
+                                        if probandDataSet:
+                                            gene.dataset.append("P")
+                                        else:
+                                            gene.dataset.append("S")
+                                        break
+                                if gene.transcriptStart[0] > int(s[1]):
                                     break
-                            if gene.transcriptStart[0] > int(s[1]):
-                                break
 
                         #for full dataset
                         for gene in result[full][currentChrom]:
