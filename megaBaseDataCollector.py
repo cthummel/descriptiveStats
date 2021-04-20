@@ -733,11 +733,13 @@ def geneCountMergeFamily(file, outputPrefix, familyData, geneCategory):
                                                 femaleCount += 1
                                         if probandDataSet:
                                             probandPeopleCount[currentDataSet] += 1
-                                            probandPeopleCount[gender] += 1
+                                            if addGenderData:
+                                                probandPeopleCount[gender] += 1
                                             probandPeopleCount[full] += 1
                                         else:
                                             siblingPeopleCount[currentDataSet] += 1
-                                            siblingPeopleCount[gender] += 1
+                                            if addGenderData:
+                                                siblingPeopleCount[gender] += 1
                                             siblingPeopleCount[full] += 1
                                             
                                     gene.count += variantCount
