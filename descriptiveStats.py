@@ -96,7 +96,7 @@ def datasetSizeFinder(probandFilename, siblingFilename, outputPrefix):
     sibFile = ".".join(sibPieces)
     proBasicData = []
     sibBasicData = []
-
+    #print(proFile,sibFile,file=stderr)
     with open(proFile, mode='rt') as f:
         header = f.readline()
         proBasicData = f.readline().split("\t")[1:]
@@ -121,6 +121,7 @@ def datasetSizeFinder(probandFilename, siblingFilename, outputPrefix):
     elif "full" in outputPrefix:
         result = [proBasicData[7], sibBasicData[7]]
 
+    print()
     return result
 
 # def basicStats(outputPrefix):
@@ -183,12 +184,16 @@ def binomialCounts(probandData, siblingData, knownGenes, dataSize, MFadjustment,
 
                 #Population method
                 table = []
-                if MFadjustment[0] == False and MFadjustment[1] == False:
+                if currentChrom[-1] == "X":
+                    if MFadjustment[0] == False and MFadjustment[1] == False:
+                        table = np.array([[probandData[i].count, siblingData[i].count],[dataSize[0], dataSize[1]]])
+                    elif MFadjustment[0] == True and MFadjustment[1] == False:
+                        table = np.array([[round(probandData[i].count / 2), siblingData[i].count],[dataSize[0], dataSize[1]]])
+                    elif MFadjustment[0] == False and MFadjustment[1] == True:
+                        table = np.array([[probandData[i].count, round(siblingData[i].count / 2)],[dataSize[0], dataSize[1]]])
+                else:
                     table = np.array([[probandData[i].count, siblingData[i].count],[dataSize[0], dataSize[1]]])
-                elif MFadjustment[0] == True and MFadjustment[1] == False:
-                    table = np.array([[round(probandData[i].count / 2), siblingData[i].count],[dataSize[0], dataSize[1]]])
-                elif MFadjustment[0] == False and MFadjustment[1] == True:
-                    table = np.array([[probandData[i].count, round(siblingData[i].count / 2)],[dataSize[0], dataSize[1]]])
+
 
                 fisherOR, fisherPvalue = stats.fisher_exact(table)
                 #pvalue = stats.binom_test(probandData[i].count, probandData[i].width, siblingRatio)
@@ -208,6 +213,7 @@ def binomialCounts(probandData, siblingData, knownGenes, dataSize, MFadjustment,
                     knownGeneString = "No"
 
                 countPvalues.append(fisherPvalue)
+                #countResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, probandData[i].width, fisherOR, fisherPvalue, probandData[i].adjCount, siblingData[j].adjCount, knownGeneString])
                 countResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, probandData[i].width, fisherOR, fisherPvalue, probandData[i].count, siblingData[j].count, knownGeneString])
 
         j += 1
