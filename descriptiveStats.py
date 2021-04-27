@@ -182,6 +182,7 @@ def binomialCounts(probandData, siblingData, knownGenes, dataSize, MFadjustment,
                 table = []
                 if populationMethod:
                     if currentChrom[-1] == "X":
+                        #True = Female, False = Male
                         if MFadjustment[0] == True and MFadjustment[1] == False:
                             table = np.array([[round(probandData[i].count / 2), siblingData[i].count],[dataSize[0], dataSize[1]]])
                         elif MFadjustment[0] == False and MFadjustment[1] == True:
@@ -192,6 +193,7 @@ def binomialCounts(probandData, siblingData, knownGenes, dataSize, MFadjustment,
                         table = np.array([[probandData[i].count, siblingData[i].count],[dataSize[0], dataSize[1]]])
                 else:
                     if currentChrom[-1] == "X":
+                        #True = Female, False = Male
                         if MFadjustment[0] == True and MFadjustment[1] == False:
                             table = np.array([[round(probandData[i].adjCount / 2), siblingData[i].adjCount],[probandData[i].width - round(probandData[i].adjCount / 2), siblingData[i].width - siblingData[i].adjCount]])
                         elif MFadjustment[0] == False and MFadjustment[1] == True:
@@ -223,8 +225,24 @@ def binomialCounts(probandData, siblingData, knownGenes, dataSize, MFadjustment,
                     knownGeneString = "No"
 
                 countPvalues.append(fisherPvalue)
-                #countResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, probandData[i].width, fisherOR, fisherPvalue, probandData[i].adjCount, siblingData[j].adjCount, knownGeneString])
-                countResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, probandData[i].width, fisherOR, fisherPvalue, probandData[i].count, siblingData[j].count, knownGeneString])
+
+                #Adjust output to match with test adjustments
+                if populationMethod:
+                    if MFadjustment[0] == True and MFadjustment[1] == False:
+                        countResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, probandData[i].width, fisherOR, fisherPvalue, round(probandData[i].count / 2), siblingData[j].count, knownGeneString])
+                    elif MFadjustment[0] == False and MFadjustment[1] == True:
+                        countResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, probandData[i].width, fisherOR, fisherPvalue, probandData[i].count, round(siblingData[i].count / 2), knownGeneString])
+                    else:
+                        countResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, probandData[i].width, fisherOR, fisherPvalue, probandData[i].count, siblingData[j].count, knownGeneString])
+                else:
+                    if MFadjustment[0] == True and MFadjustment[1] == False:
+                        countResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, probandData[i].width, fisherOR, fisherPvalue, round(probandData[i].adjCount / 2), siblingData[j].adjCount, knownGeneString])
+                    elif MFadjustment[0] == False and MFadjustment[1] == True:
+                        countResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, probandData[i].width, fisherOR, fisherPvalue, probandData[i].adjCount, round(siblingData[j].adjCount / 2), knownGeneString])
+                    else:
+                        countResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, probandData[i].width, fisherOR, fisherPvalue, probandData[i].adjCount, siblingData[j].adjCount, knownGeneString])
+
+                
 
         j += 1
         i += 1
