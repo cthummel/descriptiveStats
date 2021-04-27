@@ -156,8 +156,8 @@ def binomialCounts(probandData, siblingData, knownGenes, dataSize, MFadjustment,
                 #skip = True
             if probandData[i].adjCount == minimumVariantCount and siblingData[j].adjCount == minimumVariantCount:
                 skip = True
-            #elif probandData[i].adjCount < siblingData[j].adjCount:
-            elif probandData[i].count < siblingData[j].count:
+            elif probandData[i].adjCount < siblingData[j].adjCount:
+            #elif probandData[i].count < siblingData[j].count:
                 skip = True
             else:
                 for y in probandData[i].ID:
@@ -179,70 +179,53 @@ def binomialCounts(probandData, siblingData, knownGenes, dataSize, MFadjustment,
                 #table = np.array([[probandData[i].adjCount, siblingData[i].adjCount],[probandData[i].width - probandData[i].adjCount, siblingData[i].width - siblingData[i].adjCount]])
 
                 #Population method
-                table = []
                 if populationMethod:
                     if currentChrom[-1] == "X":
                         #True = Female, False = Male
                         if MFadjustment[0] == True and MFadjustment[1] == False:
                             table = np.array([[round(probandData[i].count / 2), siblingData[i].count],[dataSize[0], dataSize[1]]])
+                            fisherOR, fisherPvalue, knownGeneString = runFisher(table, probandData[i].name, knownGeneList, geneFilenames)
+                            countPvalues.append(fisherPvalue)
+                            countResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, probandData[i].width, fisherOR, fisherPvalue, round(probandData[i].count / 2), siblingData[j].count, knownGeneString])
+
                         elif MFadjustment[0] == False and MFadjustment[1] == True:
                             table = np.array([[probandData[i].count, round(siblingData[i].count / 2)],[dataSize[0], dataSize[1]]])
+                            fisherOR, fisherPvalue, knownGeneString = runFisher(table, probandData[i].name, knownGeneList, geneFilenames)
+                            countPvalues.append(fisherPvalue)
+                            countResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, probandData[i].width, fisherOR, fisherPvalue, probandData[i].count, round(siblingData[i].count / 2), knownGeneString])
                         else:
                             table = np.array([[probandData[i].count, siblingData[i].count],[dataSize[0], dataSize[1]]])
+                            fisherOR, fisherPvalue, knownGeneString = runFisher(table, probandData[i].name, knownGeneList, geneFilenames)
+                            countPvalues.append(fisherPvalue)
+                            countResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, probandData[i].width, fisherOR, fisherPvalue, probandData[i].count, siblingData[j].count, knownGeneString])
                     else:
                         table = np.array([[probandData[i].count, siblingData[i].count],[dataSize[0], dataSize[1]]])
+                        fisherOR, fisherPvalue, knownGeneString = runFisher(table, probandData[i].name, knownGeneList, geneFilenames)
+                        countPvalues.append(fisherPvalue)
+                        countResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, probandData[i].width, fisherOR, fisherPvalue, probandData[i].count, siblingData[j].count, knownGeneString])
                 else:
                     if currentChrom[-1] == "X":
                         #True = Female, False = Male
                         if MFadjustment[0] == True and MFadjustment[1] == False:
                             table = np.array([[round(probandData[i].adjCount / 2), siblingData[i].adjCount],[probandData[i].width - round(probandData[i].adjCount / 2), siblingData[i].width - siblingData[i].adjCount]])
+                            fisherOR, fisherPvalue, knownGeneString = runFisher(table, probandData[i].name, knownGeneList, geneFilenames)
+                            countPvalues.append(fisherPvalue)
+                            countResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, probandData[i].width, fisherOR, fisherPvalue, round(probandData[i].adjCount / 2), siblingData[j].adjCount, knownGeneString])
                         elif MFadjustment[0] == False and MFadjustment[1] == True:
                             table = np.array([[probandData[i].adjCount, round(siblingData[i].adjCount / 2)],[probandData[i].width - probandData[i].adjCount, siblingData[i].width - round(siblingData[i].adjCount / 2)]])
+                            fisherOR, fisherPvalue, knownGeneString = runFisher(table, probandData[i].name, knownGeneList, geneFilenames)
+                            countPvalues.append(fisherPvalue)
+                            countResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, probandData[i].width, fisherOR, fisherPvalue, probandData[i].adjCount, round(siblingData[j].adjCount / 2), knownGeneString])
                         else:
                             table = np.array([[probandData[i].adjCount, siblingData[i].adjCount],[probandData[i].width - probandData[i].adjCount, siblingData[i].width - siblingData[i].adjCount]])
+                            fisherOR, fisherPvalue, knownGeneString = runFisher(table, probandData[i].name, knownGeneList, geneFilenames)
+                            countPvalues.append(fisherPvalue)
+                            countResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, probandData[i].width, fisherOR, fisherPvalue, probandData[i].adjCount, siblingData[j].adjCount, knownGeneString])
                     else:
                         table = np.array([[probandData[i].adjCount, siblingData[i].adjCount],[probandData[i].width - probandData[i].adjCount, siblingData[i].width - siblingData[i].adjCount]])
-
-
-
-
-
-                fisherOR, fisherPvalue = stats.fisher_exact(table)
-                #pvalue = stats.binom_test(probandData[i].count, probandData[i].width, siblingRatio)
-
-                found = False
-                knownGeneString = ""
-                for x in np.arange(0, len(knownGeneList)):
-                    if probandData[i].name in knownGeneList[x]:
-                        if knownGeneString == "":
-                            knownGeneString += geneFilenames[x].split("/")[-1]
-                            found = True
-                        else:
-                            knownGeneString += "|" + geneFilenames[x].split("/")[-1]
-                            found = True
-
-                if not found:
-                    knownGeneString = "No"
-
-                countPvalues.append(fisherPvalue)
-
-                #Adjust output to match with test adjustments
-                if populationMethod:
-                    if MFadjustment[0] == True and MFadjustment[1] == False:
-                        countResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, probandData[i].width, fisherOR, fisherPvalue, round(probandData[i].count / 2), siblingData[j].count, knownGeneString])
-                    elif MFadjustment[0] == False and MFadjustment[1] == True:
-                        countResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, probandData[i].width, fisherOR, fisherPvalue, probandData[i].count, round(siblingData[i].count / 2), knownGeneString])
-                    else:
-                        countResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, probandData[i].width, fisherOR, fisherPvalue, probandData[i].count, siblingData[j].count, knownGeneString])
-                else:
-                    if MFadjustment[0] == True and MFadjustment[1] == False:
-                        countResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, probandData[i].width, fisherOR, fisherPvalue, round(probandData[i].adjCount / 2), siblingData[j].adjCount, knownGeneString])
-                    elif MFadjustment[0] == False and MFadjustment[1] == True:
-                        countResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, probandData[i].width, fisherOR, fisherPvalue, probandData[i].adjCount, round(siblingData[j].adjCount / 2), knownGeneString])
-                    else:
-                        countResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, probandData[i].width, fisherOR, fisherPvalue, probandData[i].adjCount, siblingData[j].adjCount, knownGeneString])
-
-                
+                        fisherOR, fisherPvalue, knownGeneString = runFisher(table, probandData[i].name, knownGeneList, geneFilenames)
+                        countPvalues.append(fisherPvalue)
+                        countResults.append([probandData[i].chrom, probandData[i].name, probandData[i].start, probandData[i].end, probandData[i].width, fisherOR, fisherPvalue, probandData[i].adjCount, siblingData[j].adjCount, knownGeneString])   
 
         j += 1
         i += 1
@@ -289,6 +272,25 @@ def readHistogram(filename):
             results.append(int(line.strip()))
     return results[0:-3], results[-2:]
 
+def runFisher(table, geneName, knownGeneList, geneFilenames):
+    fisherOR, fisherPvalue = stats.fisher_exact(table)
+    #pvalue = stats.binom_test(probandData[i].count, probandData[i].width, siblingRatio)
+    found = False
+    knownGeneString = ""
+    for x in np.arange(0, len(knownGeneList)):
+        if geneName in knownGeneList[x]:
+            if knownGeneString == "":
+                knownGeneString += geneFilenames[x].split("/")[-1]
+                found = True
+            else:
+                knownGeneString += "|" + geneFilenames[x].split("/")[-1]
+                found = True
+
+    if not found:
+        knownGeneString = "No"
+
+    return fisherOR, fisherPvalue, knownGeneString
+    
 
 def readCount(filename):
     results = []
